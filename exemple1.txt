@@ -1,0 +1,33 @@
+{CONSTS}
+const const1 = 1;
+const const2 = 2;
+
+{TYPES}
+type type1 = bool;
+type type2 = int;
+
+
+{FUNCTIONS AND PROCEDURES}
+
+
+procedure procedure1 (par1 : bool, par2 : int) 
+begin 
+  var var1 : bool;
+  var var2 : int;
+
+  if var1 == true then 
+  begin
+    var1 := false;
+  end
+
+end
+
+function function1 (par1 : bool, par2 : bool) : int
+begin
+  return par1 == par2;
+end
+
+{VARIABLES}
+
+var globalVar1 : bool;
+var globalVar2 : int;
