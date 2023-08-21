@@ -1,85 +1,90 @@
 %{
-#include<stdio.h>
-
-#define ID 1  //Identifier token
-
-
-#define T_INT 3
-#define T_REAL 4
-#define T_CHAR 5
-#define T_BOOL 6
-
-#define V_INT 7
-#define V_CHAR 8
-#define V_BOOL 9
-#define V_REAL 10
-
-#define EQ 11
-#define LEQ 12
-#define GEQ 13
-#define GE 14
-#define LE 15
-#define NEQ 16
-
-#define PLUS 17
-#define MINUS 18
-#define DIVIDE 19
-#define MULTIPLY 20
-#define MOD 21
-
-#define LOOP 22
-#define IF 23
-#define ELSE 24
-#define ELSIF 25
-#define BEGIN 26
-#define END 27
-
+  #include <stdio.h>
+  #include "defines.h"
 
 %}
 
 low    [a-z]
 upp    [A-Z]
 number [0-9]
-letter (low|upper|\_)*
-ID     (letter)(letter|number)*
-
-%option noyywrap
+letter [a-z|A-Z|\_]*
+delim         [ \t\n]
+ws            {delim}+
 
 %%
 
-"int" {return T_INT;}
-"real" {return T_REAL;}
-"bool" {return T_BOOL;}
-"char" {return T_CHAR;}
+{ws}          {/* No action and no returne*/}
+"bool"      {return T_BOOL;}
+"int"       {return T_INT;}
+"real"      {return T_REAL;}
+"char"      {return T_CHAR;}
 
-
-"True" | "False"	{return V_BOOL;}
-{number}{number}+ {return V_INT;}
-
-
-">" {return GE;}
-"<" {return LE;}
+"true" | "false"	{return V_BOOL;}
+">" {return '>';}
+"<" {return '<';}
 ">=" {return GEQ;}
 "<=" {return LEQ;}
 "==" {return EQ;}
 "!=" {return NEQ;}
 
-"+" {return PLUS;}
-"-" {return MINUS;}
-"*" {return MULTIPLY;}
-"/" {return DIVIDE;}
-"%" {return MOD;}
+"+" {return '+';}
+"-" {return '-';}
+"*" {return '*';}
+"/" {return '/';}
+"%" {return '%';}
+
+"!" {return '!';}
+"&&" {return AND;}
+"||" {return OR;}
 
 
+"(" {return '(';}
+")" {return ')';}
+"[" {return '[';}
+"]" {return ']';}
+
+"const" {return CONST;}
 "if" {return IF;}
 "else" {return ELSE;}
 "elsif" {return ELSIF;}
 "loop" {return LOOP;}
-"begin" {return BEGIN;}
+"begin" {return _BEGIN;}
 "end" {return END;}
 
-{ID}  return ID;
+"function" {return FUNCTION;}
+"procedure" {return PROCEDURE;}
 
+"return" {return RETURN;}
+"break" {return BREAK;}
+"continue" {return CONTINUE;}
+"record" {return RECORD;}
+"of" {return OF;}
+
+"/." {return '.';}
+"," {return ',';}
+":" {return ':';}
+";" {return ';';}
+"{" {return '{';}
+"}" {return '}';}
+
+"type" {return TYPE;}
+"array" {return ARRAY;}
+"exit" {return EXIT;}
+"when" {return WHEN;}
+"to" {return TO;}
+"step" {return STEP;}
+"then" {return THEN;}
+
+":=" {return ATTRIB;}
+
+{number}+(\.{number}+)?(E[+-]?{number}+)?
+
+{letter}({letter}|{number})*  {printf("ID: %s\n", yytext);return ID;}
+[+-]?{number}+(E[+-]?{number}+)? {return V_INT;}
+[+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
+\'.\' {return V_CHAR;}
+
+(.)* {printf("ERROR: %s", yytext);}
 
 %%
 
