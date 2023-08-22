@@ -2,123 +2,93 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include "defines.h"
-
-  //TODO: Mover SymbolEntry e logica da tabela de simbolos para outro arquivo
-  struct SymbolEntry {
-    char *name;
-    int class;
-  };
-
-  struct SymbolEntry symbol_table[100]; // Tabela de símbolos (tamanho máximo de 100)
-  int maxNumSymbols = 100;
-  int numSymbols = 0;
-
-  void initializeSymbolTable();
-  void addSymbol(const char * symbol_name, const int token_class);
-
+  #include "symbol_table.c"
 
 %}
 
-low    [a-z]
-upp    [A-Z]
-number [0-9]
-letter         [a-z|A-Z|\_]*
-delim         [ \t\n]
-ws            {delim}+
+low             [a-z]
+upp             [A-Z]
+number          [0-9]
+letter          [a-z|A-Z|\_]*
+delim           [ \t\n]
+ws              {delim}+
 identificador 	{letter}({letter}|{number})*
 
 %%
 
 {ws}          {/* No action and no returne*/}
-"bool"      {addSymbol(yytext, T_BOOL); return T_BOOL;}
-"int"       {return T_INT;}
-"real"      {return T_REAL;}
-"char"      {return T_CHAR;}
+"bool"        {addSymbol(yytext, T_BOOL); return T_BOOL;}
+"int"         {addSymbol(yytext, T_INT); return T_INT;}
+"real"        {addSymbol(yytext, T_REAL); return T_REAL;}
+"char"        {addSymbol(yytext, T_CHAR); return T_CHAR;}
 
-"true" | "false"	{return V_BOOL;}
-">" {return '>';}
-"<" {return '<';}
-">=" {return GEQ;}
-"<=" {return LEQ;}
-"==" {return EQ;}
-"!=" {return NEQ;}
+"true" | "false"	{addSymbol(yytext, V_BOOL); return V_BOOL;}
+">"         {addSymbol(yytext, (int) '>'); return '>';}
+"<"         {addSymbol(yytext, (int) '<'); return '<';}
+">="        {addSymbol(yytext, GEQ); return GEQ;}
+"<="        {addSymbol(yytext, LEQ); return LEQ;}
+"=="        {addSymbol(yytext, EQ); return EQ;}
+"!="        {addSymbol(yytext, NEQ); return NEQ;}
 
-"+" {return '+';}
-"-" {return '-';}
-"*" {return '*';}
-"/" {return '/';}
-"%" {return '%';}
+"+"         {addSymbol(yytext, (int) '+'); return '+';}
+"-"         {addSymbol(yytext, (int) '-'); return '-';}
+"*"         {addSymbol(yytext, (int) '*'); return '*';}
+"/"         {addSymbol(yytext, (int) '/'); return '/';}
+"%"         {addSymbol(yytext, (int) '%'); return '%';}
 
-"!" {return '!';}
-"&&" {return AND;}
-"||" {return OR;}
+"!"         {addSymbol(yytext, (int) '!'); return '!';}
+"&&"        {addSymbol(yytext, AND); return AND;}
+"||"        {addSymbol(yytext, OR); return OR;}
 
 
-"(" {return '(';}
-")" {return ')';}
-"[" {return '[';}
-"]" {return ']';}
+"("         {addSymbol(yytext, (int) '('); return '(';}
+")"         {addSymbol(yytext, (int) ')'); return ')';}
+"["         {addSymbol(yytext, (int) '['); return '[';}
+"]"         {addSymbol(yytext, (int) ']'); return ']';}
 
-"const" {return CONST;}
-"if" {return IF;}
-"else" {return ELSE;}
-"elsif" {return ELSIF;}
-"loop" {return LOOP;}
-"begin" {return _BEGIN;}
-"end" {return END;}
+"const"     {addSymbol(yytext, CONST); return CONST;}
+"if"        {addSymbol(yytext, IF); return IF;}
+"else"      {addSymbol(yytext, ELSE); return ELSE;}
+"elsif"     {addSymbol(yytext, ELSIF); return ELSIF;}
+"loop"      {addSymbol(yytext, LOOP); return LOOP;}
+"begin"     {addSymbol(yytext, _BEGIN); return _BEGIN;}
+"end"       {addSymbol(yytext, END); return END;}
 
-"function" {return FUNCTION;}
-"procedure" {return PROCEDURE;}
+"function"  {addSymbol(yytext, FUNCTION); return FUNCTION;}
+"procedure" {addSymbol(yytext, PROCEDURE); return PROCEDURE;}
 
-"return" {return RETURN;}
-"break" {return BREAK;}
-"continue" {return CONTINUE;}
-"record" {return RECORD;}
-"of" {return OF;}
+"return"    {addSymbol(yytext, RETURN); return RETURN;}
+"break"     {addSymbol(yytext, BREAK); return BREAK;}
+"continue"  {addSymbol(yytext, CONTINUE); return CONTINUE;}
+"record"    {addSymbol(yytext, RECORD); return RECORD;}
+"of"        {addSymbol(yytext, OF); return OF;}
 
-"/." {return '.';}
-"," {return ',';}
-":" {return ':';}
-";" {return ';';}
-"{" {return '{';}
-"}" {return '}';}
+"/."        {addSymbol(yytext, (int) '.'); return '.';}
+","         {addSymbol(yytext, (int) ','); return ',';}
+":"         {addSymbol(yytext, (int) ':'); return ':';}
+";"         {addSymbol(yytext, (int) ';'); return ';';}
+"{"         {addSymbol(yytext, (int) '{'); return '{';}
+"}"         {addSymbol(yytext, (int) '}'); return '}';}
 
-"type" {return TYPE;}
-"array" {return ARRAY;}
-"exit" {return EXIT;}
-"when" {return WHEN;}
-"to" {return TO;}
-"step" {return STEP;}
-"then" {return THEN;}
+"type"      {addSymbol(yytext, TYPE); return TYPE;}
+"array"     {addSymbol(yytext, ARRAY); return ARRAY;}
+"exit"      {addSymbol(yytext, EXIT); return EXIT;}
+"when"      {addSymbol(yytext, WHEN); return WHEN;}
+"to"        {addSymbol(yytext, TO); return TO;}
+"step"      {addSymbol(yytext, STEP); return STEP;}
+"then"      {addSymbol(yytext, THEN); return THEN;}
 
-":=" {return ATTRIB;}
+":="        {addSymbol(yytext, ATTRIB); return ATTRIB;}
 
 {number}+(\.{number}+)?(E[+-]?{number}+)?
 
-{identificador} {addSymbol(yytext, ID); return ID;}
-[+-]?{number}+(E[+-]?{number}+)? {return V_INT;}
-[+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
-\'.\' {return V_CHAR;}
-
+{identificador}                             {addSymbol(yytext, ID); return ID;}
+[+-]?{number}+(E[+-]?{number}+)?            {addSymbol(yytext, V_INT); return V_INT;}
+[+-]?{number}+\.{number}+(E[+-]?{number}+)? {addSymbol(yytext, V_REAL); return V_REAL;}
+\'.\'                                       {addSymbol(yytext, V_CHAR); return V_CHAR;}
 
 
 %%
-
-void initializeSymbolTable(){
-    int i = 0;
-    while(i < maxNumSymbols){
-      symbol_table[i++].name = "";
-    }
-  }
-
-  void addSymbol(const char * symbol_name, const int token_class){
-    //TODO: Tratar duplicacao
-    //TODO: Analisar abordagem O(1) usando hashtable com chave string sendo unica (ex.: lexema+escopo)
-    int pos = numSymbols++;
-    symbol_table[pos].name = strdup(symbol_name);
-    symbol_table[pos].class = token_class;
-  }
-
 
 
 int main()
@@ -132,10 +102,7 @@ int main()
       printf("token lido: %d\n", token);
   }
   printf("\nLeitura de tokens finalizada.\n");
-
-  printf("\n\n\tTABELA DE SIMBOLOS\n");
-  for(int i = 0; i < 10; i++){
-    printf("TokenName: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].class);
-  }
+  printFirst10Entries();
+  
   return 0;
 }
