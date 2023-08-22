@@ -9,7 +9,7 @@ struct SymbolEntry {
 };
 
 struct SymbolEntry symbol_table[100];
-int maxNumSymbols = 100;
+const int maxNumSymbols = 100;
 int numSymbols = 0;
 
 void initializeSymbolTable(){
@@ -20,8 +20,14 @@ void initializeSymbolTable(){
 }
 
 void addSymbol(const char * symbol_name, const int token_class){
-    //TODO: Tratar duplicacao
     //TODO: Analisar abordagem O(1) usando hashtable com chave string sendo unica (ex.: lexema+escopo)
+    for (size_t i = 0; i < numSymbols; i++)
+    {
+        if(strcmp(symbol_table[i].name, symbol_name) == 0){
+            printf("Ja existe um token na tabela de simbolos com este lexema.");
+            return;
+        }
+    }
     int pos = numSymbols++;
     symbol_table[pos].name = strdup(symbol_name);
     symbol_table[pos].class = token_class;
