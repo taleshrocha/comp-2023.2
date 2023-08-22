@@ -1,6 +1,8 @@
 %{
   #include <stdio.h>
+
   #include "defines.h"
+  #include "symbolTable.h"
 
 %}
 
@@ -12,7 +14,7 @@ ws            {delim}+
 %%
 
 {ws}          {/* No action and no return*/}
-"bool"      {return T_BOOL;}
+"bool"      {addSymbol(yytext, T_BOOL); return T_BOOL;}
 "int"       {return T_INT;}
 "real"      {return T_REAL;}
 "char"      {return T_CHAR;}
@@ -77,7 +79,7 @@ ws            {delim}+
 
 {number}+(\.{number}+)?(E[+-]?{number}+)?
 
-{letter}({letter}|{number})*  {printf("ID: %s - ", yytext);return ID;}
+{letter}({letter}|{number})*  {printf("ID: %s - ", yytext); addSymbol(yytext, ID); return ID;}
 [+-]?{number}+(E[+-]?{number}+)? {return V_INT;}
 [+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
 \'.\' {return V_CHAR;}
@@ -86,10 +88,18 @@ ws            {delim}+
 
 int main()
 {
+  initializeSymbolTable();
+  printf("\n\n");
   int token = -1;
   while (token != 0) {
       token = yylex();
       printf("token: %d\n", token);
+  }
+
+  printf("numSymbols: %d\n", numSymbols);
+
+  for(int i = 0; i < numSymbols; i++){
+      printf("Token: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].type);
   }
   return 0;
 }

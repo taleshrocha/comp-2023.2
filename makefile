@@ -27,12 +27,15 @@ debug: all
 
 # executables
 
-$(BIN)/lexer: $(OBJS)/lexer.o 
-	$(CC) $< $(LIBS) -I $(INCLUDE) -o $@ 
+$(BIN)/lexer: $(OBJS)/lexer.o $(OBJS)/symbolTable.o
+	$(CC) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
 
 $(OBJS)/lexer.o: $(SRC)/lexer.l.c
+	$(CC) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
+$(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
 	$(CC) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources
