@@ -3,13 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "symbol_table.h"
+
 struct SymbolEntry {
     char *name;
     int class;
 };
 
-struct SymbolEntry symbol_table[100];
-const int maxNumSymbols = 100;
+//TODO: Substituir por array dinamico
+struct SymbolEntry symbol_table[SYMBLE_TABLE_SIZE];
+const int maxNumSymbols = SYMBLE_TABLE_SIZE;
 int numSymbols = 0;
 
 void initializeSymbolTable(){
@@ -24,7 +26,7 @@ void addSymbol(const char * symbol_name, const int token_class){
     for (size_t i = 0; i < numSymbols; i++)
     {
         if(strcmp(symbol_table[i].name, symbol_name) == 0){
-            printf("Ja existe um token na tabela de simbolos com o lexema \"%s\".\n", symbol_name);
+            printf("Ja existe um token na tabela de simbolos com o lexema \"%s\".\n\n", symbol_name);
             return;
         }
     }
