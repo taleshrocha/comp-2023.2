@@ -24,7 +24,7 @@ void addSymbol(const char * symbol_name, const int token_class){
     for (size_t i = 0; i < numSymbols; i++)
     {
         if(strcmp(symbol_table[i].name, symbol_name) == 0){
-            printf("Ja existe um token na tabela de simbolos com este lexema.");
+            printf("Ja existe um token na tabela de simbolos com o lexema \"%s\".\n", symbol_name);
             return;
         }
     }

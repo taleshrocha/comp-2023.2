@@ -17,75 +17,75 @@ identificador 	{letter}({letter}|{number})*
 %%
 
 {ws}          {/* No action and no returne*/}
-"bool"        {addSymbol(yytext, T_BOOL); return T_BOOL;}
-"int"         {addSymbol(yytext, T_INT); return T_INT;}
-"real"        {addSymbol(yytext, T_REAL); return T_REAL;}
-"char"        {addSymbol(yytext, T_CHAR); return T_CHAR;}
+"bool"        {return T_BOOL;}
+"int"         {return T_INT;}
+"real"        {return T_REAL;}
+"char"        {return T_CHAR;}
 
-"true" | "false"	{addSymbol(yytext, V_BOOL); return V_BOOL;}
-">"         {addSymbol(yytext, (int) '>'); return '>';}
-"<"         {addSymbol(yytext, (int) '<'); return '<';}
-">="        {addSymbol(yytext, GEQ); return GEQ;}
-"<="        {addSymbol(yytext, LEQ); return LEQ;}
-"=="        {addSymbol(yytext, EQ); return EQ;}
-"!="        {addSymbol(yytext, NEQ); return NEQ;}
+"true" | "false"	{return V_BOOL;}
+">"         {return '>';}
+"<"         {return '<';}
+">="        {return GEQ;}
+"<="        {return LEQ;}
+"=="        {return EQ;}
+"!="        {return NEQ;}
 
-"+"         {addSymbol(yytext, (int) '+'); return '+';}
-"-"         {addSymbol(yytext, (int) '-'); return '-';}
-"*"         {addSymbol(yytext, (int) '*'); return '*';}
-"/"         {addSymbol(yytext, (int) '/'); return '/';}
-"%"         {addSymbol(yytext, (int) '%'); return '%';}
+"+"         {return '+';}
+"-"         {return '-';}
+"*"         {return '*';}
+"/"         {return '/';}
+"%"         {return '%';}
 
-"!"         {addSymbol(yytext, (int) '!'); return '!';}
-"&&"        {addSymbol(yytext, AND); return AND;}
-"||"        {addSymbol(yytext, OR); return OR;}
+"!"         {return '!';}
+"&&"        {return AND;}
+"||"        {return OR;}
 
 
-"("         {addSymbol(yytext, (int) '('); return '(';}
-")"         {addSymbol(yytext, (int) ')'); return ')';}
-"["         {addSymbol(yytext, (int) '['); return '[';}
-"]"         {addSymbol(yytext, (int) ']'); return ']';}
+"("         {return '(';}
+")"         {return ')';}
+"["         {return '[';}
+"]"         {return ']';}
 
-"const"     {addSymbol(yytext, CONST); return CONST;}
-"if"        {addSymbol(yytext, IF); return IF;}
-"else"      {addSymbol(yytext, ELSE); return ELSE;}
-"elsif"     {addSymbol(yytext, ELSIF); return ELSIF;}
-"loop"      {addSymbol(yytext, LOOP); return LOOP;}
-"begin"     {addSymbol(yytext, _BEGIN); return _BEGIN;}
-"end"       {addSymbol(yytext, END); return END;}
+"const"     {return CONST;}
+"if"        {return IF;}
+"else"      {return ELSE;}
+"elsif"     {return ELSIF;}
+"loop"      {return LOOP;}
+"begin"     {return _BEGIN;}
+"end"       {return END;}
 
-"function"  {addSymbol(yytext, FUNCTION); return FUNCTION;}
-"procedure" {addSymbol(yytext, PROCEDURE); return PROCEDURE;}
+"function"  {return FUNCTION;}
+"procedure" {return PROCEDURE;}
 
-"return"    {addSymbol(yytext, RETURN); return RETURN;}
-"break"     {addSymbol(yytext, BREAK); return BREAK;}
-"continue"  {addSymbol(yytext, CONTINUE); return CONTINUE;}
-"record"    {addSymbol(yytext, RECORD); return RECORD;}
-"of"        {addSymbol(yytext, OF); return OF;}
+"return"    {return RETURN;}
+"break"     {return BREAK;}
+"continue"  {return CONTINUE;}
+"record"    {return RECORD;}
+"of"        {return OF;}
 
-"/."        {addSymbol(yytext, (int) '.'); return '.';}
-","         {addSymbol(yytext, (int) ','); return ',';}
-":"         {addSymbol(yytext, (int) ':'); return ':';}
-";"         {addSymbol(yytext, (int) ';'); return ';';}
-"{"         {addSymbol(yytext, (int) '{'); return '{';}
-"}"         {addSymbol(yytext, (int) '}'); return '}';}
+"/."        {return '.';}
+","         {return ',';}
+":"         {return ':';}
+";"         {return ';';}
+"{"         {return '{';}
+"}"         {return '}';}
 
-"type"      {addSymbol(yytext, TYPE); return TYPE;}
-"array"     {addSymbol(yytext, ARRAY); return ARRAY;}
-"exit"      {addSymbol(yytext, EXIT); return EXIT;}
-"when"      {addSymbol(yytext, WHEN); return WHEN;}
-"to"        {addSymbol(yytext, TO); return TO;}
-"step"      {addSymbol(yytext, STEP); return STEP;}
-"then"      {addSymbol(yytext, THEN); return THEN;}
+"type"      {return TYPE;}
+"array"     {return ARRAY;}
+"exit"      {return EXIT;}
+"when"      {return WHEN;}
+"to"        {return TO;}
+"step"      {return STEP;}
+"then"      {return THEN;}
 
-":="        {addSymbol(yytext, ATTRIB); return ATTRIB;}
+":="        {return ATTRIB;}
 
 {number}+(\.{number}+)?(E[+-]?{number}+)?
 
 {identificador}                             {addSymbol(yytext, ID); return ID;}
-[+-]?{number}+(E[+-]?{number}+)?            {addSymbol(yytext, V_INT); return V_INT;}
-[+-]?{number}+\.{number}+(E[+-]?{number}+)? {addSymbol(yytext, V_REAL); return V_REAL;}
-\'.\'                                       {addSymbol(yytext, V_CHAR); return V_CHAR;}
+[+-]?{number}+(E[+-]?{number}+)?            {return V_INT;}
+[+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
+\'.\'                                       {return V_CHAR;}
 
 
 %%
