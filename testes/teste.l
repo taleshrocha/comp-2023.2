@@ -13,34 +13,24 @@
   int maxNumSymbols = 100;
   int numSymbols = 0;
 
-  void initializeSymbolTable(){
-    int i = 0;
-    while(i < maxNumSymbols){
-      symbol_table[i++].name = "";
-    }
-  }
+  void initializeSymbolTable();
+  void addSymbol(const char * symbol_name, const int token_class);
 
-  void addSymbol(const char * symbol_name, const int token_class){
-    //TODO: Tratar duplicacao
-    //TODO: Analisar abordagem usando hashtable
-    int pos = numSymbols++;
-    symbol_table[pos].name = strdup(symbol_name);
-    symbol_table[pos].class = token_class;
-  }
 
 %}
 
 low    [a-z]
 upp    [A-Z]
 number [0-9]
-letter [a-z|A-Z|\_]*
+letter         [a-z|A-Z|\_]*
 delim         [ \t\n]
 ws            {delim}+
+identificador 	{letter}({letter}|{number})*
 
 %%
 
 {ws}          {/* No action and no returne*/}
-"bool"      {printf("I'm here."); addSymbol(yytext, T_BOOL); return T_BOOL;}
+"bool"      {addSymbol(yytext, T_BOOL); return T_BOOL;}
 "int"       {return T_INT;}
 "real"      {return T_REAL;}
 "char"      {return T_CHAR;}
@@ -105,7 +95,7 @@ ws            {delim}+
 
 {number}+(\.{number}+)?(E[+-]?{number}+)?
 
-{letter}({letter}|{number})*  {printf("ID: %s\n", yytext); addSymbol(yytext, ID); return ID;}
+{identificador} {addSymbol(yytext, ID); return ID;}
 [+-]?{number}+(E[+-]?{number}+)? {return V_INT;}
 [+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
 \'.\' {return V_CHAR;}
@@ -114,16 +104,37 @@ ws            {delim}+
 
 %%
 
+void initializeSymbolTable(){
+    int i = 0;
+    while(i < maxNumSymbols){
+      symbol_table[i++].name = "";
+    }
+  }
+
+  void addSymbol(const char * symbol_name, const int token_class){
+    //TODO: Tratar duplicacao
+    //TODO: Analisar abordagem O(1) usando hashtable com chave string sendo unica (ex.: lexema+escopo)
+    int pos = numSymbols++;
+    symbol_table[pos].name = strdup(symbol_name);
+    symbol_table[pos].class = token_class;
+  }
+
+
+
 int main()
 {
+  printf("\nInicializando tabela de simbolos...\n");
   initializeSymbolTable();
-  printf("\n\n");
+  printf("Iniciando leitura de tokens...\n\n");
   int token = -1;
   while (token != 0) {
       token = yylex();
-      printf("token: %d\n", token);
+      printf("token lido: %d\n", token);
   }
-  for(int i = 0; i < 100; i++){
+  printf("\nLeitura de tokens finalizada.\n");
+
+  printf("\n\n\tTABELA DE SIMBOLOS\n");
+  for(int i = 0; i < 10; i++){
     printf("Token: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].class);
   }
   return 0;
