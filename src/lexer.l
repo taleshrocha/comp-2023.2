@@ -4,16 +4,14 @@
 
 %}
 
-low    [a-z]
-upp    [A-Z]
-number [0-9]
-letter [a-z|A-Z|\_]*
+number        [0-9]
+letter        [a-z|A-Z|\_]*
 delim         [ \t\n]
 ws            {delim}+
 
 %%
 
-{ws}          {/* No action and no returne*/}
+{ws}          {/* No action and no return*/}
 "bool"      {return T_BOOL;}
 "int"       {return T_INT;}
 "real"      {return T_REAL;}
@@ -60,7 +58,7 @@ ws            {delim}+
 "record" {return RECORD;}
 "of" {return OF;}
 
-"/." {return '.';}
+"\." {return '.';}
 "," {return ',';}
 ":" {return ':';}
 ";" {return ';';}
@@ -79,12 +77,10 @@ ws            {delim}+
 
 {number}+(\.{number}+)?(E[+-]?{number}+)?
 
-{letter}({letter}|{number})*  {printf("ID: %s\n", yytext);return ID;}
+{letter}({letter}|{number})*  {printf("ID: %s - ", yytext);return ID;}
 [+-]?{number}+(E[+-]?{number}+)? {return V_INT;}
 [+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
 \'.\' {return V_CHAR;}
-
-(.)* {printf("ERROR: %s", yytext);}
 
 %%
 

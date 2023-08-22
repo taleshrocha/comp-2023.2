@@ -1,10 +1,10 @@
 {CONSTS}
-const const1 = 1;
-const const2 = 2;
+const const1 := 1;
+const const2 := 2;
 
 {TYPES}
-type type1 = bool;
-type type2 = int;
+type type1 := bool;
+type type2 := int;
 
 
 {FUNCTIONS AND PROCEDURES}
