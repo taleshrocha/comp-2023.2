@@ -100,7 +100,7 @@ identificador 	{letter}({letter}|{number})*
 [+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
 \'.\' {return V_CHAR;}
 
-(.)* {printf("ERROR: %s", yytext);}
+
 
 %%
 
@@ -135,7 +135,7 @@ int main()
 
   printf("\n\n\tTABELA DE SIMBOLOS\n");
   for(int i = 0; i < 10; i++){
-    printf("Token: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].class);
+    printf("TokenName: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].class);
   }
   return 0;
 }
