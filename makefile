@@ -4,7 +4,7 @@ CC = gcc
 LIBS = -lfl
 LEX = lex
 
-CFLAGS = -Wall -Wextra #-Werror
+CFLAGS = -Wall -Wextra #-Werror 
  
 BIN=./bin
 OBJS=./objs
@@ -22,8 +22,10 @@ mkfolders:
 
 # debug
 
-debug: CFLAGS += -DDEBUG -g -O0
+debug: CFLAGS += -DDEBUG -g -O0 #-fsanitize=address -fno-omit-frame-pointer
 debug: all
+
+
 
 # executables
 

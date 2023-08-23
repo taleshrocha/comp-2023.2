@@ -1,5 +1,5 @@
 
-#define ID 10000  //Identifier token
+#define ID 10000  // Identifier token
 #define CONST 20000
 #define T_INT 300
 #define T_REAL 400

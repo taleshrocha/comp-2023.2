@@ -142,6 +142,7 @@ int main()
           break;
         case V_STRING:
           printf("string com valor: %s\n", yylval.string_value);
+          free(yylval.string_value);
           break;
         default:
           printf("sem valor associado\n");
@@ -151,5 +152,9 @@ int main()
   printf("\nLeitura de tokens finalizada.\n");
   printFirst10Entries();
   
+
+  destroySymbolTable();
+  printf("\ntabela de simbolos destruida.\n");
+  yylex_destroy();
   return 0;
 }
