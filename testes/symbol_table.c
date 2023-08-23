@@ -44,6 +44,8 @@ void printFirst10Entries(){
 }
 
 void increaseTableSize(){
+
+    //Memory allocation (doubling symbol_table current size)
     struct SymbolEntry * new_symbol_table = (struct SymbolEntry *) malloc(2 * maxNumSymbols * sizeof(struct SymbolEntry));
     
     if (new_symbol_table == NULL) {
@@ -51,6 +53,7 @@ void increaseTableSize(){
         return;
     }
 
+    //Deep copy
     for (size_t i = 0; i < maxNumSymbols; i++)
     {
         new_symbol_table[i].name = symbol_table[i].name;
