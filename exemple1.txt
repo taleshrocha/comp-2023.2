@@ -22,7 +22,7 @@ begin
 
 end
 
-function function1 (par1 : bool, par2 : bool) : int
+function function1 (par1 : bool, par2 : bool) : bool
 begin
   return par1 == par2;
 end
@@ -60,9 +60,21 @@ begin
     begin
       continue;
     end
+    exit when 3 == 3;
   end
 
-  exit when 3 == 3;
+  
+  {TESTING ALL EXPRESSIONS}
+  if (globalVar1 && true) || function1(true, true) != false || -3 <= 2 ||
+    2 >= -4 || 3 < 4 || 5 > 6 || 2*5 == 10 || 2/3-4+1*2 % 2 == 0 then return; 
+
+  globalVar6 := 6.65;
+  
+  globalVar7 := 'a';
+  
+  globalVar8 := "four";
+
+  return;
   
 end
 
@@ -76,3 +88,6 @@ var globalVar5 : record
   a : int
   b : bool
 end;
+var globalVar6 : real;
+var globalVar7 : char;
+var globalVar8 : array[0..4] of char;
