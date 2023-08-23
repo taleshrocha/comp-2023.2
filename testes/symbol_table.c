@@ -50,7 +50,7 @@ void increaseTableSize(){
     
     if (new_symbol_table == NULL) {
         printf("Error: could not increase Symbol Table. No free memory available.\n");
-        return;
+        exit(1);
     }
 
     //Deep copy

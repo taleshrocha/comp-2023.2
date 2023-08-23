@@ -5,7 +5,7 @@
 
 //TODO: TokenEntry attributes based on the category
 struct TokenEntry {
-    
+
     //Token Category - eg:ID, V_INT, IF, LOOP, FUNCTION.
     int category;
 
@@ -50,7 +50,7 @@ void increaseTableSize(){
     
     if (new_token_table == NULL) {
         printf("Error: could not increase Symbol Table. No free memory available.\n");
-        return;
+        exit(1);
     }
 
     //Deep copy
