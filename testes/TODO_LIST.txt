@@ -1,0 +1,10 @@
+1 - Tratar adequadamente o include #include "symbol_table.c" no arquivo teste.l
+    O ideal é que seja utilizado
+
+2 - Em C não há templates. Ver como tratar os atributos de uma entrada na lista de tokens.
+    Ex.: literal int, numero da linha na tabela de simbolos para referenciar o Identificador, literal char, etc.
+
+3 - Preencher tabela de tokens.
+    addToken(ID, addSymbol(yytext, ID))
+        addSymbol(yytext, ID) retorna o numero da linha na qual o ID ficou armazenado na tabela de simbolos
+        addToken(ID, addSymbol(yytext, ID)) adiciona à tabela de tokens um registro cuja categoria é ID e atributo o nº da linha na tabela de simbolos.
