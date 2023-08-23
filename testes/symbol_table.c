@@ -10,8 +10,8 @@ struct SymbolEntry {
 };
 
 //TODO: Substituir por array dinamico
-struct SymbolEntry symbol_table[SYMBLE_TABLE_SIZE];
-const int maxNumSymbols = SYMBLE_TABLE_SIZE;
+struct SymbolEntry symbol_table[SYMBOL_TABLE_SIZE];
+const int maxNumSymbols = SYMBOL_TABLE_SIZE;
 int numSymbols = 0;
 
 void initializeSymbolTable(){
