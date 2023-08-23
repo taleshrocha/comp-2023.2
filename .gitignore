@@ -1,5 +1,9 @@
 # vscode
 .vscode/*
+
+# others
+./test/*
+
 # Prerequisites
 *.d
 

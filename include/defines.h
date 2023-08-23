@@ -10,6 +10,7 @@
 #define V_CHAR 800
 #define V_BOOL 900
 #define V_REAL 1000
+#define V_STRING 1001
 
 #define EQ 1100
 #define LEQ 1200
