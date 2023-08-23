@@ -9,12 +9,13 @@ struct SymbolEntry {
     int class;
 };
 
-//TODO: Substituir por array dinamico
-struct SymbolEntry symbol_table[SYMBOL_TABLE_SIZE];
-const int maxNumSymbols = SYMBOL_TABLE_SIZE;
+//Dynamic array
+struct SymbolEntry * symbol_table;
+size_t maxNumSymbols = SYMBOL_TABLE_INITIAL_SIZE;
 int numSymbols = 0;
 
 void initializeSymbolTable(){
+    symbol_table = (struct SymbolEntry *) malloc(maxNumSymbols * sizeof(struct SymbolEntry));
     int i = 0;
     while(i < maxNumSymbols){
       symbol_table[i++].name = "";
@@ -40,4 +41,24 @@ void printFirst10Entries(){
     for(int i = 0; i < 10; i++){
         printf("TokenName: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].class);
     }
+}
+
+void increaseTableSize(){
+    struct SymbolEntry * new_symbol_table = (struct SymbolEntry *) malloc(2 * maxNumSymbols * sizeof(struct SymbolEntry));
+    
+    if (new_symbol_table == NULL) {
+        printf("Error: could not increase Symbol Table. No free memory available.\n");
+        return;
+    }
+
+    for (size_t i = 0; i < maxNumSymbols; i++)
+    {
+        new_symbol_table[i].name = symbol_table[i].name;
+        new_symbol_table[i].class = symbol_table[i].class;
+    }
+
+    maxNumSymbols = maxNumSymbols * 2;
+
+    free(symbol_table);
+    symbol_table = new_symbol_table;
 }
