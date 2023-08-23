@@ -12,9 +12,12 @@ number          [0-9]
 letter          [a-z|A-Z|\_]*
 delim           [ \t\n]
 ws              {delim}+
-identificador 	{letter}({letter}|{number})*
+id {letter}({letter}|{number})*
 
 %%
+
+"{"([^}]|\n)*"}"   {/* Ignorar tudo entre "{" e "}" */}
+"--".*		  {/* Ignorar tudo após "--" até o final da linha */}
 
 {ws}          {/* No action and no returne*/}
 "bool"        {return T_BOOL;}
@@ -47,6 +50,7 @@ identificador 	{letter}({letter}|{number})*
 "]"         {return ']';}
 
 "const"     {return CONST;}
+"var"	    {return VAR;}
 "if"        {return IF;}
 "else"      {return ELSE;}
 "elsif"     {return ELSIF;}
@@ -82,7 +86,7 @@ identificador 	{letter}({letter}|{number})*
 
 {number}+(\.{number}+)?(E[+-]?{number}+)?
 
-{identificador}                             {addSymbol(yytext, ID); return ID;}
+{id}					    {addSymbol(yytext, ID); return ID;}
 [+-]?{number}+(E[+-]?{number}+)?            {return V_INT;}
 [+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
 \'.\'                                       {return V_CHAR;}

@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "symbolTable.h"
 
+/*
 struct SymbolEntry {
     char *name;
     int class;
 };
+*/
 
 //Dynamic array
 struct SymbolEntry * symbol_table;
