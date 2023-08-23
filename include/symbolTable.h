@@ -12,7 +12,7 @@ extern SymbolEntry * symbol_table; // Tabela de símbolos (tamanho inicial: 100)
 extern int numSymbols;
 
 void initializeSymbolTable();
-void addSymbol(const char *symbol_name, const int token_class);
+int addSymbol(const char *symbol_name, const int token_class);
 void printFirst10Entries();
 
 #endif // SYMBOLTABLE_H
