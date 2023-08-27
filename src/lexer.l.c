@@ -2205,6 +2205,26 @@ int main()
           printf("string com valor: %s\n", yylval.string_value);
           free(yylval.string_value);
           break;
+		case FUNCTION: 
+		  printf("Function: %d \n", yylval.id_index);
+		  increaseScopeLevel();
+		  break;
+		case IF: 
+		  printf("Function: %d \n", yylval.id_index);
+		  increaseScopeLevel();
+		  break;
+		case ELSIF: 
+		  printf("Function: %d \n", yylval.id_index);
+		  increaseScopeLevel();
+		  break;
+		case PROCEDURE: 
+		  printf("Function: %d \n", yylval.id_index);
+		  increaseScopeLevel();
+		  break;
+		case END: 
+		  decreaseScopeLevel();
+		  printf("End: %d \n", yylval.id_index);
+		  break;
         default:
           printf("sem valor associado\n");
           break;

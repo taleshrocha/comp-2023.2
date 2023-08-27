@@ -7,6 +7,8 @@
 
 #define SYMBOL_TABLE_INITIAL_SIZE 100
 
+#define SCOPE_LEVEL 0
+
 extern SymbolEntry *symbol_table;  // Tabela de símbolos (tamanho inicial: 100)
 extern TokenData yylval;
 
@@ -16,4 +18,6 @@ void printFirst10Entries();
 void increaseTableSize();
 void destroySymbolTable();
 void showFullTable();
+void increaseScopeLevel();
+void decreaseScopeLevel();
 #endif  // SYMBOLTABLE_H
