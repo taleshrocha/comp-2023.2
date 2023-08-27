@@ -89,8 +89,8 @@ void increaseTableSize() {
 }
 // Acho que seria interessante ter uma forma de ver toda a tabela de símbolos para fins de debug
 void showFullTable() {
-    printf("Tabela de Simbolos completa: \n");
+    printf("Tabela de Simbolos completa: \n \n");
   for (size_t i = 0; i < curr_scope->size; i++) {
-    printf("Token:: %s \t Class: %d \n", curr_scope->symbol_table[i].name, curr_scope->symbol_table[i].type);
+    printf("Token: %s \t Class: %d \n", curr_scope->symbol_table[i].name, curr_scope->symbol_table[i].type);
   }
 }
