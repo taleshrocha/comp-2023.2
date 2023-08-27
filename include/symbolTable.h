@@ -15,4 +15,5 @@ unsigned int addSymbol(const char *name);
 void printFirst10Entries();
 void increaseTableSize();
 void destroySymbolTable();
+void showFullTable();
 #endif  // SYMBOLTABLE_H
