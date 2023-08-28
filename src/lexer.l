@@ -20,6 +20,9 @@ identificador 	{letter}({letter}|{number})*
 
 %%
 
+"{"([^}]|\n)*"}"   {/* Ignorar tudo entre "{" e "}" */}
+"--".*		  {/* Ignorar tudo após "--" até o final da linha */}
+
 {ws}          {/* No action and no returne*/}
 "bool"        {return T_BOOL;}
 "int"         {return T_INT;}
@@ -100,6 +103,7 @@ identificador 	{letter}({letter}|{number})*
                                             }
 
 \'.\'                                       {
+                                              printf("minha string legal: %s\n", yytext);
                                               yylval.char_value = yytext[1];
                                               return V_CHAR;
                                             }
