@@ -8,6 +8,8 @@
 
 %}
 
+%option noyywrap
+
 low             [a-z]
 upp             [A-Z]
 number          [0-9]

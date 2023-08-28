@@ -8,6 +8,7 @@
 #include "typedefs.h"
 
 size_t maxNumSymbols = SYMBOL_TABLE_INITIAL_SIZE;
+int SCOPE = SCOPE_LEVEL;
 // Dynamic array
 ScopeEntry* curr_scope;
 size_t numSymbols = 0;
@@ -86,4 +87,21 @@ void increaseTableSize() {
 
   free(curr_scope->symbol_table);
   curr_scope->symbol_table = new_symbol_table;
+}
+// Acho que seria interessante ter uma forma de ver toda a tabela de símbolos para fins de debug
+void showFullTable() {
+    printf("Tabela de Simbolos completa: \n \n");
+  for (size_t i = 0; i < curr_scope->size; i++) {
+    printf("Token: %s \t Class: %d \n", curr_scope->symbol_table[i].name, curr_scope->symbol_table[i].type);
+  }
+}
+
+void increaseScopeLevel() {
+  SCOPE++;
+  printf("Nível de escopo aumentado \n Escopo: %d \n", SCOPE);
+}
+
+void decreaseScopeLevel() {
+  SCOPE--;
+  printf("Nível de escopo reduzido \n Escopo: %d \n", SCOPE);
 }
