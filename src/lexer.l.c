@@ -1136,7 +1136,7 @@ case 58:
 YY_RULE_SETUP
 #line 106 "src/lexer.l"
 {
-                                              printf("minha string legal: %s\n", yytext);
+                                              //printf("minha string legal: %s\n", yytext);
                                               yylval.char_value = yytext[1];
                                               return V_CHAR;
                                             }

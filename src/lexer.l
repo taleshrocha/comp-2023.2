@@ -104,7 +104,7 @@ identificador   {letter}({letter}|{number})*
                                             }
 
 \'.\'                                       {
-                                              printf("minha string legal: %s\n", yytext);
+                                              //printf("minha string legal: %s\n", yytext);
                                               yylval.char_value = yytext[1];
                                               return V_CHAR;
                                             }
@@ -125,12 +125,15 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
+  /*
 int main()
 {
   printf("\nInicializando tabela de simbolos...\n");
   initializeSymbolTable();
   printf("Iniciando leitura de tokens...\n\n");
   int token = -1;
+  token = yylex();
+
   while (token != 0) {
       token = yylex();
       printf("token lido: %d\n", token);
@@ -166,5 +169,7 @@ int main()
   destroySymbolTable();
   printf("\ntabela de simbolos destruida.\n");
   yylex_destroy();
+  
   return 0;
 }
+  */
