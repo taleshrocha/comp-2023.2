@@ -44,7 +44,7 @@ unsigned int addSymbol(const char* name) {
   for (size_t i = 0; i < curr_scope->size; i++) {
     if (strcmp(curr_scope->symbol_table[i].name, name) == 0) {
       printf(
-          "Ja existe um token na tabela de simbolos com o lexema \"%s\".\n\n",
+          "Ja existe um token na tabela de simbolos com o lexema \"%s\".\n",
           name);
       return i;
     }
@@ -54,8 +54,7 @@ unsigned int addSymbol(const char* name) {
   }
 
   curr_scope->symbol_table[curr_scope->size].name = strdup(name);
-  curr_scope->size++;
-  return curr_scope->size;
+  return curr_scope->size++;
 }
 
 void printFirst10Entries() {

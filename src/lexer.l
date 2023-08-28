@@ -13,10 +13,10 @@
 low             [a-z]
 upp             [A-Z]
 number          [0-9]
-letter          [a-z|A-Z|\_]*
+letter          [a-zA-Z\_]
 delim           [ \t\n]
 ws              {delim}+
-id {letter}({letter}|{number})*
+identificador   {letter}({letter}|{number})*
 
 %%
 
@@ -53,7 +53,7 @@ id {letter}({letter}|{number})*
 "]"         {return ']';}
 
 "const"     {return CONST;}
-"var"	    {return VAR;}
+"var"	      {return VAR;}
 "if"        {return IF;}
 "else"      {return ELSE;}
 "elsif"     {return ELSIF;}
@@ -119,6 +119,9 @@ id {letter}({letter}|{number})*
                                               yylval.id_index = addSymbol(yytext);
                                               return ID;
                                             }
+
+.*        {printf("ERROR! %s \n", yytext);}
+
 %%
 
 

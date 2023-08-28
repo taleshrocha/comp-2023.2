@@ -1,7 +1,6 @@
 
 #define ID 10000  // Identifier token
 #define CONST 20000
-#define VAR 20012
 #define T_INT 300
 #define T_REAL 400
 #define T_CHAR 500
@@ -53,3 +52,4 @@
 #define CONTINUE 3576485
 #define RECORD 78423
 #define OF 23236
+#define VAR 123125
