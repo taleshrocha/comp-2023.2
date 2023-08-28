@@ -1,75 +1,107 @@
-#include <stdio.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "symbolTable.h"
 
-/*
-struct SymbolEntry {
-    char *name;
-    int class;
-};
-*/
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-//Dynamic array
-struct SymbolEntry * symbol_table;
+#include "typedefs.h"
+
 size_t maxNumSymbols = SYMBOL_TABLE_INITIAL_SIZE;
-int numSymbols = 0;
+int SCOPE = SCOPE_LEVEL;
+// Dynamic array
+ScopeEntry* curr_scope;
+size_t numSymbols = 0;
+TokenData yylval;
 
-void initializeSymbolTable(){
-    symbol_table = (struct SymbolEntry *) malloc(maxNumSymbols * sizeof(struct SymbolEntry));
-    int i = 0;
-    while(i < maxNumSymbols){
-      symbol_table[i++].name = "";
-    }
+void initializeSymbolTable() {
+  curr_scope = (ScopeEntry*)malloc(sizeof(ScopeEntry));
+  curr_scope->previous_scope = NULL;
+  curr_scope->symbol_table =
+      (SymbolEntry*)malloc(SYMBOL_TABLE_INITIAL_SIZE * sizeof(SymbolEntry));
+  curr_scope->capacity = SYMBOL_TABLE_INITIAL_SIZE;
+  curr_scope->size = 0;
 }
 
-int addSymbol(const char * symbol_name, const int token_class){
-    //TODO: Analisar abordagem O(1) usando hashtable com chave string sendo unica (ex.: lexema+escopo)
-    for (size_t i = 0; i < numSymbols; i++)
-    {
-        if(strcmp(symbol_table[i].name, symbol_name) == 0){
-            printf("Ja existe um token na tabela de simbolos com o lexema \"%s\".\n\n", symbol_name);
-            return i;
-        }
+void destroySymbolTable() {
+  ScopeEntry* aux;
+  while (curr_scope->previous_scope != NULL) {
+    for (size_t i = 0; i < curr_scope->size; i++) {
+      free(curr_scope->symbol_table[i].name);
     }
-    if(numSymbols == maxNumSymbols){
-        increaseTableSize();
-    }
-    
-    int pos = numSymbols++;
-    symbol_table[pos].name = strdup(symbol_name);
-    symbol_table[pos].class = token_class;
-    return pos;
+    free(curr_scope->symbol_table);
+    aux = curr_scope->previous_scope;
+    free(curr_scope);
+    curr_scope = aux;
+  }
+  free(curr_scope->symbol_table);
+  free(curr_scope);
 }
 
-void printFirst10Entries(){
-    printf("\n\n\tTABELA DE SIMBOLOS (10 primeiros)\n");
-    for(int i = 0; i < 10; i++){
-        printf("TokenName: %s \t TokenClass: %d \n", symbol_table[i].name, symbol_table[i].class);
+unsigned int addSymbol(const char* name) {
+  // TODO: Analisar abordagem O(1) usando hashtable com chave string sendo unica
+  // (ex.: lexema+escopo)
+  for (size_t i = 0; i < curr_scope->size; i++) {
+    if (strcmp(curr_scope->symbol_table[i].name, name) == 0) {
+      printf(
+          "Ja existe um token na tabela de simbolos com o lexema \"%s\".\n\n",
+          name);
+      return i;
     }
+  }
+  if (curr_scope->size == curr_scope->capacity) {
+    increaseTableSize();
+  }
+
+  curr_scope->symbol_table[curr_scope->size].name = strdup(name);
+  curr_scope->size++;
+  return curr_scope->size;
 }
 
-void increaseTableSize(){
+void printFirst10Entries() {
+  printf("\n\n\tTABELA DE SIMBOLOS (10 primeiros)\n");
+  for (int i = 0; i < 10; i++) {
+    printf("TokenName: %s \t TokenClass: %d \n",
+           curr_scope->symbol_table[i].name, curr_scope->symbol_table[i].type);
+  }
+}
 
-    //Memory allocation (doubling symbol_table current size)
-    struct SymbolEntry * new_symbol_table = (struct SymbolEntry *) malloc(2 * maxNumSymbols * sizeof(struct SymbolEntry));
-    
-    if (new_symbol_table == NULL) {
-        printf("Error: could not increase Symbol Table. No free memory available.\n");
-        exit(1);
-    }
+void increaseTableSize() {
+  // Memory allocation (doubling symbol_table current size)
+  SymbolEntry* new_symbol_table =
+      (SymbolEntry*)malloc(2 * curr_scope->capacity * sizeof(SymbolEntry));
 
-    //Deep copy
-    for (size_t i = 0; i < maxNumSymbols; i++)
-    {
-        new_symbol_table[i].name = symbol_table[i].name;
-        new_symbol_table[i].class = symbol_table[i].class;
-    }
+  if (new_symbol_table == NULL) {
+    printf(
+        "Error: could not increase Symbol Table. No free memory available.\n");
+    exit(1);
+  }
 
-    maxNumSymbols = maxNumSymbols * 2;
+  // Deep copy
+  for (size_t i = 0; i < curr_scope->capacity; i++) {
+    new_symbol_table[i].name = curr_scope->symbol_table[i].name;
+    new_symbol_table[i].type = curr_scope->symbol_table[i].type;
+  }
 
-    free(symbol_table);
-    symbol_table = new_symbol_table;
+  curr_scope->capacity = curr_scope->capacity * 2;
+
+  free(curr_scope->symbol_table);
+  curr_scope->symbol_table = new_symbol_table;
+}
+// Acho que seria interessante ter uma forma de ver toda a tabela de símbolos para fins de debug
+void showFullTable() {
+    printf("Tabela de Simbolos completa: \n \n");
+  for (size_t i = 0; i < curr_scope->size; i++) {
+    printf("Token: %s \t Class: %d \n", curr_scope->symbol_table[i].name, curr_scope->symbol_table[i].type);
+  }
+}
+
+void increaseScopeLevel() {
+  SCOPE++;
+  printf("Nível de escopo aumentado \n Escopo: %d \n", SCOPE);
+}
+
+void decreaseScopeLevel() {
+  SCOPE--;
+  printf("Nível de escopo reduzido \n Escopo: %d \n", SCOPE);
 }

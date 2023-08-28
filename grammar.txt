@@ -1,0 +1,32 @@
+Prog := Decl CB
+ConstAux := Id ':=' Exp ';' ConstAux | lambda
+Loc := Id | Loc.Id | Loc[Exp]
+Exp :=   V_INT | V_REAL | V_BOOL | V_CHAR | Loc 
+       | Func_Call | (Exp) | +Exp  | -Exp | !Exp  
+       | Exp '+' Exp | Exp '-' Exp | Exp '*' Exp
+       | Exp '/' Exp | Exp '%' Exp | Exp '!=' Exp
+       | Exp '==' Exp | Exp '>' Exp | Exp '<' Exp
+       | Exp '>=' Exp | Exp '<=' Exp | Exp '&&' Exp
+       | Exp '||' Exp
+% Regras não ambiguas para expressoes numericas
+NumExpression := NumExpression '+' NumExpression2
+                    | NumExpression '-' NumExpression2 
+                    | NumExpression2
+NumExpression2 := NumExpression2 '*' NumFinalTerm
+                    | NumExpression2 '/' NumFinalTerm 
+                    | NumExpression2 '%' NumFinalTerm 
+                    | NumFinalTerm
+NumFinalTerm := '(' NumFinalTerm ')' | Value 
+Value := V_INT | V_REAL | V_BOOL | V_CHAR | Loc 
+Types := `type` TypeAux | lambda
+TypeAux := Id ':=' TypeDec
+TypeDec :=   `bool` | `int` | `real` | `char` | Id 
+           | `array``[`Iv`]` `of` TypeDec | `record` Fields `end`
+Iv := Exp`..`Exp | Exp`..`Exp`,`Iv
+Fields := FieldAux Fields | lambda
+FieldAux := Id ':' TypeDec
+SubProg := (ProcedureDecl | FunctionDecl)$^*$ 
+ProcedureDecl := 'procedure' Id '(' Parameters ')' <CB> ';'
+FunctionDecl := 'function' Id '(' Parameters ')' ':' TypeDec <CB> ';'
+Parameters := ParameterAux Parameters | lambda
+            | 'return' Exp

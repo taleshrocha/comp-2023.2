@@ -1,10 +1,14 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
+  #include <string.h>
   #include "defines.h"
+  #include "typedefs.h"
   #include "symbolTable.h"
 
 %}
+
+%option noyywrap
 
 low             [a-z]
 upp             [A-Z]
@@ -25,7 +29,6 @@ id {letter}({letter}|{number})*
 "real"        {return T_REAL;}
 "char"        {return T_CHAR;}
 
-"true" | "false"	{return V_BOOL;}
 ">"         {return '>';}
 "<"         {return '<';}
 ">="        {return GEQ;}
@@ -67,7 +70,7 @@ id {letter}({letter}|{number})*
 "record"    {return RECORD;}
 "of"        {return OF;}
 
-"/."        {return '.';}
+"\."        {return '.';}
 ","         {return ',';}
 ":"         {return ':';}
 ";"         {return ';';}
@@ -84,14 +87,38 @@ id {letter}({letter}|{number})*
 
 ":="        {return ATTRIB;}
 
-{number}+(\.{number}+)?(E[+-]?{number}+)?
-
-{id}					    {addSymbol(yytext, ID); return ID;}
-[+-]?{number}+(E[+-]?{number}+)?            {return V_INT;}
-[+-]?{number}+\.{number}+(E[+-]?{number}+)? {return V_REAL;}
-\'.\'                                       {return V_CHAR;}
+"true"|"false"	                          {
+                                              yylval.bool_value = yytext[0] == 't' ? true : false;
+                                              return V_BOOL;
+                                            }
 
 
+[+-]?{number}+(E[+-]?{number}+)?            {
+                                              yylval.int_value = atoi(yytext);
+                                              return V_INT;
+                                            }
+
+[+-]?{number}+\.{number}+(E[+-]?{number}+)? {
+                                              yylval.real_value = strtof(yytext, NULL);
+                                              return V_REAL;
+                                            }
+
+\'.\'                                       {
+                                              printf("minha string legal: %s\n", yytext);
+                                              yylval.char_value = yytext[1];
+                                              return V_CHAR;
+                                            }
+\".*\"                                      {
+                                              yylval.string_value = strdup(yytext+1);
+                                              yylval.string_value[yyleng-2] = '\0';
+                                              printf("yyleng: %d\n", yyleng);
+                                              return V_STRING; // ?? como indicar uma string?
+                                            }
+
+{identificador}                             {
+                                              yylval.id_index = addSymbol(yytext);
+                                              return ID;
+                                            }
 %%
 
 
@@ -104,9 +131,37 @@ int main()
   while (token != 0) {
       token = yylex();
       printf("token lido: %d\n", token);
+      switch (token) {
+        case ID:
+          printf("id na posição: %d da symbol table\n", yylval.id_index);
+          break;
+        case V_BOOL:
+          printf("bool com valor: %s\n", yylval.bool_value ? "true" : "false");
+          break;
+        case V_INT:
+          printf("int com valor: %d\n", yylval.int_value);
+          break;
+        case V_REAL:
+          printf("real com valor: %f\n", yylval.real_value);
+          break;
+        case V_CHAR:
+          printf("char com valor: %c\n", yylval.char_value);
+          break;
+        case V_STRING:
+          printf("string com valor: %s\n", yylval.string_value);
+          free(yylval.string_value);
+          break;
+        default:
+          printf("sem valor associado\n");
+          break;
+      }
   }
   printf("\nLeitura de tokens finalizada.\n");
   printFirst10Entries();
   
+
+  destroySymbolTable();
+  printf("\ntabela de simbolos destruida.\n");
+  yylex_destroy();
   return 0;
 }

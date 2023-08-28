@@ -1,18 +1,23 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
+#include <stdbool.h>
+
+#include "typedefs.h"
+
 #define SYMBOL_TABLE_INITIAL_SIZE 100
 
-typedef struct SymbolEntry {
-    char *name;
-    int class;
-} SymbolEntry;
+#define SCOPE_LEVEL 0
 
-extern SymbolEntry * symbol_table; // Tabela de símbolos (tamanho inicial: 100)
-extern int numSymbols;
+extern SymbolEntry *symbol_table;  // Tabela de símbolos (tamanho inicial: 100)
+extern TokenData yylval;
 
 void initializeSymbolTable();
-int addSymbol(const char *symbol_name, const int token_class);
+unsigned int addSymbol(const char *name);
 void printFirst10Entries();
-
-#endif // SYMBOLTABLE_H
+void increaseTableSize();
+void destroySymbolTable();
+void showFullTable();
+void increaseScopeLevel();
+void decreaseScopeLevel();
+#endif  // SYMBOLTABLE_H

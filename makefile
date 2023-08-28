@@ -4,7 +4,7 @@ CC = gcc
 LIBS = -lfl
 LEX = lex
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra #-Werror 
  
 BIN=./bin
 OBJS=./objs
@@ -22,21 +22,23 @@ mkfolders:
 
 # debug
 
-debug: CFLAGS += -DDEBUG -g -O0
+debug: CFLAGS += -DDEBUG -g -O0 #-fsanitize=address -fno-omit-frame-pointer
 debug: all
+
+
 
 # executables
 
 $(BIN)/lexer: $(OBJS)/lexer.o $(OBJS)/symbolTable.o
-	$(CC) $^ $(LIBS) -I $(INCLUDE) -o $@ 
+	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
 
 $(OBJS)/lexer.o: $(SRC)/lexer.l.c
-	$(CC) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
-	$(CC) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources
 

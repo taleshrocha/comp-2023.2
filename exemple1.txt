@@ -35,7 +35,7 @@ begin
   
   begin
     var localVar : int;
-    localVar = 
+    localVar := 3;
     if 2 > 3 then 
       begin
         procedure1(false, globalVar2)

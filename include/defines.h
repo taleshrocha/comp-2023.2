@@ -1,5 +1,5 @@
 
-#define ID 10000  //Identifier token
+#define ID 10000  // Identifier token
 #define CONST 20000
 #define VAR 20012
 #define T_INT 300
@@ -11,6 +11,7 @@
 #define V_CHAR 800
 #define V_BOOL 900
 #define V_REAL 1000
+#define V_STRING 1001
 
 #define EQ 1100
 #define LEQ 1200
