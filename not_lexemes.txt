@@ -1,5 +1,5 @@
-1
-oi
-12slkdjflkdsj
-oi
-12
+12asjdsajdaijweqd
+hello
+const a := 3;
+var globalVar3 : array[0..99] of int;
+globalVar3[1] := 0;

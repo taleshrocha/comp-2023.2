@@ -120,7 +120,7 @@ identificador   {letter}({letter}|{number})*
                                               return ID;
                                             }
 
-.*        {printf("ERROR! %s \n", yytext);}
+.        {printf("ERROR! %s \n", yytext);}
 
 %%
 
