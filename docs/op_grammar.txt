@@ -1,83 +1,33 @@
-Gramática da Linguagem:
+NumExp := V_INT | V_REAL | V_BOOL | V_CHAR 
+
+AcessMemAddr := Id | AcessMemAddr.Id | AcessMemAddr [ Exp]| LAMBDA
 
 
-<Prog> := <Decl> <CmdBlock>
-<Decl> := <Consts> <Types> <SubProg> <Vars> 
-<Consts> := const <ConstAux> | λ
-<ConstAux> := <Id > ':=' <Exp> ';' <ConstAux> | λ
-<AcessMemAddr> := <Id> | <AcessMemAddr>.<Id> | <AcessMemAddr> [ <Exp>]
+// Seguir a ordem da op_table
 
-⟨Exp⟩ := 
-  <V_INT> | <V_REAL> | <V_BOOL> | <V_CHAR> | <AcessMemAddr>
-  <Func_Call> | (<Exp>) | + <Exp> | -<Exp> | !<Exp>
-  < Exp > '+'  <Exp > | <Exp> '-' <Exp> | <Exp> '*'   <Exp>
-  < Exp > '/'  <Exp > | <Exp> '%' <Exp> | <Exp> '!='  <Exp>
-  < Exp > '==' <Exp > | <Exp> '>' <Exp> | <Exp> '<'   <Exp>
-  < Exp > '>=' <Exp > | <Exp> '<='<Exp> | <Exp> '&&'  <Exp>
-  < Exp > '||' <Exp >
+Exp :=  Exp   '+'   Terms
+        | Exp   '-'   Terms
+        | Terms| LAMBDA
 
+Terms :=  Terms '*' Comps
+          | Terms '/' Comps
+          | Terms '%' Comps
+          | Comps| LAMBDA
 
- --> "Regras não ambiguas para expressoes numericas"
+Comps :=    LogicTerms   '!='  LogicTerms | LogicTerms   '=='  LogicTerms 
+            | LogicTerms   ''   LogicTerms | LogicTerms   ''   LogicTerms 
+            | LogicTerms   '='  LogicTerms | LogicTerms   '='  LogicTerms 
+            | LogicTerms| LAMBDA
 
-// TODO ligar com o resto da gramatica (em <Exp>)
-<NumExpression> := 
-  <NumExpression> '+' <NumExpression2>
-  <NumExpression> '-' <NumExpression2>
-  <NumExpression2>
+LogicTerms :=   LogicTerms '||' LogicFactor
+                | LogicFactor | LAMBDA
 
-<NumExpression2> := 
-  <NumExpression2> '*' <NumFinalTerm>
-  <NumExpression2> '/' <NumFinalTerm>
-  <NumExpression2> '%' <NumFinalTerm>
-  <NumFinalTerm>
+LogicFactor := LogicFactor '&&' LogicNot| LAMBDA
 
-<NumFinalTerm> := '('<NumFinalTerm>')' | <Value>
+LogicNot  := '!'Parenthesis | Parenthesis| LAMBDA
 
-<Value> := <V_INT> | <V_REAL> | <V_BOOL> | <V_CHAR> | <AcessMemAddr>
+Parenthesis := UnaryExp | '('UnaryExp')'| LAMBDA
 
-<Types> := 'type' <TypeAux> | λ
+UnaryExp := '+'SimpleExp | '-'SimpleExp| LAMBDA
 
-<TypeAux> := <Id> ':=' <TypeDec>
-
-<TypeDec> := 
-  'bool' | 'int' | 'real' | 'char' | <Id>
-  'array' '[' <Interval> ']' 'of' <TypeDec> | 'record' <Fields> 'end'
-
-
-<Interval> := <Exp> '..' <Exp> | <Exp> '..' <Exp> ',' <Interval>
-
-
-<Fields> := <FieldAux> <Fields> | λ
-
-<FieldAux> := <Id> ':' <TypeDec>
-
-<SubProgAux> := (ProcedureDecl | FunctionDecl) | λ
-<SubProg> := <SubProgAux> | <SubProgAux><SubProg>
-
-<ProcedureDecl> := 'procedure' <Id> '(' <Parameters> ')' <CmdBlock> ';'
-
-<FunctionDecl> := 'function' <Id> '(' <Parameters> ')' ':' <TypeDec> <CmdBlock> ';'
-
-<Parameters> := <ParameterAux> <Parameters> | λ
-
-<ParameterAux> := <Id> ':' <TypeDec>
-
-<Vars> := 'var' <VarAux> | λ
-
-<VarAux> := (<Id> ':' <TypeDecl> ';' ) ∗
-
-<CmdBlock> := 'begin' <Vars> <Cmds> 'end'
-
-<Cmds> := <CmdAux> | <CmdAux> ';' <Cmd> | λ
-
-<CmdAux> := <AcessMemAddr> ':=' <Exp>
-  <Id> '(' <Args> ')'
-  <CmdBlock> |
-  'if' <Exp> 'then' <CmdBlock>
-  'if' <Exp> 'then' <CmdBlock> 'else' <CmdBlock>
-  'for' <Id> ':=' <Exp > 'to' <Exp> 'step' <Exp> <CmdBlock>
-  'loop' <Vars> <Cmds> 'end'
-  'exit' 'when'  <Exp >
-  'continue'
-  'return'
-  'return' <Exp>
+SimpleExp := NumExp | AcessMemAddr | FuncCall | LAMBDA
