@@ -1,0 +1,10 @@
+         OP         |   ASSOC
+ + -                | esquerda
+ * / %              | esquerda
+ != < <= > >= ==    | não possui
+ ||                 | esquerda
+ &&                 | esquerda
+ !                  | unário
+ ( )                | unário
+ + -                | unário
+ expr_simples       | unário
