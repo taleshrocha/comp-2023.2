@@ -1,8 +1,8 @@
          OP         |   ASSOC
  ||                 | esquerda
  &&                 | esquerda
- !                  | unário
  != < <= > >= ==    | não possui
+ !                  | unário
  + -                | esquerda
  * / %              | esquerda
  ( )                | unário

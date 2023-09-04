@@ -11,14 +11,14 @@ SubProg := SubProgAux | SubProgAuxSubProg
 
 Exp :=   Exp '||' Terms | Terms | LAMBDA
 
-Terms := Terms '&&' Factor | Factor |LAMBDA
+Terms := Terms '&&' Comps | Comps |LAMBDA
 
-Factor  := '!'Comps | Comps | LAMBDA
+Comps :=    Factor    '!='  Factor | Factor   '=='  Factor 
+            | Factor   '<'   Factor | Factor   '>'   Factor 
+            | Factor   '='  Factor | Factor   '='  Factor 
+            | Factor | LAMBDA
 
-Comps :=    AriOp    '!='  AriOp | AriOp   '=='  AriOp 
-            | AriOp   '<'   AriOp | AriOp   '>'   AriOp 
-            | AriOp   '='  AriOp | AriOp   '='  AriOp 
-            | AriOp | LAMBDA
+Factor  := '!'AriOp | AriOp | LAMBDA
 
 AriOp :=    AriOp   '+'   AriOp2
         | AriOp   '-'   AriOp2
