@@ -1,85 +1,28 @@
-Gramática da Linguagem:
+Exp := Terms Exp_
+Exp_ := '||' Terms Exp_ | Terms | LAMBDA
 
-
-Prog := Decl CmdBlock
-Decl := Consts Types SubProg Vars 
-Consts := const ConstAux | λ
-ConstAux := Id  ':=' Exp ';' ConstAux | λ
-SubProgAux := (ProcedureDecl | FunctionDecl) | λ
-SubProg := SubProgAux | SubProgAuxSubProg
-
-
-Exp :=   Exp '||' Terms | Terms | LAMBDA
-
-Terms := Terms '&&' Comps | Comps |LAMBDA
+Terms := Comps Terms_
+Terms_ := '&&' Comps Terms_ | Comps | LAMBDA
 
 Comps :=    Factor    '!='  Factor | Factor   '=='  Factor 
             | Factor   '<'   Factor | Factor   '>'   Factor 
             | Factor   '='  Factor | Factor   '='  Factor 
-            | Factor | LAMBDA
+            | Factor
 
-Factor  := '!'AriOp | AriOp | LAMBDA
+Factor := '!'AriOp | AriOp
 
-AriOp :=    AriOp   '+'   AriOp2
-        | AriOp   '-'   AriOp2
-        | AriOp2| LAMBDA
+AriOp := AriOp2 AriOp_
+AriOp_ := '+' AriOp2 AriOp_ | '-' AriOp2 AriOp_  |  AriOp2 | LAMBDA
 
-AriOp2 :=  AriOp2   '*' Parenthesis
-          | AriOp2 '/' Parenthesis
-          | AriOp2 '%' Parenthesis
-          | Parenthesis | LAMBDA
+AriOp2 := Parenthesis AriOp2_
+AriOp2_ := '*' Parenthesis AriOp2_ | '/' Parenthesis AriOp2_  |  '%' Parenthesis AriOp2_ | Parenthesis | LAMBDA
 
-Parenthesis := UnaryExp | '(' Exp ')'| LAMBDA
+Parenthesis := UnaryExp | '(' Exp ')' 
 
-UnaryExp := '+'SimpleExp | '-'SimpleExp | SimpleExp | LAMBDA
+UnaryExp := '+'SimpleExp | '-'SimpleExp | SimpleExp 
 
-SimpleExp := NumExp | AcessMemAddr | FuncCall | LAMBDA
+SimpleExp := NumExp | AcessMemAddr | FuncCall 
 
 NumExp := V_INT | V_REAL | V_BOOL | V_CHAR 
 
-AcessMemAddr := Id | AcessMemAddr.Id | AcessMemAddr [Exp]|LAMBDA
-
-Types := 'type' TypeAux | λ
-
-TypeAux := Id ':=' TypeDec
-
-TypeDec := 
-  'bool' | 'int' | 'real' | 'char' | Id
-  'array' '[' Interval ']' 'of' TypeDec | 'record' Fields 'end'
-
-
-Interval := Exp '..' Exp | Exp '..' Exp ',' Interval
-
-
-Fields := FieldAux Fields | λ
-
-FieldAux := Id ':' TypeDec
-
-
-ProcedureDecl := 'procedure' Id '(' Parameters ')' CmdBlock ';'
-
-FunctionDecl := 'function' Id '(' Parameters ')' ':' TypeDec CmdBlock ';'
-
-Parameters := ParameterAux Parameters | λ
-
-ParameterAux := Id ':' TypeDec
-
-Vars := 'var' VarAux | λ
-
-VarAux := (Id ':' TypeDecl ';' ) ∗
-
-CmdBlock := 'begin' Vars Cmds 'end'
-
-Cmds := CmdAux | CmdAux ';' Cmd | λ
-
-CmdAux := AcessMemAddr ':=' Exp
-  Id '(' Args ')'
-  CmdBlock |
-  'if' Exp 'then' CmdBlock
-  'if' Exp 'then' CmdBlock 'else' CmdBlock
-  'for' Id ':=' Exp  'to' Exp 'step' Exp CmdBlock
-  'loop' Vars Cmds 'end'
-  'exit' 'when'  Exp 
-  'continue'
-  'return'
-  'return' Exp
+AcessMemAddr := Id | AcessMemAddr.Id | AcessMemAddr [Exp]
