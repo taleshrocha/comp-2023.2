@@ -1,0 +1,126 @@
+Gramática da Linguagem:
+
+
+Prog -> Decl CmdBlock
+Decl -> Consts Types SubProg Vars 
+Consts -> 'const' Id '->' Exp ';' Consts
+Consts -> epsilon
+
+Exp -> Terms Exp_
+Exp_ -> '||' Terms Exp_ 
+Exp_ -> Terms
+Exp_ -> epsilon
+
+Terms -> Comps Terms_
+Terms_ -> '&&' Comps Terms_
+Terms_ -> Comps
+Terms_ -> epsilon
+
+Comps ->  Factor Comps_
+Comps_ -> '!='  Factor | '=='  Factor 
+Comps_ -> '=='  Factor 
+Comps_ -> '<'   Factor
+Comps_ -> '>'   Factor 
+Comps_ -> '<='   Factor 
+Comps_ -> '>='   Factor 
+Comps_ -> epsilon
+
+Factor -> '!'AriOp
+Factor -> AriOp
+
+AriOp -> AriOp2 AriOp_
+AriOp_ -> '+' AriOp2 AriOp_
+AriOp_ -> '-' AriOp2 AriOp_
+AriOp_ -> epsilon
+
+AriOp2 -> Parenthesis AriOp2_
+AriOp2_ -> '*' Parenthesis AriOp2_
+AriOp2_ -> '/' Parenthesis AriOp2_
+AriOp2_ -> '%' Parenthesis AriOp2_
+AriOp2_ -> epsilon
+
+Parenthesis -> UnaryExp
+Parenthesis -> '(' Exp ')' 
+
+UnaryExp -> '+'SimpleExp
+UnaryExp -> '-'SimpleExp
+UnaryExp -> SimpleExp 
+
+SimpleExp -> NumExp
+SimpleExp -> AcessMemAddr
+SimpleExp -> FuncCall 
+
+NumExp -> V_INT
+NumExp -> V_REAL
+NumExp -> V_BOOL
+NumExp -> V_CHAR 
+
+AcessMemAddr -> Id
+AcessMemAddr -> AcessMemAddr.Id
+AcessMemAddr -> AcessMemAddr [Exp]
+
+Types -> 'type' Id '->' TypeDec ';' Types
+Types -> epsilon
+
+TypeDec -> 'bool'
+TypeDec -> 'int'
+TypeDec -> 'real'
+TypeDec -> 'char'
+TypeDec -> Id
+TypeDec -> 'array' '[' Interval ']' 'of' TypeDec
+TypeDec -> 'record' Fields 'end'
+
+Interval -> Exp '..' Exp Interval_
+Interval_ -> ',' Interval
+Interval_ -> epsilon
+
+Fields -> Id ':' TypeDec `;` Fields
+Fields -> epsilon
+
+SubProg -> ProcedureDecl SubProg_
+SubProg -> FunctionDecl SubProg_
+SubProg_ -> SubProg
+SubProg_ -> epsilon
+
+ProcedureDecl -> 'procedure' Id '(' Parameters ')' CmdBlock ';'
+
+FunctionDecl -> 'function' Id '(' Parameters ')' ':' TypeDec CmdBlock ';'
+
+Parameters -> ParametersAux
+Parameters -> epsilon
+ParametersAux -> Id ':' TypeDec ParametersAux_ 
+ParametersAux_ -> ',' ParametersAux
+ParametersAux_ -> epsilon
+
+Vars -> 'var' Id ':' TypeDecl ';' Vars
+Vars -> epsilon
+
+CmdBlock -> 'begin' Vars Cmds 'end'
+
+Cmds -> CmdAux Cmds_ 
+Cmds_ -> ';' Cmds
+Cmds_ -> epsilon
+
+CmdAux -> AcessMemAddr '->' Exp
+CmdAux -> Id '(' Args ')' 
+CmdAux -> CmdBlock 
+CmdAux -> CmdConditional 
+CmdAux -> 'for' Id '->' Exp 'to' Exp 'step' Exp CmdBlock 
+CmdAux -> 'loop' Vars Cmds 'end' 
+CmdAux -> 'exit' 'when'  Exp  
+CmdAux -> 'continue' 
+CmdAux -> CmdReturn
+
+CmdConditional -> 'if' Exp 'then' CmdBlock CmdConditionalEnd
+CmdConditionalEnd -> 'else' CmdBlock
+CmdConditionalEnd -> epsilon
+
+CmdReturn -> 'return' CmdReturnExp
+CmdReturnExp -> Exp
+CmdReturnExp -> epsilon
+
+Args -> ArgsAux
+Args -> epsilon
+ArgsAux -> Exp ArgsAux_ 
+ArgsAux_ -> ',' ArgsAux
+ArgsAux_ -> epsilon
