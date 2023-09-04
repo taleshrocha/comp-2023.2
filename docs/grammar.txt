@@ -1,21 +1,30 @@
+Gramática da Linguagem:
+
+
+Prog := Decl CmdBlock
+Decl := Consts Types SubProg Vars 
+Consts := const ConstAux | λ
+ConstAux := Id  ':=' Exp ';' ConstAux | λ
+
 Exp := Terms Exp_
-Exp_ := '||' Terms Exp_ | Terms | LAMBDA
+Exp_ := '||' Terms Exp_ | Terms | λ
 
 Terms := Comps Terms_
-Terms_ := '&&' Comps Terms_ | Comps | LAMBDA
+Terms_ := '&&' Comps Terms_ | Comps | λ
 
 Comps :=    Factor    '!='  Factor | Factor   '=='  Factor 
             | Factor   '<'   Factor | Factor   '>'   Factor 
-            | Factor   '='  Factor | Factor   '='  Factor 
+            | Factor   '<='  Factor | Factor   '>='  Factor 
             | Factor
 
 Factor := '!'AriOp | AriOp
 
 AriOp := AriOp2 AriOp_
-AriOp_ := '+' AriOp2 AriOp_ | '-' AriOp2 AriOp_  |  AriOp2 | LAMBDA
+AriOp_ := '+' AriOp2 AriOp_ | '-' AriOp2 AriOp_  |  AriOp2 | λ
 
 AriOp2 := Parenthesis AriOp2_
-AriOp2_ := '*' Parenthesis AriOp2_ | '/' Parenthesis AriOp2_  |  '%' Parenthesis AriOp2_ | Parenthesis | LAMBDA
+AriOp2_ := '*' Parenthesis AriOp2_ | '/' Parenthesis AriOp2_  
+        |  '%' Parenthesis AriOp2_ | Parenthesis | λ
 
 Parenthesis := UnaryExp | '(' Exp ')' 
 
@@ -26,3 +35,52 @@ SimpleExp := NumExp | AcessMemAddr | FuncCall
 NumExp := V_INT | V_REAL | V_BOOL | V_CHAR 
 
 AcessMemAddr := Id | AcessMemAddr.Id | AcessMemAddr [Exp]
+
+Types := 'type' TypeAux | λ
+
+TypeAux := Id ':=' TypeDec
+
+TypeDec := 
+  'bool' | 'int' | 'real' | 'char' | Id
+  'array' '[' Interval ']' 'of' TypeDec | 'record' Fields 'end'
+
+
+Interval := Exp '..' Exp | Exp '..' Exp ',' Interval
+
+
+Fields := FieldAux Fields | λ
+
+FieldAux := Id ':' TypeDec
+
+SubProgAux := (ProcedureDecl | FunctionDecl) | λ
+SubProg := SubProgAux | SubProgAuxSubProg
+
+ProcedureDecl := 'procedure' Id '(' Parameters ')' CmdBlock ';'
+
+FunctionDecl := 'function' Id '(' Parameters ')' ':' TypeDec CmdBlock ';'
+
+Parameters := ParameterAux Parameters | λ
+
+ParameterAux := Id ':' TypeDec
+
+Vars := 'var' VarAux | λ
+
+VarAux := (Id ':' TypeDecl ';' ) ∗
+
+CmdBlock := 'begin' Vars Cmds 'end'
+
+Cmds := CmdAux | CmdAux ';' Cmd | λ
+
+CmdAux := AcessMemAddr ':=' Exp
+  Id '(' Args ')'
+  CmdBlock |
+  'if' Exp 'then' CmdBlock
+  'if' Exp 'then' CmdBlock 'else' CmdBlock
+  'for' Id ':=' Exp  'to' Exp 'step' Exp CmdBlock
+  'loop' Vars Cmds 'end'
+  'exit' 'when'  Exp 
+  'continue'
+  'return'
+  'return' Exp
+
+
