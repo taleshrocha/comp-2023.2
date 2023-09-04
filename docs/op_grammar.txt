@@ -5,29 +5,29 @@ AcessMemAddr := Id | AcessMemAddr.Id | AcessMemAddr [ Exp]| LAMBDA
 
 // Seguir a ordem da op_table
 
+LogicTerms :=   LogicTerms '||' LogicFactor
+                | LogicFactor | LAMBDA
+
+LogicFactor := LogicFactor '&&' LogicNot | LAMBDA
+
+LogicNot  := '!'Comps | Comps | LAMBDA
+
+Comps :=    Exp   '!='  Exp | Exp   '=='  Exp 
+            | Exp   ''   Exp | Exp   ''   Exp 
+            | Exp   '='  Exp | Exp   '='  Exp 
+            | Exp | LAMBDA
+
 Exp :=  Exp   '+'   Terms
         | Exp   '-'   Terms
         | Terms| LAMBDA
 
-Terms :=  Terms '*' Comps
-          | Terms '/' Comps
-          | Terms '%' Comps
-          | Comps| LAMBDA
-
-Comps :=    LogicTerms   '!='  LogicTerms | LogicTerms   '=='  LogicTerms 
-            | LogicTerms   ''   LogicTerms | LogicTerms   ''   LogicTerms 
-            | LogicTerms   '='  LogicTerms | LogicTerms   '='  LogicTerms 
-            | LogicTerms| LAMBDA
-
-LogicTerms :=   LogicTerms '||' LogicFactor
-                | LogicFactor | LAMBDA
-
-LogicFactor := LogicFactor '&&' LogicNot| LAMBDA
-
-LogicNot  := '!'Parenthesis | Parenthesis| LAMBDA
+Terms :=  Terms '*' Parenthesis
+          | Terms '/' Parenthesis
+          | Terms '%' Parenthesis
+          | Parenthesis | LAMBDA
 
 Parenthesis := UnaryExp | '('UnaryExp')'| LAMBDA
 
-UnaryExp := '+'SimpleExp | '-'SimpleExp| LAMBDA
+UnaryExp := '+'SimpleExp | '-'SimpleExp | LAMBDA
 
 SimpleExp := NumExp | AcessMemAddr | FuncCall | LAMBDA
