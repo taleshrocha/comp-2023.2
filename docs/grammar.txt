@@ -5,35 +5,42 @@ Gramática da Linguagem:
 <Decl> := <Consts> <Types> <SubProg> <Vars> 
 <Consts> := const <ConstAux> | λ
 <ConstAux> := <Id > ':=' <Exp> ';' <ConstAux> | λ
-<AcessMemAddr> := <Id> | <AcessMemAddr>.<Id> | <AcessMemAddr> [ <Exp>]
-
-⟨Exp⟩ := 
-  <V_INT> | <V_REAL> | <V_BOOL> | <V_CHAR> | <AcessMemAddr>
-  <Func_Call> | (<Exp>) | + <Exp> | -<Exp> | !<Exp>
-  < Exp > '+'  <Exp > | <Exp> '-' <Exp> | <Exp> '*'   <Exp>
-  < Exp > '/'  <Exp > | <Exp> '%' <Exp> | <Exp> '!='  <Exp>
-  < Exp > '==' <Exp > | <Exp> '>' <Exp> | <Exp> '<'   <Exp>
-  < Exp > '>=' <Exp > | <Exp> '<='<Exp> | <Exp> '&&'  <Exp>
-  < Exp > '||' <Exp >
 
 
- --> "Regras não ambiguas para expressoes numericas"
 
-// TODO ligar com o resto da gramatica (em <Exp>)
-<NumExpression> := 
-  <NumExpression> '+' <NumExpression2>
-  <NumExpression> '-' <NumExpression2>
-  <NumExpression2>
+// Seguir a ordem da op_table
 
-<NumExpression2> := 
-  <NumExpression2> '*' <NumFinalTerm>
-  <NumExpression2> '/' <NumFinalTerm>
-  <NumExpression2> '%' <NumFinalTerm>
-  <NumFinalTerm>
+LogicTerms :=   LogicTerms '||' LogicFactor
+                | LogicFactor | LAMBDA
 
-<NumFinalTerm> := '('<NumFinalTerm>')' | <Value>
+LogicFactor := LogicFactor '&&' LogicNot | LogicNot |LAMBDA
 
-<Value> := <V_INT> | <V_REAL> | <V_BOOL> | <V_CHAR> | <AcessMemAddr>
+LogicNot  := '!'Comps | Comps | LAMBDA
+
+Comps :=    Exp    '!='  Exp | Exp   '=='  Exp 
+            | Exp   '>'   Exp | Exp   '<'   Exp 
+            | Exp   '>='  Exp | Exp   '<='  Exp 
+            | Exp | LAMBDA
+
+Exp :=    Exp   '+'   Terms
+        | Exp   '-'   Terms
+        | Terms| LAMBDA
+
+Terms :=  Terms   '*' Parenthesis
+          | Terms '/' Parenthesis
+          | Terms '%' Parenthesis
+          | Parenthesis | LAMBDA
+
+Parenthesis := UnaryExp | '(' LogicTerms ')'| LAMBDA
+
+UnaryExp := '+'SimpleExp | '-'SimpleExp | SimpleExp | LAMBDA
+
+
+SimpleExp := NumExp | AcessMemAddr | FuncCall | LAMBDA
+
+NumExp := V_INT | V_REAL | V_BOOL | V_CHAR 
+
+AcessMemAddr := Id | AcessMemAddr.Id | AcessMemAddr [Exp]|LAMBDA
 
 <Types> := 'type' <TypeAux> | λ
 
