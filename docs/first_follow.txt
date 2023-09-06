@@ -1,71 +1,71 @@
-Link: https://mikedevice.github.io/first-follow/
+Link da ferramenta: https://www.cs.princeton.edu/courses/archive/spring20/cos320/LL1/
 
-Prog ⟶ Decl CmdBlock
-Decl ⟶ Consts Types SubProg Vars 
-Consts ⟶ 'const' Id ':=' Exp ';' Consts | λ
+Prog ::= Decl CmdBlock
+Decl ::= Consts Types SubProg Vars 
+Consts ::= 'const' Id ':=' Exp ';' Consts | EPSILON
 
-Exp ⟶ Terms Exp_
-Exp_ ⟶ '||' Terms Exp_ | Terms | λ
+Exp ::= Terms Exp_
+Exp_ ::= '||' Terms Exp_ | Terms | EPSILON
 
-Terms ⟶ Comps Terms_
-Terms_ ⟶ '&&' Comps Terms_ | Comps | λ
+Terms ::= Comps Terms_
+Terms_ ::= '&&' Comps Terms_ | Comps | EPSILON
 
-Comps ⟶  Factor Comps_
-Comps_ ⟶ '!='  Factor | '=='  Factor  | '<'   Factor | '>'   Factor | '<='  Factor | '>='  Factor | λ
+Comps ::=  Factor Comps_
+Comps_ ::= '!='  Factor | '=='  Factor  | '<'   Factor | '>'   Factor | '<='  Factor | '>='  Factor | EPSILON
 
-Factor ⟶ '!'AriOp | AriOp
+Factor ::= '!'AriOp | AriOp
 
-AriOp ⟶ AriOp2 AriOp_
-AriOp_ ⟶ '+' AriOp2 AriOp_ | '-' AriOp2 AriOp_  |  λ
+AriOp ::= AriOp2 AriOp_
+AriOp_ ::= '+' AriOp2 AriOp_ | '-' AriOp2 AriOp_  |  EPSILON
 
-AriOp2 ⟶ Parenthesis AriOp2_
-AriOp2_⟶ '*' Parenthesis AriOp2_ | '/' Parenthesis AriOp2_ |  '%' Parenthesis AriOp2_ | λ
+AriOp2 ::= Parenthesis AriOp2_
+AriOp2_::= '*' Parenthesis AriOp2_ | '/' Parenthesis AriOp2_ |  '%' Parenthesis AriOp2_ | EPSILON
 
-Parenthesis ⟶ UnaryExp | '(' Exp ')' 
+Parenthesis ::= UnaryExp | '(' Exp ')' 
 
-UnaryExp ⟶ '+'SimpleExp | '-'SimpleExp | SimpleExp 
+UnaryExp ::= '+'SimpleExp | '-'SimpleExp | SimpleExp 
 
-SimpleExp ⟶ NumExp | AcessMemAddr | FuncCall 
+SimpleExp ::= NumExp | AcessMemAddr | FuncCall 
 
-NumExp ⟶ V_INT | V_REAL | V_BOOL | V_CHAR 
+NumExp ::= V_INT | V_REAL | V_BOOL | V_CHAR 
 
-AcessMemAddr ⟶ Id | AcessMemAddr.Id | AcessMemAddr [Exp]
+AcessMemAddr ::= Id | AcessMemAddr.Id | AcessMemAddr [Exp]
 
-Types ⟶'type' Id ':=' TypeDec ';' Types | λ
+Types ::= 'type' Id ':=' TypeDec ';' Types | EPSILON
 
-TypeDec ⟶ 'bool' | 'int' | 'real' | 'char' | Id |'array' '[' Interval ']' 'of' TypeDec | 'record' Fields 'end'
+TypeDec ::= 'bool' | 'int' | 'real' | 'char' | Id |'array' '[' Interval ']' 'of' TypeDec | 'record' Fields 'end'
 
-Interval ⟶ Exp '..' Exp Interval_
-Interval_ ⟶ ',' Interval | λ
+Interval ::= Exp '..' Exp Interval_
+Interval_ ::= ',' Interval | EPSILON
 
-Fields ⟶ Id ':' TypeDec `;` Fields | λ
+Fields ::= Id ':' TypeDec `;` Fields | EPSILON
 
-SubProg ⟶ ProcedureDecl SubProg_ | FunctionDecl SubProg_
-SubProg_ ⟶ SubProg | λ
+SubProg ::= ProcedureDecl SubProg_ | FunctionDecl SubProg_
+SubProg_ ::= SubProg | EPSILON
 
-ProcedureDecl ⟶ 'procedure' Id '(' Parameters ')' CmdBlock ';'
+ProcedureDecl ::= 'procedure' Id '(' Parameters ')' CmdBlock ';'
 
-FunctionDecl ⟶ 'function' Id '(' Parameters ')' ':' TypeDec CmdBlock ';'
+FunctionDecl ::= 'function' Id '(' Parameters ')' ':' TypeDec CmdBlock ';'
 
-Parameters ⟶ ParametersAux | λ
-ParametersAux ⟶ Id ':' TypeDec ParametersAux_ 
-ParametersAux_⟶ ',' ParametersAux | λ
+Parameters ::= ParametersAux | EPSILON
+ParametersAux ::= Id ':' TypeDec ParametersAux_ 
+ParametersAux_::= ',' ParametersAux | EPSILON
 
-Vars ⟶ 'var' Id ':' TypeDecl ';' Vars  | λ
+Vars ::= 'var' Id ':' TypeDecl ';' Vars  | EPSILON
 
-CmdBlock ⟶ 'begin' Vars Cmds 'end'
+CmdBlock ::= 'begin' Vars Cmds 'end'
 
-Cmds ⟶ CmdAux Cmds_ 
-Cmds_ ⟶ ';' Cmds | λ
+Cmds ::= CmdAux Cmds_ 
+Cmds_ ::= ';' Cmds | EPSILON
 
-CmdAux ⟶ AcessMemAddr ':=' Exp | Id '(' Args ')' | CmdBlock | CmdConditional |'for' Id ':=' Exp  'to' Exp 'step' Exp CmdBlock |'loop' Vars Cmds 'end' | 'exit' 'when'  Exp  | 'continue' | CmdReturn
+CmdAux ::= AcessMemAddr ':=' Exp | Id '(' Args ')' | CmdBlock | CmdConditional |'for' Id ':=' Exp  'to' Exp 'step' Exp CmdBlock |'loop' Vars Cmds 'end' | 'exit' 'when'  Exp  | 'continue' | CmdReturn
 
-CmdConditional ⟶ 'if' Exp 'then' CmdBlock CmdConditionalEnd
-CmdConditionalEnd ⟶ 'else' CmdBlock | λ
+CmdConditional ::= 'if' Exp 'then' CmdBlock CmdConditionalEnd
+CmdConditionalEnd ::= 'else' CmdBlock | EPSILON
 
-CmdReturn ⟶ 'return' CmdReturnExp
-CmdReturnExp ⟶ Exp | λ
+CmdReturn ::= 'return' CmdReturnExp
+CmdReturnExp ::= Exp | EPSILON
 
-Args ⟶ ArgsAux | λ
-ArgsAux ⟶ Exp ArgsAux_ 
-ArgsAux_ ⟶ ',' ArgsAux | λ
+Args ::= ArgsAux | EPSILON
+ArgsAux ::= Exp ArgsAux_ 
+ArgsAux_ ::= ',' ArgsAux | EPSILON
