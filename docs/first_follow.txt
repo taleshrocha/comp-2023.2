@@ -1,131 +1,127 @@
 Link da ferramenta: https://www.cs.princeton.edu/courses/archive/spring20/cos320/LL1/
 
-Table Conflicts: SimpleExp, AcessMemAddr, CmdAux
-
 ----xxx----
-
 
 Prog ::= Decl CmdBlock
 Decl ::= Consts Types SubProg Vars
-Consts ::= 'const' Id ':=' Exp ';' Consts
-Consts ::= EPSILON
+Consts ::= const Id := Exp ; Consts
+Consts ::= ''
 
 Exp ::= Terms Exp_
-Exp_ ::= '||' Terms Exp_  
-Exp_ ::= Terms
-Exp_ ::= EPSILON
+Exp_ ::= || Terms Exp_  
+Exp_ ::= ''
 
 Terms ::= Comps Terms_
-Terms_ ::= '&&' Comps Terms_
-Terms_ ::= Comps
-Terms_ ::= EPSILON
+Terms_ ::= && Comps Terms_
+Terms_ ::= ''
 
 Comps ::=  Factor Comps_
-Comps_ ::= '!='  Factor
-Comps_ ::= '==' Factor
-Comps_ ::= '<' Factor
-Comps_ ::= '>' Factor
-Comps_ ::= '<=' Factor
-Comps_ ::= '>=' Factor
-Comps_ ::= EPSILON
+Comps_ ::= !=  Factor
+Comps_ ::= == Factor
+Comps_ ::= < Factor
+Comps_ ::= > Factor
+Comps_ ::= <= Factor
+Comps_ ::= >= Factor
+Comps_ ::= ''
 
-Factor ::= '!' AriOp
+Factor ::= ! AriOp
 Factor ::= AriOp
 
 AriOp ::= AriOp2 AriOp_
-AriOp_ ::= '+' AriOp2 AriOp_
-AriOp_ ::= '-' AriOp2 AriOp_
-AriOp_ ::= EPSILON
+AriOp_ ::= + AriOp2 AriOp_
+AriOp_ ::= - AriOp2 AriOp_
+AriOp_ ::= ''
 
 AriOp2 ::= Parenthesis AriOp2_
-AriOp2_::= '*' Parenthesis AriOp2_
-AriOp2_::= '/' Parenthesis AriOp2_
-AriOp2_::= '%' Parenthesis AriOp2_
-AriOp2_::= EPSILON
+AriOp2_::= * Parenthesis AriOp2_
+AriOp2_::= / Parenthesis AriOp2_
+AriOp2_::= % Parenthesis AriOp2_
+AriOp2_::= ''
 
 Parenthesis ::= UnaryExp
-Parenthesis ::= '(' Exp ')' 
+Parenthesis ::= ( Exp ) 
 
-UnaryExp ::= '+' SimpleExp
-UnaryExp ::= '-' SimpleExp
+UnaryExp ::= + UnaryExp
+UnaryExp ::= - UnaryExp
 UnaryExp ::= SimpleExp 
 
 SimpleExp ::= NumExp
 SimpleExp ::= AcessMemAddr
-SimpleExp ::= FuncCall 
 
 NumExp ::= V_INT
 NumExp ::= V_REAL
 NumExp ::= V_BOOL
 NumExp ::= V_CHAR 
 
-AcessMemAddr ::= Id
-AcessMemAddr ::= AcessMemAddr.Id
-AcessMemAddr ::= AcessMemAddr [Exp]
+AcessMemAddr ::= Id AcessMemAddr_
+AcessMemAddr_ ::= . Id AcessMemAddr_
+AcessMemAddr_ ::= [ Exp ] AcessMemAddr_
+AcessMemAddr_ ::= ( Args ) AcessMemAddr_
+AcessMemAddr_ ::= ''
 
-Types ::= 'type' Id ':=' TypeDec ';' Types
-Types ::= EPSILON
+Types ::= type Id := TypeDec ; Types
+Types ::= ''
 
-TypeDec ::= 'bool'
-TypeDec ::= 'int'
-TypeDec ::= 'real'
-TypeDec ::= 'char'
+TypeDec ::= bool
+TypeDec ::= int
+TypeDec ::= real
+TypeDec ::= char
 TypeDec ::= Id
-TypeDec ::='array' '[' Interval ']' 'of' TypeDec
-TypeDec ::= 'record' Fields 'end'
+TypeDec ::=array [ Interval ] of TypeDec
+TypeDec ::= record Fields end
 
-Interval ::= Exp '..' Exp Interval_
-Interval_ ::= ',' Interval
-Interval_ ::= EPSILON
+Interval ::= Exp .. Exp Interval_
+Interval_ ::= , Interval
+Interval_ ::= ''
 
-Fields ::= Id ':' TypeDec `;` Fields
-Fields ::= EPSILON
+Fields ::= Id : TypeDec `;` Fields
+Fields ::= ''
 
-SubProg ::= ProcedureDecl SubProg_
-SubProg ::= FunctionDecl SubProg_
-SubProg_ ::= SubProg
-SubProg_ ::= EPSILON
+SubProg ::= ProcedureDecl SubProg
+SubProg ::= FunctionDecl SubProg
+SubProg ::= ''
 
-ProcedureDecl ::= 'procedure' Id '(' Parameters ')' CmdBlock ';'
+ProcedureDecl ::= procedure Id ( Parameters ) CmdBlock ;
 
-FunctionDecl ::= 'function' Id '(' Parameters ')' ':' TypeDec CmdBlock ';'
+FunctionDecl ::= function Id ( Parameters ) : TypeDec CmdBlock ;
 
 Parameters ::= ParametersAux
-Parameters ::= EPSILON
-ParametersAux ::= Id ':' TypeDec ParametersAux_ 
-ParametersAux_::= ',' ParametersAux | EPSILON
+Parameters ::= ''
+ParametersAux ::= Id : TypeDec ParametersAux_ 
+ParametersAux_::= , ParametersAux
+ParametersAux_::=  ''
 
-Vars ::= 'var' Id ':' TypeDecl ';' Vars
-Vars ::= EPSILON
+Vars ::= var Id : TypeDecl ; Vars
+Vars ::= ''
 
-CmdBlock ::= 'begin' Vars Cmds 'end'
+CmdBlock ::= begin Vars Cmds end
 
 Cmds ::= CmdAux Cmds_ 
-Cmds_ ::= ';' Cmds
-Cmds_ ::= EPSILON
+Cmds_ ::= ; Cmds
+Cmds_ ::= ''
 
-CmdAux ::= AcessMemAddr ':=' Exp
-CmdAux ::= Id '(' Args ')'
+CmdAux ::= AcessMemAddr CmdAux_
+CmdAux_ ::= := Exp
+CmdAux_ ::= ''
 CmdAux ::= CmdBlock
 CmdAux ::= CmdConditional
-CmdAux ::= 'for' Id ':=' Exp  'to' Exp 'step' Exp CmdBlock
-CmdAux ::= 'loop' Vars Cmds 'end'
-CmdAux ::= 'exit' 'when' Exp
-CmdAux ::= 'continue'
+CmdAux ::= for Id := Exp to Exp step Exp CmdBlock
+CmdAux ::= loop Vars Cmds end
+CmdAux ::= exit when Exp
+CmdAux ::= continue
 CmdAux ::= CmdReturn
 
-CmdConditional ::= 'if' Exp 'then' CmdBlock CmdConditionalEnd
-CmdConditionalEnd ::= 'else' CmdBlock
-CmdConditionalEnd ::= EPSILON
+CmdConditional ::= if Exp then CmdBlock CmdConditionalEnd
+CmdConditionalEnd ::= else CmdBlock
+CmdConditionalEnd ::= ''
 
-CmdReturn ::= 'return' CmdReturnExp
+CmdReturn ::= return CmdReturnExp
 CmdReturnExp ::= Exp
-CmdReturnExp ::= EPSILON
+CmdReturnExp ::= ''
 
 Args ::= ArgsAux
-Args ::= EPSILON
+Args ::= ''
 ArgsAux ::= Exp ArgsAux_ 
-ArgsAux_ ::= ',' ArgsAux
-ArgsAux_ ::= EPSILON
+ArgsAux_ ::= , ArgsAux
+ArgsAux_ ::= ''
 
-FuncCall ::= Id '(' Args ')'
