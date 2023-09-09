@@ -156,8 +156,7 @@ void Terms(){
     Terms_();
 }
 
-//Exp_ -> || Terms Exp_  
-//Exp_ -> ''
+
 void Terms_(){
     if(lookahead == AND){
         Comps();
@@ -240,6 +239,11 @@ void Parenthesis(){
     }
 }
 
+/*
+UnaryExp -> + UnaryExp
+UnaryExp -> - UnaryExp
+UnaryExp -> SimpleExp 
+*/
 void UnaryExp(){
     if( lookahead == PLUS ||
         lookahead == MINUS){
