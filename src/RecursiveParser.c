@@ -85,6 +85,11 @@ int getNextToken(){
 int lookahead = -1;
 
 
+/*
+TODO: Tratar ocorrência de erros sintáticos.
+Retornar -1 ou executar exit(-1)? 
+*/
+
 //Prog -> Decl CmdBlock
 void Prog(){
     Decl();

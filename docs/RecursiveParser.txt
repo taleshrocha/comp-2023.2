@@ -17,6 +17,9 @@ TODOs:
 
 2. Backtracking para tentativa e erro em aplicação de regras de produção.
 3. Criar novas funções para deixar mais curtas as regras gramáticais implementadas (tem muito if-else dentro de uma função).
+4. Tratar ocorrências de erros sintáticos.
+    Retornar código ou executar exit(1)?
+    Coloquei apenas prints.
 
 Explicações:
 lookahead - Variável que irá controlar qual token está sendo lido.
