@@ -1,0 +1,23 @@
+TODOs:
+1. Determinar em quais momentos chamar a função getNextToken().
+    Principalmente nos momentos em que uma produção é testada.
+    Como deixei: é assumido que o lookahead esteja atualizado em cada função (falta chamar o getNextToken antes de entrar na função).
+        Ex.:
+        void A(){
+            ...
+            B();
+        }
+        void B(){
+            if(lookahead == OR)
+            ...
+        }
+
+        ^Eu assumi que o lookahead está atualizado ao entrar na função B.
+
+
+2. Backtracking para tentativa e erro em aplicação de regras de produção.
+3. Criar novas funções para deixar mais curtas as regras gramáticais implementadas (tem muito if-else dentro de uma função).
+
+Explicações:
+lookahead - Variável que irá controlar qual token está sendo lido.
+getNextToken() - Função responsável por obter o próximo token, para continuar o parsing.
