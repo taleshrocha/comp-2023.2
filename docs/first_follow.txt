@@ -51,7 +51,8 @@ SimpleExp ::= AcessMemAddr
 NumExp ::= V_INT
 NumExp ::= V_REAL
 NumExp ::= V_BOOL
-NumExp ::= V_CHAR 
+NumExp ::= V_CHAR
+NumExp ::= V_STRING
 
 AcessMemAddr ::= Id AcessMemAddr_
 AcessMemAddr_ ::= . Id AcessMemAddr_
@@ -67,14 +68,14 @@ TypeDec ::= int
 TypeDec ::= real
 TypeDec ::= char
 TypeDec ::= Id
-TypeDec ::=array [ Interval ] of TypeDec
+TypeDec ::= array [ Interval ] of TypeDec
 TypeDec ::= record Fields end
 
 Interval ::= Exp .. Exp Interval_
 Interval_ ::= , Interval
 Interval_ ::= ''
 
-Fields ::= Id : TypeDec `;` Fields
+Fields ::= Id : TypeDec ; Fields
 Fields ::= ''
 
 SubProg ::= ProcedureDecl SubProg
@@ -88,10 +89,10 @@ FunctionDecl ::= function Id ( Parameters ) : TypeDec CmdBlock ;
 Parameters ::= ParametersAux
 Parameters ::= ''
 ParametersAux ::= Id : TypeDec ParametersAux_ 
-ParametersAux_::= , ParametersAux
-ParametersAux_::=  ''
+ParametersAux_ ::= , ParametersAux
+ParametersAux_ ::=  ''
 
-Vars ::= var Id : TypeDecl ; Vars
+Vars ::= var Id : TypeDec ; Vars
 Vars ::= ''
 
 CmdBlock ::= begin Vars Cmds end
