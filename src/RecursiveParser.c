@@ -77,644 +77,386 @@
 
 
 int getNextToken(){
-    //TODO: realizar integração
+    //TODO: integrate with lexer.
     //return yylex();
     return 0;
 }
 
 int lookahead = -1;
 
+void initializeParsing(){
+	lookahead = getNextToken();
+	Prog();
+}
 
-/*
-TODO: Tratar ocorrência de erros sintáticos.
-Retornar -1 ou executar exit(-1)? 
-*/
 
-//Prog -> Decl CmdBlock
+void error(){
+	printf("error() - Syntax error. Lookahead did not match the current token.");
+}
+
+
+void eat(int token){
+	if(token == lookahead){
+		lookahead = getNextToken();
+	}
+	else{
+		error();
+	}
+	
+}
+
 void Prog(){
-    Decl();
-    CmdBlock();
+	switch lookahead:
+	case CONST: 	 Decl(); CmdBlock(); break;
+	case TYPE: 	 Decl(); CmdBlock(); break;
+	case PROCEDURE:  Decl(); CmdBlock(); break;
+	case FUNCTION: 	 Decl(); CmdBlock(); break;
+	case VAR: 	 Decl(); CmdBlock(); break;
+	case _BEGIN: 	 Decl(); CmdBlock(); break;	
+	default: printf("Syntax error.");
 }
 
-//Decl -> Consts Types SubProg Vars
 void Decl(){
-    Consts();
-    Types();
-    SubProg();
-    Vars();
+	switch lookahead:
+	case CONST: 	Consts(); Types(); SubProg(); Vars(); break;
+	case TYPE: 	Consts(); Types(); SubProg(); Vars(); break;
+	case PROCEDURE: Consts(); Types(); SubProg(); Vars(); break;
+	case FUNCTION: 	Consts(); Types(); SubProg(); Vars(); break;
+	case VAR: 	Consts(); Types(); SubProg(); Vars(); break;
+	case _BEGIN: 	Consts(); Types(); SubProg(); Vars(); break;
+	default: printf("Syntax error.");
 }
 
 
-//Consts -> const Id := Exp ; Consts
-//Consts -> ''
 void Consts(){
-    if(lookahead == CONST){
-        lookahead = getNextToken();
-        if(lookahead == ID){
-            lookahead = getNextToken();
-            if(lookahead == ATTRIB){
-                Exp();
-                lookahead = getNextToken();
-                if(lookahead == SEMICOLON){
-                    Consts();
-                }
-                else{
-                    printf("Syntax error! Expected ';'\n");
-                }
-            }
-            else
-                printf("Syntax error! Expected ':='\n");
-        }else{
-            printf("Syntax error! Expected an identifier\n");
-        }
-    }
-    else{
-        //printf("Syntax error! Expected 'const'\n");
-        return; //Lambda ('')
-    }
+	switch lookahead:
+	case CONST:	eat(CONST); eat(ID); eat(ATTRIB); Exp(); eat(SEMICOLON); Consts(); break;
+	case TYPE:	break; //lambda - search on FOLLOW. removing Consts from stack...
+	case PROCEDURE: break; //lambda - search on FOLLOW. removing Consts from stack...
+	case FUNCTION: 	break; //lambda - search on FOLLOW. removing Consts from stack...
+	case VAR: 	break; //lambda - search on FOLLOW. removing Consts from stack...
+	case _BEGIN: 	break; //lambda - search on FOLLOW. removing Consts from stack...
+	default: printf("Syntax error.");
 }
 
 void Exp(){
-    Terms();
-    Exp_();
+	switch lookahead:
+	case ID: 	Terms(); Exp_(); break;
+	case NOT: 	Terms(); Exp_(); break;
+	case PLUS: 	Terms(); Exp_(); break;
+	case MINUS: 	Terms(); Exp_(); break;
+	case LPAR: 	Terms(); Exp_(); break;
+	case V_INT: 	Terms(); Exp_(); break;
+	case V_CHAR: 	Terms(); Exp_(); break;
+	case V_REAL: 	Terms(); Exp_(); break;
+	case V_BOOL: 	Terms(); Exp_(); break;
+	case V_STRING: 	Terms(); Exp_(); break;
+	default: printf("Syntax error.");
 }
 
-//Exp_ -> || Terms Exp_  
-//Exp_ -> ''
 void Exp_(){
-    if(lookahead == OR){
-        Terms();
-        Exp_();
-    }
-    else{
-        return; //Lambda ('')
-    }
+	switch lookahead:
+	case SEMICOLON:	break; //lambda - search on FOLLOW
+	case RPAR:	break; //lambda - search on FOLLOW
+	case RBRA:	break; //lambda - search on FOLLOW
+	case END:	break; //lambda - search on FOLLOW
+	case INTERVAL:	break; //lambda - search on FOLLOW
+	case COMMA:	break; //lambda - search on FOLLOW
+	case _BEGIN:	break; //lambda - search on FOLLOW
+	case TO:	break; //lambda - search on FOLLOW
+	case STEP:	break; //lambda - search on FOLLOW
+	case THEN:	break; //lambda - search on FOLLOW
+	case OR: 	eat(OR); Terms(); Exp_(); break;
+	default: printf("Syntax error.");
 }
 
 void Terms(){
-    Comps();
-    Terms_();
+	switch lookahead:
+	case ID:	Comps(); Terms_(); break;
+	case NOT:	Comps(); Terms_(); break;
+	case PLUS:	Comps(); Terms_(); break;
+	case MINUS:	Comps(); Terms_(); break;
+	case LPAR: 	Comps(); Terms_(); break;
+	case V_INT: 	Comps(); Terms_(); break;
+	case V_CHAR: 	Comps(); Terms_(); break;
+	case V_REAL: 	Comps(); Terms_(); break;
+	case V_BOOL: 	Comps(); Terms_(); break;
+	case V_STRING: 	Comps(); Terms_(); break;
+	default: printf("Syntax error.");
 }
 
-
 void Terms_(){
-    if(lookahead == AND){
-        Comps();
-        Terms_();
-    }
-    else{
-        return; //Lambda ('')
-    }
+	switch lookahead:
+	case SEMICOLON:	break;
+	case OR: 	break;
+	case AND: 	eat(AND); Comps(); Terms_(); break;
+	case RPAR:	break;
+	case RBRA:	break;
+	case END: 	break;
+	case INTERVAL:	break;
+	case COMMA:	break;
+	case _BEGIN:	break;
+	case TO:	break;
+	case STEP:	break;
+	case THEN:	break;
+	default:	printf("Syntax error.");
 }
 
 void Comps(){
-    Factor();
-    Comps_();
+	switch lookahead:
+	case ID: 	Factor(); Comps_(); break;
+	case NOT: 	Factor(); Comps_(); break;
+	case PLUS: 	Factor(); Comps_(); break;
+	case MINUS: 	Factor(); Comps_(); break;
+	case LPAR: 	Factor(); Comps_(); break;
+	case V_INT: 	Factor(); Comps_(); break;
+	case V_REAL: 	Factor(); Comps_(); break;
+	case V_BOOL: 	Factor(); Comps_(); break;
+	case V_CHAR: 	Factor(); Comps_(); break;
+	case V_STRING: 	Factor(); Comps_(); break;
+	default: printf("Syntax error.");
 }
 
 void Comps_(){
-    if(lookahead == NEQ || 
-    lookahead == EQ || 
-    lookahead == GREATER ||
-    lookahead == LESS || 
-    lookahead == GEQ || 
-    lookahead == LEQ ){
-        Factor();
-        return;
-    }
-    return; //Lamda
+	switch lookahead:
+	case SEMICOLON: break;
+	case OR: 	break;
+	case AND: 	break;
+	case NEQ:	eat(NEQ); 	Factor();
+	case EQ:	eat(EQ); 	Factor();
+	case GREATER:	eat(GREATER); 	Factor();
+	case LESS:	eat(LESS); 	Factor();
+	case LEQ:	eat(LEQ); 	Factor();
+	case GEQ:	eat(GEQ); 	Factor();
+	case RPAR:	break;
+	case RBRA:	break;
+	case INTERVAL:	break;
+	case END:	break;
+	case COMMA:	break;
+	case _BEGIN: 	break;
+	case TO:	break;
+	case STEP:	break;
+	case THEN:	break;
+	default: printf("Syntax error.");
 }
 
 void Factor(){
-    if(lookahead == NOT){
-        AriOp();
-        return;
-    }
-    AriOp();
+	switch lookahead:
+	case ID: 	AriOp(); 	break;
+	case NEQ: 	eat(NEQ); 	break;
+	case PLUS:	AriOp();	break;
+	case MINUS:	AriOp();	break;
+	case LPAR: 	AriOp(); 	break;
+	case V_INT: 	AriOp(); 	break;
+	case V_REAL: 	AriOp(); 	break;
+	case V_BOOL: 	AriOp(); 	break;
+	case V_CHAR: 	AriOp(); 	break;
+	case V_STRING: 	AriOp(); 	break;
+	default: printf("Syntax error.");
 }
+
 
 void AriOp(){
-    AriOp2();
-    AriOp_();
+	switch lookahead:
+	case ID:	AriOp2(); AriOp_(); 	break;
+	case PLUS:	AriOp2(); AriOp_(); 	break;
+	case MINUS:	AriOp2(); AriOp_(); 	break;
+	case LPAR: 	AriOp2(); AriOp_(); 	break;
+	case V_INT: 	AriOp2(); AriOp_(); 	break;
+	case V_REAL: 	AriOp2(); AriOp_(); 	break;
+	case V_BOOL: 	AriOp2(); AriOp_(); 	break;
+	case V_CHAR: 	AriOp2(); AriOp_(); 	break;
+	case V_STRING: 	AriOp2(); AriOp_(); 	break;
+	default: printf("Syntax error.");
 }
 
+
 void AriOp_(){
-    if( lookahead == PLUS ||
-        lookahead == MINUS){
-        AriOp2();
-        AriOp_();
-        return;
-    }
+	switch lookahead:
+	case SEMICOLON: break;
+	case OR: 	break;
+	case AND: 	break;
+	case NEQ: 	break;
+	case EQ: 	break;
+	case LESS: 	break;
+	case GREATER: 	break;
+	case LEQ: 	break;
+	case GEQ: 	break;
+	case PLUS:	eat(PLUS); AriOp2(); AriOp_(); break;
+	case MINUS:	eat(MINUS); AriOp2(); AriOp_(); break;
+	case RPAR:	break;
+	case RBRA:	break;
+	case END:	break;
+	case INTERVAL: 	break;
+	case COMMA:	break;
+	case _BEGIN:	break;
+	case TO:	break;
+	case STEP:	break;
+	case THEN:	break;
+	default: printf("Syntax error.");
+
 }
 
 void AriOp2(){
-    Parenthesis();
-    AriOp2_();
+	switch lookahead:
+	case ID: 	Parenthesis(); AriOp2_(); break;
+	case PLUS: 	Parenthesis(); AriOp2_(); break;
+	case MINUS: 	Parenthesis(); AriOp2_(); break;
+	case LPAR: 	Parenthesis(); AriOp2_(); break;
+	case V_INT: 	Parenthesis(); AriOp2_(); break;
+	case V_REAL: 	Parenthesis(); AriOp2_(); break;
+	case V_CHAR: 	Parenthesis(); AriOp2_(); break;
+	case V_BOOL: 	Parenthesis(); AriOp2_(); break;
+	case V_STRING: 	Parenthesis(); AriOp2_(); break;
+	default: printf("Syntax error.");
 }
 
+
 void AriOp2_(){
-    if( lookahead == MULTIPLY ||
-        lookahead == DIVIDE ||
-        lookahead == MOD){
-        Parenthesis();
-        AriOp2_();
-        return;
-    }
-    //Lambda ('')
+	switch lookahead:
+	case SEMICOLON: break;
+	case OR: 	break;
+	case AND: 	break;
+	case NEQ: 	break;
+	case EQ: 	break;
+	case LESS: 	break;
+	case GREATER: 	break;
+	case LEQ: 	break;
+	case GEQ: 	break;
+	case PLUS:	break;
+	case MINUS:	break;
+	case MULTIPLY: 	eat(MULTIPLY); 	Parenthesis(); AriOp2_(); break;
+	case DIVIDE: 	eat(DIVIDE); 	Parenthesis(); AriOp2_(); break;
+	case MOD: 	eat(MOD); 	Parenthesis(); AriOp2_(); break;
+	case RPAR:	break;
+	case RBRA:	break;
+	case END:	break;
+	case INTERVAL: 	break;
+	case COMMA:	break;
+	case _BEGIN:	break;
+	case TO:	break;
+	case STEP:	break;
+	case THEN:	break;
+	default: printf("Syntax error.");
 }
 
 void Parenthesis(){
-    if(lookahead == LPAR){
-        Exp();
-        lookahead = getNextToken();
-        if(lookahead == RPAR){
-            return;
-        }
-        else{
-            printf("Syntax error! Expected ')'\n");
-        }
-    }
-    else{
-        UnaryExp();
-    }
+	switch lookahead:
+	case ID: 	UnaryExp();	break;
+	case PLUS: 	UnaryExp();	break;
+	case MINUS: 	UnaryExp();	break;
+	case LPAR:	eat(LPAR);	Exp();	eat(RPAR); break;
+	case V_INT: 	UnaryExp(); 	break;
+	case V_REAL: 	UnaryExp();  	break;
+	case V_CHAR: 	UnaryExp();  	break;
+	case V_BOOL: 	UnaryExp(); 	break;
+	case V_STRING: 	UnaryExp(); 	break;
+	default: printf("Syntax error.");
 }
 
-/*
-UnaryExp -> + UnaryExp
-UnaryExp -> - UnaryExp
-UnaryExp -> SimpleExp 
-*/
 void UnaryExp(){
-    if( lookahead == PLUS ||
-        lookahead == MINUS){
-        UnaryExp();
-        return;
-    }
-    SimpleExp();
-}
-
-int isNumExp(int token){
-    if(lookahead == V_INT ||
-        lookahead == V_CHAR ||
-        lookahead == V_BOOL ||
-        lookahead == V_STRING ||
-        lookahead == V_REAL){
-        return 1;
-    }
-    else{
-        return 0;
-    }
+	switch lookahead:
+	case ID: 	SimpleExp();	break;
+	case PLUS:	eat(PLUS); 	UnaryExp();	break;
+	case MINUS: 	eat(MINUS);	UnaryExp();	break;
+	case V_INT: 	SimpleExp(); 	break;
+	case V_REAL: 	SimpleExp();  	break;
+	case V_CHAR: 	SimpleExp();  	break;
+	case V_BOOL: 	SimpleExp(); 	break;
+	case V_STRING: 	SimpleExp(); 	break;
+	default: printf("Syntax error.");
 }
 
 void SimpleExp(){
-    if(isNumExp(lookahead) == 1){
-        return;
-    }else{
-        AcessMemAddr();
-    }
+	switch lookahead:
+	case ID: 	AcessMemAddr(); 	break;
+	case V_INT: 	NumExp(); 		break;
+	case V_REAL: 	NumExp();  		break;
+	case V_CHAR: 	NumExp();  		break;
+	case V_BOOL: 	NumExp(); 		break;
+	case V_STRING: 	NumExp(); 		break;
+	default: printf("Syntax error.");
 }
 
-
-// void NumExp(){
-
-// }
+void NumExp(){
+	switch lookahead:
+	case V_INT: 	eat(V_INT); 		break;
+	case V_REAL: 	eat(V_REAL);  		break;
+	case V_CHAR: 	eat(V_CHAR);  		break;
+	case V_BOOL: 	eat(V_BOOL); 		break;
+	case V_STRING: 	eat(V_STRING); 		break;
+	default: printf("Syntax error.");
+}
 
 void AcessMemAddr(){
-    if(lookahead == ID){
-        AcessMemAddr_();
-    }else{
-        printf("Syntax error! Expected an identifier\n");
-    }
-    
-    
+	switch lookahead:
+	case ID: eat(ID); AcessMemAddr_(); 
+	default: printf("Syntax error.");
 }
 
-/*
-AcessMemAddr_ -> . Id AcessMemAddr_
-AcessMemAddr_ -> [ Exp ] AcessMemAddr_
-AcessMemAddr_ -> ( Args ) AcessMemAddr_
-AcessMemAddr_ -> ''
-*/
 void AcessMemAddr_(){
-    if(lookahead == DOT){
-        lookahead = getNextToken();
-        if(lookahead == ID){
-            AcessMemAddr_();
-            return;
-        }
-        else{
-            printf("Syntax error! Expected an identifier\n");
-        }
-    }
-    else if(lookahead == LBRA){
-        Exp();
-        lookahead = getNextToken();
-        if(lookahead == RBRA){
-            AcessMemAddr_();
-            return;
-        }
-        else{
-            printf("Syntax error! Expected ']'\n");
-        }
-    }
-    else if(lookahead == LPAR){
-        Args();
-        lookahead = getNextToken();
-        if(lookahead == RPAR){
-            AcessMemAddr_();
-            return;
-        }
-        else{
-            printf("Syntax error! Expected ')'\n");
-        }
-    }
-    return; //Lambda ('')
+	switch lookahead:
+	case ATTRIB:	break;
+	case SEMICOLON:	break;
+	case OR:	break;
+	case AND:	break;
+	case NEQ:	break;
+	case EQ: 	break;
+	case LESS: 	break;
+	case GREATER: 	break;
+	case LEQ: 	break;
+	case GEQ: 	break;
+	case PLUS: 	break;
+	case MINUS: 	break;
+	case MULTIPLY: 	break;
+	case DIVIDE: 	break;
+	case MOD: 	break;
+	case LPAR:	eat(LPAR); 	Args(); 	eat(RPAR); AcessMemAddr_(); break;
+	case RPAR:	break;
+	case DOT:	eat(DOT); 	eat(ID); 	AcessMemAddr_(); break;
+	case LBRA:	eat(LBRA); 	Exp(); 		eat(RBRA); AcessMemAddr_(); break;
+	case RBRA:	break;
+	case END:	break;
+	case INTERVAL:	break;
+	case COMMA:	break;
+	case _BEGIN:	break;
+	case TO:	break;
+	case STEP:	break;
+	case THEN:	break;
+	default: printf("Syntax error.");
 }
 
-/*
-Types -> type Id := TypeDec ; Types
-Types -> ''
-*/
+
 void Types(){
-    if(lookahead == TYPE){
-        lookahead = getNextToken();
-        if(lookahead == ID){
-            lookahead = getNextToken();
-            if(lookahead == ATTRIB){
-                TypeDec();
-                lookahead = getNextToken();
-                if(lookahead == SEMICOLON){
-                    Types();
-                }else{
-                    printf("Syntax error! Expected ';'\n");
-                }
-            }else{
-                printf("Syntax error! Expected ':='\n");
-            }
-        }
-        else{
-            printf("Syntax error! Expected an identifier\n");
-        }
-    }
-    // else{
-    //     printf("Syntax error! Expected 'type'\n");
-    // }
-    return; //Lambda ('')
-    
+	switch lookahead:
+	case TYPE: 	eat(TYPE); eat(ID); eat(ATTRIB); TypeDec(); eat(SEMICOLON); Types(); break;
+	case PROCEDURE: break;
+	case FUNCTION: 	break;
+	case VAR: 	break;
+	case _BEGIN: 	break;
+	default: printf("Syntax error.");
+
 }
 
 void TypeDec(){
-    if(lookahead == T_BOOL || lookahead == T_INT ||
-        lookahead == T_REAL || lookahead == T_CHAR ||
-        lookahead == ID){
-        return;
-    }
-    else if (lookahead == ARRAY){
-        lookahead = getNextToken();
-        if(lookahead == LBRA){
-            Interval();
-            lookahead = getNextToken();
-            if(lookahead == RBRA){
-                lookahead = getNextToken();
-                if(lookahead == OF){
-                    TypeDec();
-                    return;
-                }else{
-                    printf("Syntax error! Expected 'of'\n");
-                }
-            }else{
-                printf("Syntax error! Expected ']'\n");
-            }
-        }else{
-            printf("Syntax error! Expected '['\n");
-        }
-    }
-    else if(lookahead == RECORD){
-        Fields();
-        lookahead = getNextToken();
-        if(lookahead == END){
-            return;
-        }
-        else{
-            printf("Syntax error! Expected 'end'\n");
-        }
-    }else{
-        printf("Syntax error! Expected 'bool', 'int', 'real', 'char', 'Id', 'array' or 'record'\n");
-    }
-    
-}
+	switch lookahead:
+	case ID: 	eat(ID); 	break;
+	case T_INT: 	eat(T_INT); 	break;
+	case T_REAL: 	eat(T_REAL); 	break;
+	case T_BOOL: 	eat(T_BOOL); 	break;
+	case T_CHAR: 	eat(T_CHAR); 	break;
+	case ARRAY: 	eat(array); 	eat(LBRA); Interval(); eat(RBRA); eat(OF); TypeDec(); break;
+	case RECORD:	eat(RECORD); 	Fields();  eat(END); break;
+	default: printf("Syntax error.");	
 
-void Interval(){
-    Exp();
-    if(lookahead == INTERVAL){
-        Exp();
-        Interval_();
-    }
-    else{
-        printf("Syntax error! Expected '..'\n");
-    }
-}
-
-void Interval_(){
-    if(lookahead == COMMA){
-        Interval();
-        return;
-    }
-    return; //Lambda ('')
-}
-
-void Fields(){
-    if(lookahead == ID){
-        lookahead = getNextToken();
-        if (lookahead == COLON)
-        {
-            TypeDec();
-            lookahead = getNextToken();
-            if(lookahead == SEMICOLON){
-                Fields();
-                return;
-            }else{
-                printf("Syntax error! Expected ';'\n");
-            }
-        }else{
-            printf("Syntax error! Expected ':'\n");
-        }
-    }
-    return; //Lambda ('')
 }
 
 
-/*
-SubProg -> ProcedureDecl SubProg
-SubProg -> FunctionDecl SubProg
-SubProg -> ''
-*/
-void SubProg(){
-    //Tive que fazer uma verificacao da primeira keyword 
-    //  das regras ProcedureDecl e FunctionDecl para a distincao
-    if(lookahead == PROCEDURE){
-        ProcedureDecl();
-        SubProg();
-    }
-    else if(lookahead == FUNCTION){
-        FunctionDecl();
-        SubProg();
-    }
-    else{
-        //Lambda ('')
-    }
-}
 
-void ProcedureDecl(){
-    if(lookahead == PROCEDURE){
-        if(lookahead == ID){
-            lookahead = getNextToken();
-            if(lookahead == LPAR){
-                Parameters();
-                lookahead = getNextToken();
-                if(lookahead == RPAR){
-                    CmdBlock();
-                    return;
-                }else{
-                    printf("Syntax error! Expected ')'\n");
-                }
-            }
-            else{
-                printf("Syntax error! Expected '('\n");
-            }
-        }else{
-            printf("Syntax error! Expected an identifier (procedure id)\n");
-        }
-    }
-    else{
-        printf("Syntax error! Expected 'procedure'\n");
-    }
-}
 
-void FunctionDecl(){
-    if(lookahead == FUNCTION){
-        if(lookahead == ID){
-            lookahead = getNextToken();
-            if(lookahead == LPAR){
-                Parameters();
-                lookahead = getNextToken();
-                if(lookahead == RPAR){
-                    lookahead = getNextToken();
-                    if(lookahead == COLON){
-                        TypeDec();
-                        CmdBlock();
-                        lookahead = getNextToken();
-                        if(lookahead == SEMICOLON){
-                            return;
-                        }
-                        else{
-                            printf("Syntax error! Expected ';'\n");
-                        }
-                    }else{
-                        printf("Syntax error! Expected ':'\n");
-                    }
-                }else{
-                    printf("Syntax error! Expected ')'\n");
-                }
-            }
-            else{
-                printf("Syntax error! Expected '('\n");
-            }
-        }else{
-            printf("Syntax error! Expected an identifier (function id)\n");
-        }
-    }else{
-        printf("Syntax error! Expected 'function'\n");
-    }
-}
 
-void Parameters(){
-    if(lookahead == ID){
-        ParametersAux();
-    }else{
-        return; //lambda
-    }
-}
 
-void ParametersAux(){
-    if(lookahead == ID){
-        lookahead = getNextToken();
-        if(lookahead == COLON){
-            TypeDec();
-            ParametersAux_();
-            return;
-        }else{
-            printf("Syntax error! Expected ':'");
-        }
-    }else{
-        printf("Syntax error! Expected an identifier\n");
-    }
-}
 
-void ParametersAux_(){
-    if(lookahead == COMMA){
-        ParametersAux();
-        return; //end of rule ParametersAux_ -> , ParametersAux
-    }
-    return; //lambda
-}
 
-void Vars(){
-    if(lookahead == VAR){
-        lookahead = getNextToken();
-        if(lookahead == ID){
-            lookahead = getNextToken();
-            if(lookahead == COLON){
-                TypeDec();
-                lookahead = getNextToken();
-                if(lookahead == SEMICOLON){
-                    Vars();
-                    return;
-                }else{
-                    printf("Syntax error! Expected ';'\n");
-                }
-            }else{
-                printf("Syntax error! Expected ':'\n");
-            }
-        }else{
-            printf("Syntax error! Expected an identifier\n");
-        }
-    }
-    else{
-        return; //lambda
-    }
-}
 
-void CmdBlock(){
-    if(lookahead == _BEGIN){
-        Vars();
-        Cmds();
-        lookahead = getNextToken();
-        if(lookahead == END){
-            return;
-        }else{
-            printf("Syntax error! Expected 'end'\n");
-        }
-    }else{
-        printf("Syntax error! Expected 'begin'\n");
-    }
-}
 
-void Cmds(){
-    CmdAux();
-    Cmds_();
-}
-
-void Cmds_(){
-    if(lookahead == SEMICOLON){
-        Cmds();
-    }
-    return; //lambda
-}
-
-void CmdAux(){
-    if(lookahead == CONTINUE){
-        return;
-    }
-    else if(lookahead == EXIT){
-        lookahead = getNextToken();
-        if(lookahead == WHEN){
-            Exp();
-            return;
-        }else{
-            printf("Syntax error! Expected 'when'\n");
-        }
-    }
-    else if(lookahead == FOR){
-        lookahead = getNextToken();
-        if(lookahead == ID){
-            lookahead = getNextToken();
-            if(lookahead == ATTRIB){
-                Exp();
-                lookahead = getNextToken();
-                if(lookahead == TO){
-                    Exp();
-                    lookahead = getNextToken();
-                    if(lookahead == STEP){
-                        Exp();
-                        CmdBlock();
-                        return;
-                    }else{
-                        printf("Syntax error! Expected 'step'\n");
-                    }
-                }else{
-                    printf("Syntax error! Expected 'to'\n");
-                }
-            }else{
-                printf("Syntax error! Expected ':='\n");
-            }
-            
-        }else{
-            printf("Syntax error! Expected an identifier\n");
-        }
-    }
-    //TODO: Backtracking (tentativa e erro) para os seguintes casos:
-    AcessMemAddr(); CmdAux_();
-    CmdBlock();
-    CmdConditional();
-    CmdReturn();
-}
-
-void CmdAux_(){
-    if(lookahead == ATTRIB){
-        Exp();
-    }
-    return; //Lambda
-}
-
-void CmdConditional(){
-    if(lookahead == IF){
-        Exp();
-        lookahead == getNextToken();
-        if(lookahead == THEN){
-            CmdBlock();
-            CmdConditionalEnd();
-            return;
-        }
-    }else{
-        printf("Syntax error! Expected 'if'\n");
-    }
-}
-
-void CmdConditionalEnd(){
-    if(lookahead == ELSE){
-        CmdBlock();
-    }
-    return; //lambda
-}
-
-void CmdReturn(){
-    if(lookahead == RETURN){
-        CmdReturnExp();
-    }
-    else{
-        printf("Syntax error! Expected 'return'\n");
-    }
-}
-
-void CmdReturnExp(){
-    //TODO: Analisar este caso. Backtracking em caso de erro.
-        //Usar primeiramente o Exp. Se der erro, considerar o lambda
-}
-
-void Args(){
-    //TODO: Analisar este caso. Backtracking em caso de erro.
-        //Usar primeiramente o ArgsAux. Se der erro, considerar o lambda
-}
-
-void ArgsAux(){
-    Exp();
-    ArgsAux_();
-}
-
-void ArgsAux_(){
-    if(lookahead == COMMA){
-        ArgsAux();
-    }
-    return; //lambda
-}
