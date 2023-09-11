@@ -90,8 +90,9 @@ void initializeParsing(){
 }
 
 
-void error(){
-	printf("error() - Syntax error. Lookahead did not match the current token.");
+void error(int token){
+	printf("error() - Syntax error. Lookahead did not match the current token.\n");
+	printf("Expected token %d but found %d.\n", token, lookahead);
 }
 
 
@@ -100,7 +101,7 @@ void eat(int token){
 		lookahead = getNextToken();
 	}
 	else{
-		error();
+		error(token);
 	}
 	
 }
@@ -506,3 +507,175 @@ void Fields(){
 	}
 }
 
+void SubProg(){
+	switch (lookahead){
+		case PROCEDURE: 	ProcedureDecl(); 	SubProg(); 	break;
+		case FUNCTION: 		FunctionDecl(); 	SubProg(); 	break;
+		case VAR: 			break;
+		case _BEGIN: 		break;
+		default: 			printf("Syntax error.");
+	}
+}
+
+void ProcedureDecl(){
+	switch (lookahead){
+		case PROCEDURE: 	eat(PROCEDURE); eat(ID); eat(LPAR); Parameters(); eat(RPAR); CmdBlock(); eat(SEMICOLON); break;
+		default: 			printf("Syntax error.");
+	}
+}
+
+void FunctionDecl(){
+	switch (lookahead){
+			//FunctionDecl ::= function Id ( Parameters ) : TypeDec CmdBlock ;
+		case FUNCTION: 		eat(FUNCTION); eat(ID); eat(LPAR); Parameters(); eat(RPAR); eat(COLON); TypeDec(); CmdBlock(); eat(SEMICOLON); break;
+		default: 			printf("Syntax error.");
+	}
+}
+
+void Parameters(){
+	switch (lookahead){
+		case ID: 		ParametersAux(); break;
+		case RPAR: 		break;
+		default: 		printf("Syntax error.");
+	}
+}
+
+void ParametersAux(){
+	switch (lookahead){
+			//ParametersAux ::= Id : TypeDec ParametersAux_
+		case ID: 		eat(ID); eat(COLON); TypeDec(); ParametersAux_(); break;
+		default: 		printf("Syntax error. Grammar rule: ParametersAux");
+	}
+}
+
+void ParametersAux_(){
+	switch (lookahead){
+		case RPAR: 		break;
+		case COMMA: 	eat(COMMA); ParametersAux(); break;
+		default: 		printf("Syntax error. Grammar rule: ParametersAux_");
+	}
+}
+
+void Vars(){
+	switch (lookahead){
+		case ID: 		break;
+		case VAR: 		eat(VAR); eat(ID); eat(COLON); TypeDec(); eat(SEMICOLON); Vars(); break; 
+		case _BEGIN: 	break;
+		case FOR:		break;
+		case LOOP:		break;
+		case EXIT:		break;
+		case CONTINUE:	break;
+		case IF:		break;
+		case RETURN:	break;
+		default: 		printf("Syntax error. Grammar rule: Vars");
+	}
+}
+
+void CmdBlock(){
+	switch (lookahead){
+		case _BEGIN: 	eat(_BEGIN); Vars(); Cmds(); eat(END); break; //begin Vars Cmds end
+		default: 		printf("Syntax error. Grammar rule: CmdBlock");
+	}
+}
+
+void Cmds(){
+	switch (lookahead){
+		case ID: 		CmdAux(); Cmds_(); break;
+		case _BEGIN: 	CmdAux(); Cmds_(); break;
+		case FOR: 		CmdAux(); Cmds_(); break;
+		case LOOP: 		CmdAux(); Cmds_(); break;
+		case EXIT: 		CmdAux(); Cmds_(); break;
+		case CONTINUE: 	CmdAux(); Cmds_(); break;
+		case IF: 		CmdAux(); Cmds_(); break;
+		case RETURN: 	CmdAux(); Cmds_(); break;
+		default: 		printf("Syntax error. Grammar rule: Cmds");
+	}
+}
+
+void Cmds_(){
+	switch (lookahead){
+		case SEMICOLON: eat(SEMICOLON); Cmds(); break;
+		case END: 		break;
+		default: 		printf("Syntax error. Grammar rule: Cmds_");
+	}
+}
+
+void CmdAux(){
+	switch (lookahead){
+		case ID: 		AcessMemAddr(); 	CmdAux_(); 	break;
+		case _BEGIN: 	CmdBlock(); 		break;
+		case FOR: 		eat(FOR); 			eat(ID); 	eat(ATTRIB); 	Exp(); 		eat(TO); Exp(); eat(STEP); Exp(); CmdBlock(); break;
+		case LOOP: 		eat(LOOP); 			Vars(); 	Cmds(); 		eat(END); 	break; 
+		case EXIT: 		eat(EXIT); 			eat(WHEN); 	Exp(); 			break; 
+		case CONTINUE:	eat(CONTINUE);		break;
+		case IF:		CmdConditional();	break;
+		case RETURN:	CmdReturn();		break;
+		default: 		printf("Syntax error. Grammar rule: CmdAux");
+	}
+}
+
+void CmdAux_(){
+	switch (lookahead){
+		case ATTRIB: 	eat(ATTRIB); Exp(); break;
+		case SEMICOLON:	break;
+		case END: 		break;
+		default: 		printf("Syntax error. Grammar rule: CmdAux_");
+	}
+}
+
+void CmdConditional(){
+	switch (lookahead){
+		case IF: 	eat(IF); Exp(); eat(THEN); CmdBlock(); CmdConditionalEnd(); break;
+		default: 	printf("Syntax error. Grammar rule: CmdConditional");
+	}
+}
+
+void CmdConditionalEnd(){
+	switch (lookahead){
+		case SEMICOLON: 	break;
+		case END: 			break;
+		case ELSE: 			eat(ELSE); CmdBlock(); break;
+		default: 			printf("Syntax error. Grammar rule: CmdConditionalEnd");
+	}
+}
+
+void Args(){
+	switch (lookahead){
+		case ID: 		ArgsAux(); break;
+		case NOT: 		ArgsAux(); break;
+		case PLUS: 		ArgsAux(); break;
+		case MINUS: 	ArgsAux(); break;
+		case LPAR: 		ArgsAux(); break;
+		case V_INT: 	ArgsAux(); break;
+		case V_REAL: 	ArgsAux(); break;
+		case V_BOOL: 	ArgsAux(); break;
+		case V_CHAR: 	ArgsAux(); break;
+		case V_STRING: 	ArgsAux(); break;	
+		case RPAR: 		break;
+		default: 		printf("Syntax error. Grammar rule: Args");
+	}
+}
+
+void ArgsAux(){
+	switch (lookahead){
+		case ID:  		Exp(); 			ArgsAux_(); break;
+		case NOT:  		Exp(); 			ArgsAux_(); break;
+		case PLUS:  	Exp(); 			ArgsAux_(); break;
+		case MINUS:  	Exp(); 			ArgsAux_(); break;
+		case LPAR:  	Exp(); 			ArgsAux_(); break;
+		case V_INT: 	ArgsAux_(); 	break;
+		case V_REAL: 	ArgsAux_(); 	break;
+		case V_BOOL: 	ArgsAux_(); 	break;
+		case V_CHAR: 	ArgsAux_(); 	break;
+		case V_STRING: 	ArgsAux_(); 	break;
+		default: 		printf("Syntax error. Grammar rule: ArgsAux");
+	}
+}
+
+void ArgsAux_(){
+	switch (lookahead){
+		case RPAR: 		break;
+		case COMMA: 	eat(COMMA); break;
+		default: 		printf("Syntax error. Grammar rule: ArgsAux_");
+	}
+}
