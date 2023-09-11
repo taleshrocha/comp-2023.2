@@ -451,10 +451,35 @@ void TypeDec(){
 
 }
 
+void Interval(){
+	switch lookahead:
+	case ID: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case NEQ: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case PLUS: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case MINUS: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case LPAR: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case V_INT: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case V_BOOL: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case V_REAL: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case V_CHAR: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	case V_STRING: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+	default: printf("Syntax error.");
 
+}
 
+void Interval_(){
+	switch lookahead:
+	case RBRA: 	break;
+	case COMMA: 	eat(COMMA); Interval(); break;
+	default: printf("Syntax error.");
+}
 
-
+void Fields(){
+	switch lookahead:
+	case ID:  eat(ID); eat(COLON); TypeDec(); eat(SEMICOLON); Fields(); break;
+	case END: break;
+	default: printf("Syntax error.");
+}
 
 
 
