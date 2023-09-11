@@ -53,7 +53,6 @@
 #define FUNCTION 39
 #define PROCEDURE 40
 #define RETURN 41
-//#define BREAK 43      REMOVIDO POR NAO ESTAR NA GRAMATICA
 #define CONTINUE 42
 #define RECORD 43
 #define OF 44
@@ -71,6 +70,7 @@
 
 #define FOR 54
 #define INTERVAL 55 //Corresponds to '..'
+#define BREAK 56
 /*
 	Missing: $								
 */
@@ -610,6 +610,7 @@ void CmdAux(){
 		case CONTINUE:	eat(CONTINUE);		break;
 		case IF:		CmdConditional();	break;
 		case RETURN:	CmdReturn();		break;
+		case BREAK: 	eat(BREAK); 		break;
 		default: 		printf("Syntax error. Grammar rule: CmdAux\n");
 	}
 }

@@ -111,6 +111,7 @@ CmdAux ::= loop Vars Cmds end
 CmdAux ::= exit when Exp
 CmdAux ::= continue
 CmdAux ::= CmdReturn
+CmdAux ::= break
 
 CmdConditional ::= if Exp then CmdBlock CmdConditionalEnd
 CmdConditionalEnd ::= else CmdBlock
