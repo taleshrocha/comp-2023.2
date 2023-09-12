@@ -49,7 +49,6 @@
 #define THEN 37
 #define ATTRIB 38 //Atribuicao
 
-
 #define FUNCTION 39
 #define PROCEDURE 40
 #define RETURN 41
@@ -253,7 +252,7 @@ void Comps_(){
 void Factor(){
 	switch (lookahead){
 		case ID: 		AriOp(); 	break;
-		case NEQ: 		eat(NEQ); 	break;
+		case NOT: 		eat(NOT);	AriOp(); 	break;
 		case PLUS:		AriOp();	break;
 		case MINUS:		AriOp();	break;
 		case LPAR: 		AriOp(); 	break;
@@ -477,7 +476,7 @@ void TypeDec(){
 void Interval(){
 	switch (lookahead){
 		case ID: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
-		case NEQ: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case NOT: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
 		case PLUS: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
 		case MINUS: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
 		case LPAR: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
@@ -637,6 +636,31 @@ void CmdConditionalEnd(){
 		case END: 			break;
 		case ELSE: 			eat(ELSE); CmdBlock(); break;
 		default: 			printf("Syntax error. Grammar rule: CmdConditionalEnd\n");
+	}
+}
+
+void CmdReturn(){
+	switch (lookahead){
+		case RETURN: 	eat(RETURN); CmdReturnExp(); break;
+		default: 		printf("Syntax error. Grammar rule: CmdReturn\n");
+	}
+}
+
+void CmdReturnExp(){
+	switch (lookahead){
+		case ID: 		Exp(); break;
+		case SEMICOLON:	break;
+		case NOT:		Exp(); break;
+		case PLUS:		Exp(); break;
+		case MINUS:		Exp(); break;
+		case LPAR:		Exp(); break;
+		case V_INT: 	Exp(); break;
+		case V_REAL: 	Exp(); break;
+		case V_BOOL: 	Exp(); break;
+		case V_CHAR: 	Exp(); break;
+		case V_STRING: 	Exp(); break;
+		case END:		break;
+		default: 		printf("Syntax error. Grammar rule: CmdReturnExp\n");
 	}
 }
 
