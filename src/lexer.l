@@ -56,7 +56,6 @@ identificador   {letter}({letter}|{number})*
 "var"	      {return VAR;}
 "if"        {return IF;}
 "else"      {return ELSE;}
-"elsif"     {return ELSIF;}
 "loop"      {return LOOP;}
 "begin"     {return _BEGIN;}
 "end"       {return END;}
