@@ -1,55 +1,70 @@
+#define ID 1
+#define CONST 2
+#define T_INT 3
+#define T_REAL 4
+#define T_CHAR 5
+#define T_BOOL 6
 
-#define ID 10000  // Identifier token
-#define CONST 20000
-#define T_INT 300
-#define T_REAL 400
-#define T_CHAR 500
-#define T_BOOL 600
+#define V_INT 7
+#define V_CHAR 8
+#define V_BOOL 9
+#define V_REAL 10
+#define V_STRING 11
 
-#define V_INT 700
-#define V_CHAR 800
-#define V_BOOL 900
-#define V_REAL 1000
-#define V_STRING 1001
+#define EQ 12
+#define LEQ 13
+#define GEQ 14
+#define GREATER 15
+#define LESS 16
+#define NEQ 17
 
-#define EQ 1100
-#define LEQ 1200
-#define GEQ 1300
-#define GE 1400
-#define LE 1500
-#define NEQ 1600
+#define PLUS 18
+#define MINUS 19
+#define DIVIDE 20
+#define MULTIPLY 21
+#define MOD 22
 
-#define PLUS 1700
-#define MINUS 1800
-#define DIVIDE 1900
-#define MULTIPLY 2000
-#define MOD 2100
+#define LOOP 23
+#define IF 24
+#define ELSE 25
+//#define ELSIF 26   --- REMOVIDO POR NAO ESTAR NA GRAMATICA
+#define _BEGIN 26
+#define END 27
 
-#define LOOP 2200
-#define IF 2300
-#define ELSE 2400
-#define ELSIF 2500
-#define _BEGIN 2600
-#define END 2700
+#define AND 28
+#define NOT 29
+#define OR 30
 
-#define AND 2800
-#define NOT 2900
-#define OR 3000
+#define TYPE 31
+#define ARRAY 32
+#define EXIT 33
+#define WHEN 34
+#define TO 35
+#define STEP 36
+#define THEN 37
+#define ATTRIB 38 //Atribuicao
 
-#define TYPE 123131
-#define ARRAY 12312332
-#define EXIT 1231233
-#define WHEN 412434
-#define TO 115345
-#define STEP 534737
-#define THEN 21256
-#define ATTRIB 41364373
+#define FUNCTION 39
+#define PROCEDURE 40
+#define RETURN 41
+#define CONTINUE 42
+#define RECORD 43
+#define OF 44
+#define VAR 45
 
-#define FUNCTION 457457
-#define PROCEDURE 2342762
-#define RETURN 23654373
-#define BREAK 2135276
-#define CONTINUE 3576485
-#define RECORD 78423
-#define OF 23236
-#define VAR 123125
+#define LPAR 46 // (
+#define RPAR 47 // )
+#define LBRA 48 //Left bracket [
+#define RBRA 49 //right bracket ]
+
+#define DOT 50
+#define COMMA 51
+#define SEMICOLON 52
+#define COLON 53
+
+#define FOR 54
+#define INTERVAL 55 //Corresponds to '..'
+#define BREAK 56
+/*
+	Missing: $								
+*/
