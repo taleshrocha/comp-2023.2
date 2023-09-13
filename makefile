@@ -29,7 +29,7 @@ debug: all
 
 # executables
 
-$(BIN)/lexer: $(OBJS)/lexer.o $(OBJS)/symbolTable.o
+$(BIN)/lexer: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/tableParser.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -38,6 +38,9 @@ $(OBJS)/lexer.o: $(SRC)/lexer.l.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
+$(OBJS)/tableParser.o: $(SRC)/tableParser.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources

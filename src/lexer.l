@@ -5,7 +5,7 @@
   #include "defines.h"
   #include "typedefs.h"
   #include "symbolTable.h"
-
+  #include "tableParser.h"
 %}
 
 %option noyywrap
@@ -122,48 +122,96 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
-int main()
-{
-  printf("\nInicializando tabela de simbolos...\n");
+char terminal_mapping[56][16] = {
+    "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
+    "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
+    "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",
+    "LPAR",     "RPAR",     "V_INT",    "V_REAL",    "V_BOOL",    "V_CHAR",
+    "V_STRING", "DOT",      "LBRA",     "RBRA",      "TYPE",      "T_BOOL",
+    "T_INT",    "T_REAL",   "T_CHAR",   "ARRAY",     "OF",        "RECORD",
+    "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
+    "VAR",      "_BEGIN",   "FOR",      "TO",        "STEP",      "LOOP",
+    "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
+    "ELSE",     "RETURN"};
+
+char non_terminal_mapping[44][32] = {"Prog",
+                                     "Decl",
+                                     "Consts",
+                                     "Exp",
+                                     "Exp_",
+                                     "Terms",
+                                     "Terms_",
+                                     "Comps",
+                                     "Comps_",
+                                     "Factor",
+                                     "AriOp",
+                                     "AriOp_",
+                                     "AriOp2",
+                                     "AriOp2_",
+                                     "Parenthesis",
+                                     "UnaryExp",
+                                     "SimpleExp",
+                                     "NumExp",
+                                     "AcessMemAddr",
+                                     "AcessMemAddr_",
+                                     "Types",
+                                     "TypeDec",
+                                     "Interval",
+                                     "Interval_",
+                                     "Fields",
+                                     "SubProg",
+                                     "ProcedureDecl",
+                                     "FunctionDecl",
+                                     "Parameters",
+                                     "ParametersAux",
+                                     "ParametersAux_",
+                                     "Vars",
+                                     "CmdBlock",
+                                     "Cmds",
+                                     "Cmds_",
+                                     "CmdAux",
+                                     "CmdAux_",
+                                     "CmdConditional",
+                                     "CmdConditionalEnd",
+                                     "CmdReturn",
+                                     "CmdReturnExp",
+                                     "Args",
+                                     "ArgsAux",
+                                     "ArgsAux_"};
+
+int main() {
   initializeSymbolTable();
-  printf("Iniciando leitura de tokens...\n\n");
-  int token = -1;
-  token = yylex();
-
-  while (token != 0) {
-      token = yylex();
-      printf("token lido: %d\n", token);
-      switch (token) {
-        case ID:
-          printf("id na posição: %d da symbol table\n", yylval.id_index);
-          break;
-        case V_BOOL:
-          printf("bool com valor: %s\n", yylval.bool_value ? "true" : "false");
-          break;
-        case V_INT:
-          printf("int com valor: %d\n", yylval.int_value);
-          break;
-        case V_REAL:
-          printf("real com valor: %f\n", yylval.real_value);
-          break;
-        case V_CHAR:
-          printf("char com valor: %c\n", yylval.char_value);
-          break;
-        case V_STRING:
-          printf("string com valor: %s\n", yylval.string_value);
-          free(yylval.string_value);
-          break;
-        default:
-          printf("sem valor associado\n");
-          break;
-      }
+  printf("starting!...\n");
+  initialize_stack();
+  int current_terminal = yylex(); 
+  int current_symbol = pop();
+  while (current_symbol != EndOfInput) {
+    if (current_symbol == current_terminal) {
+      current_terminal = yylex(); 
+    //   current_symbol = pop();
+    } else if (current_symbol < 100) {
+        // printf("symbol: %d-%s is terminal\n", current_symbol, terminal_mapping[current_symbol-1]);
+        error();
+        destroySymbolTable();
+        yylex_destroy();
+        return -1;
+    } else if (get_symbols(current_symbol-100, current_terminal-1)[0] == 0) {
+        // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
+        // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
+        // printf("Invalid terminal!\n");
+        error();
+        destroySymbolTable();
+        yylex_destroy();
+        return -1;
+    } else {
+        // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
+        // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
+        insert_symbols(get_symbols(current_symbol-100, current_terminal-1));
+    }
+    current_symbol = pop();
   }
-  printf("\nLeitura de tokens finalizada.\n");
-  printFirst10Entries();
-  
-
+  printf("end of input! Finalizing!\n");
   destroySymbolTable();
-  printf("\ntabela de simbolos destruida.\n");
   yylex_destroy();
   
   return 0;
