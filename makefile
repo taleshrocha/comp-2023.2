@@ -12,7 +12,7 @@ SRC=./src
 INCLUDE=./include
 
 # main target
-all: mkfolders $(BIN)/lexer
+all: mkfolders $(BIN)/lexer_test $(BIN)/nonRecursiveParser
 
 # create folders
 
@@ -26,10 +26,12 @@ debug: CFLAGS += -DDEBUG -g -O0 #-fsanitize=address -fno-omit-frame-pointer
 debug: all
 
 
-
 # executables
 
-$(BIN)/lexer: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/tableParser.o
+$(BIN)/lexer_test: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/lexerTest.o
+	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
+
+$(BIN)/nonRecursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/nonRecursiveParser.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -40,7 +42,10 @@ $(OBJS)/lexer.o: $(SRC)/lexer.l.c
 $(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
-$(OBJS)/tableParser.o: $(SRC)/tableParser.c
+$(OBJS)/lexerTest.o: $(SRC)/lexerTest.c
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
+$(OBJS)/nonRecursiveParser.o: $(SRC)/nonRecursiveParser.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources

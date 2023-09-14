@@ -1,5 +1,5 @@
-#ifndef TABLEPARSER_H
-#define TABLEPARSER_H
+#ifndef NON_RECURSIVE_PARSER_H
+#define NON_RECURSIVE_PARSER_H
 
 #include "defines.h"
 #include "stdio.h"
@@ -47,4 +47,4 @@ void print_stack();
 //   }
 // }
 
-#endif  // TABLEPARSER_H
+#endif  // NON_RECURSIVE_PARSER_H

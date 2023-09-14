@@ -5,7 +5,7 @@
   #include "defines.h"
   #include "typedefs.h"
   #include "symbolTable.h"
-  #include "tableParser.h"
+  #include "lexer.h"
 %}
 
 %option noyywrap
@@ -178,41 +178,3 @@ char non_terminal_mapping[44][32] = {"Prog",
                                      "Args",
                                      "ArgsAux",
                                      "ArgsAux_"};
-
-int main() {
-  initializeSymbolTable();
-  printf("starting!...\n");
-  initialize_stack();
-  int current_terminal = yylex(); 
-  int current_symbol = pop();
-  while (current_symbol != EndOfInput) {
-    if (current_symbol == current_terminal) {
-      current_terminal = yylex(); 
-    //   current_symbol = pop();
-    } else if (current_symbol < 100) {
-        // printf("symbol: %d-%s is terminal\n", current_symbol, terminal_mapping[current_symbol-1]);
-        error();
-        destroySymbolTable();
-        yylex_destroy();
-        return -1;
-    } else if (get_symbols(current_symbol-100, current_terminal-1)[0] == 0) {
-        // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
-        // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
-        // printf("Invalid terminal!\n");
-        error();
-        destroySymbolTable();
-        yylex_destroy();
-        return -1;
-    } else {
-        // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
-        // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
-        insert_symbols(get_symbols(current_symbol-100, current_terminal-1));
-    }
-    current_symbol = pop();
-  }
-  printf("end of input! Finalizing!\n");
-  destroySymbolTable();
-  yylex_destroy();
-  
-  return 0;
-}
