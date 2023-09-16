@@ -1,5 +1,5 @@
 
-#line 2 "<stdout>"
+#line 3 "<stdout>"
 
 #define  YY_INT_ALIGNED short int
 
@@ -354,8 +354,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 62
-#define YY_END_OF_BUFFER 63
+#define YY_NUM_RULES 59
+#define YY_END_OF_BUFFER 60
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -363,26 +363,26 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[165] =
+static const flex_int16_t yy_accept[162] =
     {   0,
-        0,    0,   63,   61,    3,    3,   19,   61,   18,   61,
-       61,   22,   23,   16,   14,   42,   15,   41,   17,   56,
-       43,   44,    9,   61,    8,   60,   24,   25,   60,   60,
-       60,   60,   60,   60,   60,   60,   60,   60,   60,   60,
-       60,   60,   45,   61,   46,    3,   13,    0,   59,   20,
-        0,   56,    2,    0,    0,   54,   11,   12,   10,   60,
-       60,   60,   60,   60,   60,   60,   60,   60,   60,   60,
-       60,   28,   60,   60,   40,   60,   60,   60,   60,   51,
-       60,   60,   60,   60,    0,    0,    1,   21,   58,    2,
-       57,    0,   56,   60,   60,   60,   60,   60,   60,   60,
+        0,    0,   60,   58,    3,    3,   19,   58,   18,   58,
+       58,   22,   23,   16,   14,   41,   15,   40,   17,   53,
+       42,   43,    9,   58,    8,   57,   24,   25,   57,   57,
+       57,   57,   57,   57,   57,   57,   57,   57,   57,   57,
+       57,   57,   58,   58,    3,   13,    0,   56,   20,    0,
+       53,    2,    0,    0,   51,   11,   12,   10,   57,   57,
+       57,   57,   57,   57,   57,   57,   57,   57,   57,   57,
+       28,   57,   57,   39,   57,   57,   57,   57,   48,   57,
+       57,   57,   57,    0,    0,    1,   21,   55,    2,   54,
+        0,   53,   57,   57,   57,   57,   57,   57,   57,   32,
 
-       33,   60,   60,   60,    5,   60,   60,   60,   60,   60,
-       60,   60,   60,   60,   27,   60,    0,   60,   60,    4,
-       60,    7,   60,   60,   29,   60,   49,   60,   60,   31,
-       60,    6,   60,   60,   52,   53,   55,   47,   50,    0,
-       57,   48,   32,   37,   26,   60,   30,   60,   60,   60,
-       60,   60,   60,   60,   39,   36,   60,   60,   60,   38,
-       34,   60,   35,    0
+       57,   57,   57,    5,   57,   57,   57,   57,   57,   57,
+       57,   57,   57,   27,   57,    0,   57,   57,    4,   57,
+        7,   57,   57,   29,   46,   57,   57,   30,   57,    6,
+       57,   57,   49,   50,   52,   44,   47,    0,   54,   45,
+       31,   36,   26,   57,   57,   57,   57,   57,   57,   57,
+       57,   38,   35,   57,   57,   57,   37,   33,   57,   34,
+        0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -427,83 +427,82 @@ static const YY_CHAR yy_meta[52] =
         1
     } ;
 
-static const flex_int16_t yy_base[170] =
+static const flex_int16_t yy_base[167] =
     {   0,
-        0,    0,  199,  200,   50,   52,  177,  192,  200,  189,
-        0,  200,  200,  200,  178,  200,   42,  200,  200,   43,
-      173,  200,  172,  171,  170,    0,  200,  200,  149,   30,
-       23,   26,   38,   34,  150,  156,  146,  155,  142,   36,
-      157,  149,   65,  132,  200,   76,  200,  176,  175,  200,
-      171,   59,    0,  161,   73,  200,  200,  200,  200,    0,
-      136,  143,  136,  143,  146,  134,  129,  140,  134,  131,
-      129,    0,  123,  126,    0,  125,   59,  132,  131,    0,
-      117,  120,  118,  127,   77,   78,  200,  200,  200,    0,
-       72,  140,  139,  128,  119,  116,  125,  110,   49,   62,
+        0,    0,  197,  198,   50,   52,  175,  190,  198,  187,
+        0,  198,  198,  198,  176,  198,   42,  198,  198,   43,
+      171,  198,  170,  169,  168,    0,  198,  198,  147,   30,
+       23,   26,   38,   34,  148,  154,  144,  153,  140,   36,
+      155,  147,   65,  130,   76,  198,  174,  173,  198,  169,
+       59,    0,  159,   73,  198,  198,  198,  198,    0,  134,
+      141,  134,  141,  144,  132,  127,  138,  132,  129,  127,
+        0,  121,  124,    0,  123,   59,  130,  129,    0,  115,
+      118,  116,  125,   77,   78,  198,  198,  198,    0,   72,
+      138,  137,  126,  117,  114,  123,  108,   49,  117,    0,
 
-        0,  107,  107,  119,    0,  107,  117,  108,  105,   99,
-      102,  102,  103,  100,    0,   89,   86,   78,   87,    0,
-       88,    0,   80,   87,    0,   89,    0,   89,   76,    0,
-       87,    0,   76,   74,    0,    0,    0,    0,    0,   97,
-       96,    0,    0,    0,    0,   74,    0,   76,   80,   79,
-       70,   63,   67,   61,    0,    0,   73,   63,   58,    0,
-        0,   64,    0,  200,  129,  132,   91,  135,  138
+      104,  104,  116,    0,  104,  114,  105,  101,   90,   91,
+       89,   95,   94,    0,   86,   81,   75,   84,    0,   85,
+        0,   77,   84,    0,    0,   87,   74,    0,   84,    0,
+       73,   72,    0,    0,    0,    0,    0,   95,   94,    0,
+        0,    0,    0,   72,   74,   78,   77,   68,   61,   65,
+       59,    0,    0,   70,   62,   58,    0,    0,   66,    0,
+      198,  129,  132,   91,  135,  138
     } ;
 
-static const flex_int16_t yy_def[170] =
+static const flex_int16_t yy_def[167] =
     {   0,
-      164,    1,  164,  164,  164,  164,  164,  165,  164,  164,
-      166,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  167,  164,  164,  167,  167,
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  168,  164,  164,  164,  164,  165,  165,  164,
-      164,  164,  169,  164,  164,  164,  164,  164,  164,  167,
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  167,  167,  168,  168,  164,  164,  164,  169,
-      164,  164,  164,  167,  167,  167,  167,  167,  167,  167,
+      161,    1,  161,  161,  161,  161,  161,  162,  161,  161,
+      163,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  164,  161,  161,  164,  164,
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+      164,  164,  165,  161,  161,  161,  162,  162,  161,  161,
+      161,  166,  161,  161,  161,  161,  161,  161,  164,  164,
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+      164,  164,  164,  165,  165,  161,  161,  161,  166,  161,
+      161,  161,  164,  164,  164,  164,  164,  164,  164,  164,
 
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  167,  167,  167,  167,  164,  167,  167,  167,
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  164,
-      164,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  167,  167,  167,  167,  167,  167,  167,  167,
-      167,  167,  167,    0,  164,  164,  164,  164,  164
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+      164,  164,  164,  164,  164,  161,  164,  164,  164,  164,
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+      164,  164,  164,  164,  164,  164,  164,  161,  161,  164,
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
+        0,  161,  161,  161,  161,  161
     } ;
 
-static const flex_int16_t yy_nxt[252] =
+static const flex_int16_t yy_nxt[250] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
        14,   15,   16,   17,   18,   19,   20,   21,   22,   23,
        24,   25,   26,   26,   27,   28,   29,   30,   31,   26,
        32,   33,   26,   26,   34,   26,   35,   26,   36,   37,
        38,   39,   40,   26,   41,   42,   26,   26,   43,   44,
-       45,   46,   46,   46,   46,   53,   65,   54,   52,   52,
-       62,   66,   67,   68,   70,   72,   55,   86,   63,   79,
-       64,   73,   69,   54,   80,   52,   81,   46,   46,   86,
-       86,   71,   55,   82,   92,  108,   92,  109,   91,   93,
-      123,  124,  125,   60,  163,  117,  126,  140,  162,  140,
+        4,   45,   45,   45,   45,   52,   64,   53,   51,   51,
+       61,   65,   66,   67,   69,   71,   54,   85,   62,   78,
+       63,   72,   68,   53,   79,   51,   80,   45,   45,   85,
+       85,   70,   54,   81,   91,  107,   91,  108,   90,   92,
+      122,  123,  138,   59,  138,  116,  160,  139,  159,  158,
 
-      161,  110,  141,  160,  159,  158,  157,  156,  155,  154,
-      153,  152,  141,  141,  151,   87,  150,  149,  148,  137,
-      147,  146,  145,  144,  143,  142,  139,   87,   87,   48,
-      138,   48,   51,  137,   51,   85,   85,   85,   90,  136,
-       90,  135,  134,  133,  132,  131,  130,  129,  128,  127,
-      122,  121,  120,  119,  118,   93,   93,  116,  115,  114,
-      113,  112,  111,  107,  106,  105,  104,  103,  102,  101,
-      100,   99,   98,   97,   96,   95,   94,   91,   89,   49,
-       49,   88,   84,   83,   78,   77,   76,   75,   74,   61,
-       59,   58,   57,   56,   52,   50,   49,   47,  164,    3,
+      157,  109,  156,  155,  154,  153,  152,  151,  150,  149,
+      139,  139,  148,  147,  146,   86,  145,  135,  144,  143,
+      142,  141,  140,  137,  136,  135,  134,   86,   86,   47,
+      133,   47,   50,  132,   50,   84,   84,   84,   89,  131,
+       89,  130,  129,  128,  127,  126,  125,  124,  121,  120,
+      119,  118,  117,   92,   92,  115,  114,  113,  112,  111,
+      110,  106,  105,  104,  103,  102,  101,  100,   99,   98,
+       97,   96,   95,   94,   93,   90,   88,   48,   48,   87,
+       83,   82,   77,   76,   75,   74,   73,   60,   58,   57,
+       56,   55,   51,   49,   48,   46,  161,    3,  161,  161,
 
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161
     } ;
 
-static const flex_int16_t yy_chk[252] =
+static const flex_int16_t yy_chk[250] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -512,27 +511,26 @@ static const flex_int16_t yy_chk[252] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    5,    5,    6,    6,   17,   31,   20,   17,   20,
        30,   31,   32,   32,   33,   34,   20,   43,   30,   40,
-       30,   34,   32,   52,   40,   52,   40,   46,   46,   85,
-       86,   33,   52,   40,   55,   77,   55,   77,   91,   55,
-       99,   99,  100,  167,  162,   91,  100,  117,  159,  117,
+       30,   34,   32,   51,   40,   51,   40,   45,   45,   84,
+       85,   33,   51,   40,   54,   76,   54,   76,   90,   54,
+       98,   98,  116,  164,  116,   90,  159,  116,  156,  155,
 
-      158,   77,  117,  157,  154,  153,  152,  151,  150,  149,
-      148,  146,  141,  140,  134,   43,  133,  131,  129,  128,
-      126,  124,  123,  121,  119,  118,  116,   85,   86,  165,
-      114,  165,  166,  113,  166,  168,  168,  168,  169,  112,
-      169,  111,  110,  109,  108,  107,  106,  104,  103,  102,
-       98,   97,   96,   95,   94,   93,   92,   84,   83,   82,
-       81,   79,   78,   76,   74,   73,   71,   70,   69,   68,
-       67,   66,   65,   64,   63,   62,   61,   54,   51,   49,
-       48,   44,   42,   41,   39,   38,   37,   36,   35,   29,
-       25,   24,   23,   21,   15,   10,    8,    7,    3,  164,
+      154,   76,  151,  150,  149,  148,  147,  146,  145,  144,
+      139,  138,  132,  131,  129,   43,  127,  126,  123,  122,
+      120,  118,  117,  115,  113,  112,  111,   84,   85,  162,
+      110,  162,  163,  109,  163,  165,  165,  165,  166,  108,
+      166,  107,  106,  105,  103,  102,  101,   99,   97,   96,
+       95,   94,   93,   92,   91,   83,   82,   81,   80,   78,
+       77,   75,   73,   72,   70,   69,   68,   67,   66,   65,
+       64,   63,   62,   61,   60,   53,   50,   48,   47,   44,
+       42,   41,   39,   38,   37,   36,   35,   29,   25,   24,
+       23,   21,   15,   10,    8,    7,    3,  161,  161,  161,
 
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164,  164,  164,  164,  164,  164,  164,  164,  164,  164,
-      164
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161,  161,
+      161,  161,  161,  161,  161,  161,  161,  161,  161
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -557,6 +555,7 @@ char *yytext;
   #include "defines.h"
   #include "typedefs.h"
   #include "symbolTable.h"
+  #include "recursiveParser.h"
 
 #line 561 "<stdout>"
 #line 562 "<stdout>"
@@ -776,7 +775,7 @@ YY_DECL
 		}
 
 	{
-#line 21 "src/lexer.l"
+#line 22 "src/lexer.l"
 
 
 #line 782 "<stdout>"
@@ -806,13 +805,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 165 )
+				if ( yy_current_state >= 162 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 200 );
+		while ( yy_base[yy_current_state] != 198 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -839,311 +838,296 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 23 "src/lexer.l"
+#line 24 "src/lexer.l"
 {/* Ignorar tudo entre "{" e "}" */}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 24 "src/lexer.l"
+#line 25 "src/lexer.l"
 {/* Ignorar tudo após "--" até o final da linha */}
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 26 "src/lexer.l"
+#line 27 "src/lexer.l"
 {/* No action and no returne*/}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 27 "src/lexer.l"
+#line 28 "src/lexer.l"
 {return T_BOOL;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 28 "src/lexer.l"
+#line 29 "src/lexer.l"
 {return T_INT;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 29 "src/lexer.l"
+#line 30 "src/lexer.l"
 {return T_REAL;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 30 "src/lexer.l"
+#line 31 "src/lexer.l"
 {return T_CHAR;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 32 "src/lexer.l"
-{return '>';}
+#line 33 "src/lexer.l"
+{return GREATER;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 33 "src/lexer.l"
-{return '<';}
+#line 34 "src/lexer.l"
+{return LESS;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 34 "src/lexer.l"
+#line 35 "src/lexer.l"
 {return GEQ;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 35 "src/lexer.l"
+#line 36 "src/lexer.l"
 {return LEQ;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 36 "src/lexer.l"
+#line 37 "src/lexer.l"
 {return EQ;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 37 "src/lexer.l"
+#line 38 "src/lexer.l"
 {return NEQ;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 39 "src/lexer.l"
-{return '+';}
+#line 40 "src/lexer.l"
+{return PLUS;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 40 "src/lexer.l"
-{return '-';}
+#line 41 "src/lexer.l"
+{return MINUS;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 41 "src/lexer.l"
-{return '*';}
+#line 42 "src/lexer.l"
+{return MULTIPLY;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 42 "src/lexer.l"
-{return '/';}
+#line 43 "src/lexer.l"
+{return DIVIDE;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 43 "src/lexer.l"
-{return '%';}
+#line 44 "src/lexer.l"
+{return MOD;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "src/lexer.l"
-{return '!';}
+#line 46 "src/lexer.l"
+{return NOT;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "src/lexer.l"
+#line 47 "src/lexer.l"
 {return AND;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "src/lexer.l"
+#line 48 "src/lexer.l"
 {return OR;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 50 "src/lexer.l"
-{return '(';}
+#line 51 "src/lexer.l"
+{return LPAR;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 51 "src/lexer.l"
-{return ')';}
+#line 52 "src/lexer.l"
+{return RPAR;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 52 "src/lexer.l"
-{return '[';}
+#line 53 "src/lexer.l"
+{return LBRA;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 53 "src/lexer.l"
-{return ']';}
+#line 54 "src/lexer.l"
+{return RBRA;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 55 "src/lexer.l"
+#line 56 "src/lexer.l"
 {return CONST;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 56 "src/lexer.l"
+#line 57 "src/lexer.l"
 {return VAR;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 57 "src/lexer.l"
+#line 58 "src/lexer.l"
 {return IF;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 58 "src/lexer.l"
+#line 59 "src/lexer.l"
 {return ELSE;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 59 "src/lexer.l"
-{return ELSIF;}
-	YY_BREAK
-case 31:
-YY_RULE_SETUP
 #line 60 "src/lexer.l"
 {return LOOP;}
 	YY_BREAK
-case 32:
+case 31:
 YY_RULE_SETUP
 #line 61 "src/lexer.l"
 {return _BEGIN;}
 	YY_BREAK
-case 33:
+case 32:
 YY_RULE_SETUP
 #line 62 "src/lexer.l"
 {return END;}
 	YY_BREAK
-case 34:
+case 33:
 YY_RULE_SETUP
 #line 64 "src/lexer.l"
 {return FUNCTION;}
 	YY_BREAK
-case 35:
+case 34:
 YY_RULE_SETUP
 #line 65 "src/lexer.l"
 {return PROCEDURE;}
 	YY_BREAK
-case 36:
+case 35:
 YY_RULE_SETUP
 #line 67 "src/lexer.l"
 {return RETURN;}
 	YY_BREAK
-case 37:
+case 36:
 YY_RULE_SETUP
 #line 68 "src/lexer.l"
 {return BREAK;}
 	YY_BREAK
-case 38:
+case 37:
 YY_RULE_SETUP
 #line 69 "src/lexer.l"
 {return CONTINUE;}
 	YY_BREAK
-case 39:
+case 38:
 YY_RULE_SETUP
 #line 70 "src/lexer.l"
 {return RECORD;}
 	YY_BREAK
-case 40:
+case 39:
 YY_RULE_SETUP
 #line 71 "src/lexer.l"
 {return OF;}
 	YY_BREAK
-case 41:
+case 40:
 YY_RULE_SETUP
 #line 73 "src/lexer.l"
-{return '.';}
+{return DOT;}
+	YY_BREAK
+case 41:
+YY_RULE_SETUP
+#line 74 "src/lexer.l"
+{return COMMA;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 74 "src/lexer.l"
-{return ',';}
+#line 75 "src/lexer.l"
+{return COLON;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 75 "src/lexer.l"
-{return ':';}
+#line 76 "src/lexer.l"
+{return SEMICOLON;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 76 "src/lexer.l"
-{return ';';}
+#line 78 "src/lexer.l"
+{return TYPE;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 77 "src/lexer.l"
-{return '{';}
+#line 79 "src/lexer.l"
+{return ARRAY;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 78 "src/lexer.l"
-{return '}';}
+#line 80 "src/lexer.l"
+{return EXIT;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 80 "src/lexer.l"
-{return TYPE;}
+#line 81 "src/lexer.l"
+{return WHEN;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 81 "src/lexer.l"
-{return ARRAY;}
+#line 82 "src/lexer.l"
+{return TO;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 82 "src/lexer.l"
-{return EXIT;}
+#line 83 "src/lexer.l"
+{return STEP;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 83 "src/lexer.l"
-{return WHEN;}
+#line 84 "src/lexer.l"
+{return THEN;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 84 "src/lexer.l"
-{return TO;}
+#line 86 "src/lexer.l"
+{return ATTRIB;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 85 "src/lexer.l"
-{return STEP;}
-	YY_BREAK
-case 53:
-YY_RULE_SETUP
-#line 86 "src/lexer.l"
-{return THEN;}
-	YY_BREAK
-case 54:
-YY_RULE_SETUP
 #line 88 "src/lexer.l"
-{return ATTRIB;}
-	YY_BREAK
-case 55:
-YY_RULE_SETUP
-#line 90 "src/lexer.l"
 {
                                               yylval.bool_value = yytext[0] == 't' ? true : false;
                                               return V_BOOL;
                                             }
 	YY_BREAK
-case 56:
+case 53:
 YY_RULE_SETUP
-#line 96 "src/lexer.l"
+#line 94 "src/lexer.l"
 {
                                               yylval.int_value = atoi(yytext);
                                               return V_INT;
                                             }
 	YY_BREAK
-case 57:
+case 54:
 YY_RULE_SETUP
-#line 101 "src/lexer.l"
+#line 99 "src/lexer.l"
 {
                                               yylval.real_value = strtof(yytext, NULL);
                                               return V_REAL;
                                             }
 	YY_BREAK
-case 58:
+case 55:
 YY_RULE_SETUP
-#line 106 "src/lexer.l"
+#line 104 "src/lexer.l"
 {
                                               //printf("minha string legal: %s\n", yytext);
                                               yylval.char_value = yytext[1];
                                               return V_CHAR;
                                             }
 	YY_BREAK
-case 59:
+case 56:
 YY_RULE_SETUP
-#line 111 "src/lexer.l"
+#line 109 "src/lexer.l"
 {
                                               yylval.string_value = strdup(yytext+1);
                                               yylval.string_value[yyleng-2] = '\0';
@@ -1151,25 +1135,25 @@ YY_RULE_SETUP
                                               return V_STRING; // ?? como indicar uma string?
                                             }
 	YY_BREAK
-case 60:
+case 57:
 YY_RULE_SETUP
-#line 118 "src/lexer.l"
+#line 116 "src/lexer.l"
 {
-                                              yylval.id_index = addSymbol(yytext);
+                                              //yylval.id_index = addSymbol(yytext);
                                               return ID;
                                             }
 	YY_BREAK
-case 61:
+case 58:
 YY_RULE_SETUP
-#line 123 "src/lexer.l"
+#line 121 "src/lexer.l"
 {printf("ERROR! %s \n", yytext);}
 	YY_BREAK
-case 62:
+case 59:
 YY_RULE_SETUP
-#line 125 "src/lexer.l"
+#line 123 "src/lexer.l"
 ECHO;
 	YY_BREAK
-#line 1172 "<stdout>"
+#line 1157 "<stdout>"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1466,7 +1450,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 165 )
+			if ( yy_current_state >= 162 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1494,11 +1478,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 165 )
+		if ( yy_current_state >= 162 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 164);
+	yy_is_jam = (yy_current_state == 161);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2174,51 +2158,662 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 125 "src/lexer.l"
+#line 123 "src/lexer.l"
 
 
+
+int getNextToken(){
+  return yylex();
+}
+
+int lookahead = -1;
+
+void initializeParsing(){
+	lookahead = getNextToken();
+	Prog();
+}
+
+
+void error(int token){
+	printf("error() - Syntax error. Lookahead did not match the current token.\n");
+	printf("Expected token %d but found %d.\n", token, lookahead);
+}
+
+
+void eat(int token){
+	if(token == lookahead){
+    printf("\nMatch! - Token: %d\n\n", lookahead);
+		lookahead = getNextToken();
+	}
+	else{
+		error(token);
+	}
+	
+}
+
+void Prog(){
+  printf("Entrei - Prog()\n");
+	switch (lookahead){
+        case CONST: 	Decl(); CmdBlock(); break;
+        case TYPE:      Decl(); CmdBlock(); break;
+        case PROCEDURE: Decl(); CmdBlock(); break;
+        case FUNCTION: 	Decl(); CmdBlock(); break;
+        case VAR: 	    Decl(); CmdBlock(); break;
+        case _BEGIN: 	Decl(); CmdBlock(); break;	
+        default:        printf("Syntax error. Grammar Rule: Prog.\n");
+    }
+}
+
+void Decl(){
+  printf("Entrei - Decl()\n");
+	switch (lookahead){
+        case CONST: 	Consts(); Types(); SubProg(); Vars(); break;
+	    case TYPE: 	    Consts(); Types(); SubProg(); Vars(); break;
+        case PROCEDURE: Consts(); Types(); SubProg(); Vars(); break;
+        case FUNCTION: 	Consts(); Types(); SubProg(); Vars(); break;
+        case VAR: 	    Consts(); Types(); SubProg(); Vars(); break;
+        case _BEGIN: 	Consts(); Types(); SubProg(); Vars(); break;
+        default:        printf("Syntax error. Grammar Rule: Decl.\n");
+    }
+}
+
+
+void Consts(){
+  printf("Entrei - Consts()\n");
+	switch (lookahead){
+		case CONST:		eat(CONST); eat(ID); eat(ATTRIB); Exp(); eat(SEMICOLON); Consts(); break;
+		case TYPE:		break; //lambda - search on FOLLOW. removing Consts from stack...
+		case PROCEDURE: break; //lambda - search on FOLLOW. removing Consts from stack...
+		case FUNCTION: 	break; //lambda - search on FOLLOW. removing Consts from stack...
+		case VAR: 		break; //lambda - search on FOLLOW. removing Consts from stack...
+		case _BEGIN: 	break; //lambda - search on FOLLOW. removing Consts from stack...
+		default: 		printf("Syntax error. Grammar Rule: Consts.\n");
+	}
+}
+
+void Exp(){
+  printf("Entrei - Exp()\n");
+	switch (lookahead){
+        case ID: 	    Terms(); Exp_(); break;
+        case NOT: 	    Terms(); Exp_(); break;
+        case PLUS: 	    Terms(); Exp_(); break;
+        case MINUS: 	Terms(); Exp_(); break;
+        case LPAR: 	    Terms(); Exp_(); break;
+        case V_INT: 	Terms(); Exp_(); break;
+        case V_CHAR: 	Terms(); Exp_(); break;
+        case V_REAL: 	Terms(); Exp_(); break;
+        case V_BOOL: 	Terms(); Exp_(); break;
+        case V_STRING: 	Terms(); Exp_(); break;
+        default:        printf("Syntax error. Grammar Rule: Exp.\n");
+    }
+}
+
+void Exp_(){
+  printf("Entrei - Exp_()\n");
+	switch (lookahead){
+		case SEMICOLON:	break; //lambda - search on FOLLOW
+		case RPAR:		break; //lambda - search on FOLLOW
+		case RBRA:		break; //lambda - search on FOLLOW
+		case END:		break; //lambda - search on FOLLOW
+		case INTERVAL:	break; //lambda - search on FOLLOW
+		case COMMA:		break; //lambda - search on FOLLOW
+		case _BEGIN:	break; //lambda - search on FOLLOW
+		case TO:		break; //lambda - search on FOLLOW
+		case STEP:		break; //lambda - search on FOLLOW
+		case THEN:		break; //lambda - search on FOLLOW
+		case OR: 		eat(OR); Terms(); Exp_(); break;
+		default: 		printf("Syntax error. Grammar Rule: Exp_.\n");
+	}
+}
+
+void Terms(){
+	switch (lookahead){
+		case ID:		Comps(); Terms_(); break;
+		case NOT:		Comps(); Terms_(); break;
+		case PLUS:		Comps(); Terms_(); break;
+		case MINUS:		Comps(); Terms_(); break;
+		case LPAR: 		Comps(); Terms_(); break;
+		case V_INT: 	Comps(); Terms_(); break;
+		case V_CHAR: 	Comps(); Terms_(); break;
+		case V_REAL: 	Comps(); Terms_(); break;
+		case V_BOOL: 	Comps(); Terms_(); break;
+		case V_STRING: 	Comps(); Terms_(); break;
+		default: 		printf("Syntax error. Grammar Rule: Terms.\n");
+	}
+}
+
+void Terms_(){
+	switch (lookahead){
+		case SEMICOLON:	break;
+		case OR: 		break;
+		case AND: 		eat(AND); Comps(); Terms_(); break;
+		case RPAR:		break;
+		case RBRA:		break;
+		case END: 		break;
+		case INTERVAL:	break;
+		case COMMA:		break;
+		case _BEGIN:	break;
+		case TO:		break;
+		case STEP:		break;
+		case THEN:		break;
+		default:		printf("Syntax error. Grammar Rule: Terms_.\n");
+	}
+}
+
+void Comps(){
+	switch (lookahead){
+		case ID: 		Factor(); Comps_(); break;
+		case NOT: 		Factor(); Comps_(); break;
+		case PLUS: 		Factor(); Comps_(); break;
+		case MINUS: 	Factor(); Comps_(); break;
+		case LPAR: 		Factor(); Comps_(); break;
+		case V_INT: 	Factor(); Comps_(); break;
+		case V_REAL: 	Factor(); Comps_(); break;
+		case V_BOOL: 	Factor(); Comps_(); break;
+		case V_CHAR: 	Factor(); Comps_(); break;
+		case V_STRING: 	Factor(); Comps_(); break;
+		default: 		printf("Syntax error. Grammar Rule: Comps.\n");
+	}
+}
+
+void Comps_(){
+	switch (lookahead){
+		case SEMICOLON: break;
+		case OR: 		break;
+		case AND: 		break;
+		case NEQ:		eat(NEQ); 		Factor(); break;
+		case EQ:		eat(EQ); 		Factor(); break;
+		case GREATER:	eat(GREATER); 	Factor(); break;
+		case LESS:		eat(LESS); 		Factor(); break;
+		case LEQ:		eat(LEQ); 		Factor(); break;
+		case GEQ:		eat(GEQ); 		Factor(); break;
+		case RPAR:		break;
+		case RBRA:		break;
+		case INTERVAL:	break;
+		case END:		break;
+		case COMMA:		break;
+		case _BEGIN: 	break;
+		case TO:		break;
+		case STEP:		break;
+		case THEN:		break;
+		default: 		printf("Syntax error. Grammar Rule: Comps_.\n");
+	}
+}
+
+void Factor(){
+	switch (lookahead){
+		case ID: 		AriOp(); 	break;
+		case NOT: 		eat(NOT);	AriOp(); 	break;
+		case PLUS:		AriOp();	break;
+		case MINUS:		AriOp();	break;
+		case LPAR: 		AriOp(); 	break;
+		case V_INT: 	AriOp(); 	break;
+		case V_REAL: 	AriOp(); 	break;
+		case V_BOOL: 	AriOp(); 	break;
+		case V_CHAR: 	AriOp(); 	break;
+		case V_STRING: 	AriOp(); 	break;
+		default: 		printf("Syntax error. Grammar Rule: Factor.\n");
+	}
+}
+
+
+void AriOp(){
+	switch (lookahead){
+		case ID:		AriOp2(); AriOp_(); break;
+		case PLUS:		AriOp2(); AriOp_(); break;
+		case MINUS:		AriOp2(); AriOp_(); break;
+		case LPAR: 		AriOp2(); AriOp_(); break;
+		case V_INT: 	AriOp2(); AriOp_(); break;
+		case V_REAL: 	AriOp2(); AriOp_(); break;
+		case V_BOOL: 	AriOp2(); AriOp_(); break;
+		case V_CHAR: 	AriOp2(); AriOp_(); break;
+		case V_STRING: 	AriOp2(); AriOp_(); break;
+		default: 		printf("Syntax error. Grammar Rule: AriOp.\n");
+	}
+}
+
+
+void AriOp_(){
+	switch (lookahead){
+		case SEMICOLON: break;
+		case OR: 		break;
+		case AND: 		break;
+		case NEQ: 		break;
+		case EQ: 		break;
+		case LESS: 		break;
+		case GREATER: 	break;
+		case LEQ: 		break;
+		case GEQ: 		break;
+		case PLUS:		eat(PLUS); 	AriOp2(); AriOp_(); break;
+		case MINUS:		eat(MINUS); AriOp2(); AriOp_(); break;
+		case RPAR:		break;
+		case RBRA:		break;
+		case END:		break;
+		case INTERVAL: 	break;
+		case COMMA:		break;
+		case _BEGIN:	break;
+		case TO:		break;
+		case STEP:		break;
+		case THEN:		break;
+		default: 		printf("Syntax error. Grammar Rule: AriOp_.\n");
+	}
+
+}
+
+void AriOp2(){
+	switch (lookahead){
+		case ID: 		Parenthesis(); AriOp2_(); break;
+		case PLUS: 		Parenthesis(); AriOp2_(); break;
+		case MINUS: 	Parenthesis(); AriOp2_(); break;
+		case LPAR: 		Parenthesis(); AriOp2_(); break;
+		case V_INT: 	Parenthesis(); AriOp2_(); break;
+		case V_REAL: 	Parenthesis(); AriOp2_(); break;
+		case V_CHAR: 	Parenthesis(); AriOp2_(); break;
+		case V_BOOL: 	Parenthesis(); AriOp2_(); break;
+		case V_STRING: 	Parenthesis(); AriOp2_(); break;
+		default: 		printf("Syntax error. Grammar Rule: AriOp2.\n");
+	}
+}
+
+
+void AriOp2_(){
+	switch (lookahead){
+		case SEMICOLON: break;
+		case OR: 		break;
+		case AND: 		break;
+		case NEQ: 		break;
+		case EQ: 		break;
+		case LESS: 		break;
+		case GREATER: 	break;
+		case LEQ: 		break;
+		case GEQ: 		break;
+		case PLUS:		break;
+		case MINUS:		break;
+		case MULTIPLY: 	eat(MULTIPLY); 	Parenthesis(); AriOp2_(); break;
+		case DIVIDE: 	eat(DIVIDE); 	Parenthesis(); AriOp2_(); break;
+		case MOD: 		eat(MOD); 		Parenthesis(); AriOp2_(); break;
+		case RPAR:		break;
+		case RBRA:		break;
+		case END:		break;
+		case INTERVAL: 	break;
+		case COMMA:		break;
+		case _BEGIN:	break;
+		case TO:		break;
+		case STEP:		break;
+		case THEN:		break;
+		default: 		printf("Syntax error. Grammar Rule: AriOp2_.\n");
+	}
+}
+
+void Parenthesis(){
+	switch (lookahead){
+		case ID: 		UnaryExp();	break;
+		case PLUS: 		UnaryExp();	break;
+		case MINUS: 	UnaryExp();	break;
+		case LPAR:		eat(LPAR);	Exp();	eat(RPAR); break;
+		case V_INT: 	UnaryExp(); 	break;
+		case V_REAL: 	UnaryExp();  	break;
+		case V_CHAR: 	UnaryExp();  	break;
+		case V_BOOL: 	UnaryExp(); 	break;
+		case V_STRING: 	UnaryExp(); 	break;
+		default: 		printf("Syntax error. Grammar Rule: Parenthesis.\n");
+	}
+}
+
+void UnaryExp(){
+	switch (lookahead){
+		case ID: 		SimpleExp();	break;
+		case PLUS:		eat(PLUS); 		UnaryExp();	break;
+		case MINUS: 	eat(MINUS);		UnaryExp();	break;
+		case V_INT: 	SimpleExp(); 	break;
+		case V_REAL: 	SimpleExp();  	break;
+		case V_CHAR: 	SimpleExp();  	break;
+		case V_BOOL: 	SimpleExp(); 	break;
+		case V_STRING: 	SimpleExp(); 	break;
+		default: 		printf("Syntax error. Grammar Rule: UnaryExp.\n");
+	}
+}
+
+void SimpleExp(){
+	switch (lookahead){
+		case ID: 		AcessMemAddr(); break;
+		case V_INT: 	NumExp(); 		break;
+		case V_REAL: 	NumExp();  		break;
+		case V_CHAR: 	NumExp();  		break;
+		case V_BOOL: 	NumExp(); 		break;
+		case V_STRING: 	NumExp(); 		break;
+		default: 		printf("Syntax error. Grammar Rule: SimpleExp.\n");
+	}
+}
+
+void NumExp(){
+	switch (lookahead){
+		case V_INT: 	eat(V_INT); 		break;
+		case V_REAL: 	eat(V_REAL);  		break;
+		case V_CHAR: 	eat(V_CHAR);  		break;
+		case V_BOOL: 	eat(V_BOOL); 		break;
+		case V_STRING: 	eat(V_STRING); 		break;
+		default: 		printf("Syntax error. Grammar Rule: NumExp.\n");
+	}
+}
+
+void AcessMemAddr(){
+	switch (lookahead){
+		case ID: 	eat(ID); AcessMemAddr_(); break;
+		default: 	printf("Syntax error. Grammar Rule: AcessMemAddr.\n");
+	}
+}
+
+void AcessMemAddr_(){
+	switch (lookahead){
+		case ATTRIB:	break;
+		case SEMICOLON:	break;
+		case OR:		break;
+		case AND:		break;
+		case NEQ:		break;
+		case EQ: 		break;
+		case LESS: 		break;
+		case GREATER: 	break;
+		case LEQ: 		break;
+		case GEQ: 		break;
+		case PLUS: 		break;
+		case MINUS: 	break;
+		case MULTIPLY: 	break;
+		case DIVIDE: 	break;
+		case MOD: 		break;
+		case LPAR:		eat(LPAR); 	Args(); 	eat(RPAR); AcessMemAddr_(); break;
+		case RPAR:		break;
+		case DOT:		eat(DOT); 	eat(ID); 	AcessMemAddr_(); break;
+		case LBRA:		eat(LBRA); 	Exp(); 		eat(RBRA); AcessMemAddr_(); break;
+		case RBRA:		break;
+		case END:		break;
+		case INTERVAL:	break;
+		case COMMA:		break;
+		case _BEGIN:	break;
+		case TO:		break;
+		case STEP:		break;
+		case THEN:		break;
+		default: 		printf("Syntax error. Grammar Rule: AcessMemAddr_.\n");
+	}
+}
+
+
+void Types(){
+  printf("Entrei - Types()\n");
+	switch (lookahead){
+		case TYPE: 		eat(TYPE); eat(ID); eat(ATTRIB); TypeDec(); eat(SEMICOLON); Types(); break;
+		case PROCEDURE: break;
+		case FUNCTION: 	break;
+		case VAR: 		break;
+		case _BEGIN: 	break;
+		default: 		printf("Syntax error. Grammar Rule: Types.\n");
+	}
+
+}
+
+void TypeDec(){
+	switch (lookahead){
+		case ID: 		eat(ID); 		break;
+		case T_INT: 	eat(T_INT); 	break;
+		case T_REAL: 	eat(T_REAL); 	break;
+		case T_BOOL: 	eat(T_BOOL); 	break;
+		case T_CHAR: 	eat(T_CHAR); 	break;
+		case ARRAY: 	eat(ARRAY); 	eat(LBRA); Interval(); eat(RBRA); eat(OF); TypeDec(); break;
+		case RECORD:	eat(RECORD); 	Fields();  eat(END); break;
+		default: 		printf("Syntax error. Grammar Rule: TypeDec.\n");
+	}
+
+}
+
+void Interval(){
+	switch (lookahead){
+		case ID: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case NOT: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case PLUS: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case MINUS: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case LPAR: 		Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case V_INT: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case V_BOOL: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case V_REAL: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case V_CHAR: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		case V_STRING: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
+		default: 		printf("Syntax error. Grammar Rule: Interval.\n");
+	}
+
+}
+
+void Interval_(){
+	switch (lookahead){
+		case RBRA: 		break;
+		case COMMA: 	eat(COMMA); Interval(); break;
+		default: 		printf("Syntax error. Grammar Rule: Interval_.\n");
+	}
+}
+
+void Fields(){
+	switch (lookahead){
+		case ID:  	eat(ID); eat(COLON); TypeDec(); eat(SEMICOLON); Fields(); break;
+		case END: 	break;
+		default: 	printf("Syntax error. Grammar Rule: Fields.\n");
+	}
+}
+
+void SubProg(){
+	switch (lookahead){
+		case PROCEDURE: 	ProcedureDecl(); printf("Vou chamar SubProg. Curr token: %d\n",lookahead);		SubProg(); 	break;
+		case FUNCTION: 		FunctionDecl(); 	printf("Vou chamar SubProg. Curr token: %d\n",lookahead); SubProg(); 	break;
+		case VAR: 			break;
+		case _BEGIN: 		break;
+		default: 			printf("Syntax error. Grammar Rule: SubProg.\n");
+	}
+}
+
+void ProcedureDecl(){
+	switch (lookahead){
+		case PROCEDURE: 	eat(PROCEDURE); eat(ID); eat(LPAR); Parameters(); eat(RPAR); CmdBlock(); eat(SEMICOLON); break;
+		default: 			printf("Syntax error. Grammar Rule: ProcedureDecl.\n");
+	}
+}
+
+void FunctionDecl(){
+	switch (lookahead){
+			//FunctionDecl ::= function Id ( Parameters ) : TypeDec CmdBlock ;
+		case FUNCTION: 		eat(FUNCTION); eat(ID); eat(LPAR); Parameters(); eat(RPAR); eat(COLON); TypeDec(); CmdBlock(); eat(SEMICOLON); break;
+		default: 			printf("Syntax error. Grammar Rule: FunctionDecl.\n");
+	}
+}
+
+void Parameters(){
+	switch (lookahead){
+		case ID: 		ParametersAux(); break;
+		case RPAR: 		break;
+		default: 		printf("Syntax error. Grammar Rule: Parameters.\n");
+	}
+}
+
+void ParametersAux(){
+	switch (lookahead){
+			//ParametersAux ::= Id : TypeDec ParametersAux_
+		case ID: 		eat(ID); eat(COLON); TypeDec(); ParametersAux_(); break;
+		default: 		printf("Syntax error. Grammar rule: ParametersAux\n");
+	}
+}
+
+void ParametersAux_(){
+	switch (lookahead){
+		case RPAR: 		break;
+		case COMMA: 	eat(COMMA); ParametersAux(); break;
+		default: 		printf("Syntax error. Grammar rule: ParametersAux_\n");
+	}
+}
+
+void Vars(){
+	switch (lookahead){
+		case ID: 		break;
+		case VAR: 		eat(VAR); eat(ID); eat(COLON); TypeDec(); eat(SEMICOLON); Vars(); break; 
+		case _BEGIN: 	break;
+		case FOR:		break;
+		case LOOP:		break;
+		case EXIT:		break;
+		case CONTINUE:	break;
+		case IF:		break;
+		case RETURN:	break;
+		default: 		printf("Syntax error. Grammar rule: Vars. Curr token: %d\n", lookahead);
+	}
+}
+
+void CmdBlock(){
+  printf("Entrei - CmdBlock()\n");
+	switch (lookahead){
+		case _BEGIN: 	eat(_BEGIN); Vars(); Cmds(); eat(END); break; 
+		default: 		printf("Syntax error. Grammar rule: CmdBlock\n");
+	}
+}
+
+void Cmds(){
+	switch (lookahead){
+		case ID: 		CmdAux(); Cmds_(); break;
+		case _BEGIN: 	CmdAux(); Cmds_(); break;
+		case FOR: 		CmdAux(); Cmds_(); break;
+		case LOOP: 		CmdAux(); Cmds_(); break;
+		case EXIT: 		CmdAux(); Cmds_(); break;
+		case CONTINUE: 	CmdAux(); Cmds_(); break;
+		case IF: 		CmdAux(); Cmds_(); break;
+		case RETURN: 	CmdAux(); Cmds_(); break;
+		default: 		printf("Syntax error. Grammar rule: Cmds. Curr token: %d\n", lookahead); 
+	}
+}
+
+void Cmds_(){
+	switch (lookahead){
+		case SEMICOLON: eat(SEMICOLON); Cmds(); break;
+		case END: 		break;
+		default: 		printf("Syntax error. Grammar rule: Cmds_\n");
+	}
+}
+
+void CmdAux(){
+	switch (lookahead){
+		case ID: 		AcessMemAddr(); 	CmdAux_(); 	break;
+		case _BEGIN: 	CmdBlock(); 		break;
+		case FOR: 		eat(FOR); 			eat(ID); 	eat(ATTRIB); 	Exp(); 		eat(TO); Exp(); eat(STEP); Exp(); CmdBlock(); break;
+		case LOOP: 		eat(LOOP); 			Vars(); 	Cmds(); 		eat(END); 	break; 
+		case EXIT: 		eat(EXIT); 			eat(WHEN); 	Exp(); 			break; 
+		case CONTINUE:	eat(CONTINUE);		break;
+		case IF:		CmdConditional();	break;
+		case RETURN:	CmdReturn();		break;
+		case BREAK: 	eat(BREAK); 		break;
+		default: 		printf("Syntax error. Grammar rule: CmdAux\n");
+	}
+}
+
+void CmdAux_(){
+	switch (lookahead){
+		case ATTRIB: 	eat(ATTRIB); Exp(); break;
+		case SEMICOLON:	break;
+		case END: 		break;
+		default: 		printf("Syntax error. Grammar rule: CmdAux_\n");
+	}
+}
+
+void CmdConditional(){
+	switch (lookahead){
+		case IF: 	eat(IF); Exp(); eat(THEN); CmdBlock(); CmdConditionalEnd(); break;
+		default: 	printf("Syntax error. Grammar rule: CmdConditional\n");
+	}
+}
+
+void CmdConditionalEnd(){
+	switch (lookahead){
+		case SEMICOLON: 	break;
+		case END: 			break;
+		case ELSE: 			eat(ELSE); CmdBlock(); break;
+		default: 			printf("Syntax error. Grammar rule: CmdConditionalEnd\n");
+	}
+}
+
+void CmdReturn(){
+	switch (lookahead){
+		case RETURN: 	eat(RETURN); CmdReturnExp(); break;
+		default: 		printf("Syntax error. Grammar rule: CmdReturn\n");
+	}
+}
+
+void CmdReturnExp(){
+	switch (lookahead){
+		case ID: 		Exp(); break;
+		case SEMICOLON:	break;
+		case NOT:		Exp(); break;
+		case PLUS:		Exp(); break;
+		case MINUS:		Exp(); break;
+		case LPAR:		Exp(); break;
+		case V_INT: 	Exp(); break;
+		case V_REAL: 	Exp(); break;
+		case V_BOOL: 	Exp(); break;
+		case V_CHAR: 	Exp(); break;
+		case V_STRING: 	Exp(); break;
+		case END:		break;
+		default: 		printf("Syntax error. Grammar rule: CmdReturnExp\n");
+	}
+}
+
+void Args(){
+	switch (lookahead){
+		case ID: 		ArgsAux(); break;
+		case NOT: 		ArgsAux(); break;
+		case PLUS: 		ArgsAux(); break;
+		case MINUS: 	ArgsAux(); break;
+		case LPAR: 		ArgsAux(); break;
+		case V_INT: 	ArgsAux(); break;
+		case V_REAL: 	ArgsAux(); break;
+		case V_BOOL: 	ArgsAux(); break;
+		case V_CHAR: 	ArgsAux(); break;
+		case V_STRING: 	ArgsAux(); break;	
+		case RPAR: 		break;
+		default: 		printf("Syntax error. Grammar rule: Args\n");
+	}
+}
+
+void ArgsAux(){
+	switch (lookahead){
+		case ID:  		Exp(); 			ArgsAux_(); break;
+		case NOT:  		Exp(); 			ArgsAux_(); break;
+		case PLUS:  	Exp(); 			ArgsAux_(); break;
+		case MINUS:  	Exp(); 			ArgsAux_(); break;
+		case LPAR:  	Exp(); 			ArgsAux_(); break;
+		case V_INT: 	ArgsAux_(); 	break;
+		case V_REAL: 	ArgsAux_(); 	break;
+		case V_BOOL: 	ArgsAux_(); 	break;
+		case V_CHAR: 	ArgsAux_(); 	break;
+		case V_STRING: 	ArgsAux_(); 	break;
+		default: 		printf("Syntax error. Grammar rule: ArgsAux\n");
+	}
+}
+
+void ArgsAux_(){
+	switch (lookahead){
+		case RPAR: 		break;
+		case COMMA: 	eat(COMMA); break;
+		default: 		printf("Syntax error. Grammar rule: ArgsAux_\n");
+	}
+}
 
 int main()
 {
-  printf("\nInicializando tabela de simbolos...\n");
-  initializeSymbolTable();
-  printf("Iniciando leitura de tokens...\n\n");
-  int token = -1;
-  while (token != 0) {
-      token = yylex();
-      printf("token lido: %d\n", token);
-      switch (token) {
-        case ID:
-          printf("id na posição: %d da symbol table\n", yylval.id_index);
-          break;
-        case V_BOOL:
-          printf("bool com valor: %s\n", yylval.bool_value ? "true" : "false");
-          break;
-        case V_INT:
-          printf("int com valor: %d\n", yylval.int_value);
-          break;
-        case V_REAL:
-          printf("real com valor: %f\n", yylval.real_value);
-          break;
-        case V_CHAR:
-          printf("char com valor: %c\n", yylval.char_value);
-          break;
-        case V_STRING:
-          printf("string com valor: %s\n", yylval.string_value);
-          free(yylval.string_value);
-          break;
-        default:
-          printf("sem valor associado\n");
-          break;
-      }
+
+  lookahead = yylex();
+
+  if (lookahead != 0) {
+      printf("Parsing initialized.\n");
+      Prog();    
   }
-  printf("\nLeitura de tokens finalizada.\n");
-  printFirst10Entries();
+
   
 
-  destroySymbolTable();
-  printf("\ntabela de simbolos destruida.\n");
+  printf("\n\nFinishing...\n");
   yylex_destroy();
+  
   return 0;
 }
+
 
