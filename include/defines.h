@@ -1,3 +1,6 @@
+#ifndef DEFINES_H
+#define DEFINES_H
+
 #define ID 1
 #define CONST 2
 #define T_INT 3
@@ -68,3 +71,5 @@
 /*
 	Missing: $								
 */
+
+#endif

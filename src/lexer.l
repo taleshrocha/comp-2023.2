@@ -5,6 +5,7 @@
   #include "defines.h"
   #include "typedefs.h"
   #include "symbolTable.h"
+  #include "recursiveParser.h"
 
 %}
 
@@ -29,28 +30,28 @@ identificador   {letter}({letter}|{number})*
 "real"        {return T_REAL;}
 "char"        {return T_CHAR;}
 
-">"         {return '>';}
-"<"         {return '<';}
+">"         {return GREATER;}
+"<"         {return LESS;}
 ">="        {return GEQ;}
 "<="        {return LEQ;}
 "=="        {return EQ;}
 "!="        {return NEQ;}
 
-"+"         {return '+';}
-"-"         {return '-';}
-"*"         {return '*';}
-"/"         {return '/';}
-"%"         {return '%';}
+"+"         {return PLUS;}
+"-"         {return MINUS;}
+"*"         {return MULTIPLY;}
+"/"         {return DIVIDE;}
+"%"         {return MOD;}
 
-"!"         {return '!';}
+"!"         {return NOT;}
 "&&"        {return AND;}
 "||"        {return OR;}
 
 
-"("         {return '(';}
-")"         {return ')';}
-"["         {return '[';}
-"]"         {return ']';}
+"("         {return LPAR;}
+")"         {return RPAR;}
+"["         {return LBRA;}
+"]"         {return RBRA;}
 
 "const"     {return CONST;}
 "var"	      {return VAR;}
@@ -69,12 +70,10 @@ identificador   {letter}({letter}|{number})*
 "record"    {return RECORD;}
 "of"        {return OF;}
 
-"\."        {return '.';}
-","         {return ',';}
-":"         {return ':';}
-";"         {return ';';}
-"{"         {return '{';}
-"}"         {return '}';}
+"\."        {return DOT;}
+","         {return COMMA;}
+":"         {return COLON;}
+";"         {return SEMICOLON;}
 
 "type"      {return TYPE;}
 "array"     {return ARRAY;}
@@ -124,7 +123,6 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
-  /*
 int main()
 {
   printf("\nInicializando tabela de simbolos...\n");
@@ -171,4 +169,4 @@ int main()
   
   return 0;
 }
-  */
+

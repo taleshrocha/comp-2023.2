@@ -40,6 +40,9 @@ $(OBJS)/lexer.o: $(SRC)/lexer.l.c
 $(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
+$(OBJS)/recursiveParser.o: $(SRC)/recursiveParser.c
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
 # sources
 
 $(SRC)/lexer.l.c: $(SRC)/lexer.l
