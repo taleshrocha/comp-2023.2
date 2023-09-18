@@ -13,7 +13,7 @@ end;
 
 function function1 (par1 : bool, par2 : bool) : bool
 begin
-  return par1 == par2;
+  return par1 == par2
 end;
 
 begin 
