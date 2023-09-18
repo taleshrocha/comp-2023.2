@@ -106,9 +106,9 @@ void insert_symbols(int* symbols) {
 }
 
 void error() {
+  printf("line %d -- column %d \n", yylineno, column_counter);
   printf("Erro!\n");  //TODO: Implementar
 }
-
 
 int main() {
   initializeSymbolTable();
@@ -121,12 +121,14 @@ int main() {
       current_terminal = yylex(); 
     //   current_symbol = pop();
     } else if (current_symbol < 100) {
+        // print_stack();
         // printf("symbol: %d-%s is terminal\n", current_symbol, terminal_mapping[current_symbol-1]);
         error();
         destroySymbolTable();
         yylex_destroy();
         return -1;
     } else if (get_symbols(current_symbol-100, current_terminal-1)[0] == 0) {
+        // print_stack();
         // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
         // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
         // printf("Invalid terminal!\n");
@@ -144,7 +146,6 @@ int main() {
   if (current_terminal != EndOfInput) {
     printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
     printf("error\n");
-    
   }
   printf("end of input! Finalizing!\n");
   destroySymbolTable();

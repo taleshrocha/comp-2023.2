@@ -1,6 +1,9 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+extern int column_counter;
+extern int yylineno;
+
 extern int yylex();
 extern int yylex_destroy();
 extern char terminal_mapping[56][16];
