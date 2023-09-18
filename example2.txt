@@ -1,7 +1,6 @@
-const const1 := 1;
-
 begin
-    var var1 : int;
-    var1 := 1; s
-    return
+    for is := 0 to 10 step 1
+    begin
+        globalVar2 := globalVar2 + 1
+    end
 end

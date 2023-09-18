@@ -638,7 +638,7 @@ void ArgsAux(){
 void ArgsAux_(){
 	switch (lookahead){
 		case RPAR: 		break;
-		case COMMA: 	eat(COMMA); break;
+		case COMMA: 	eat(COMMA); ArgsAux(); break;
 		default: 		printf("Syntax error. Grammar rule: ArgsAux_.  Line : %d\n", yylineno);
 	}
 }

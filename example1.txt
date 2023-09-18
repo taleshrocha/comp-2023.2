@@ -17,15 +17,15 @@ begin
 
   if var1 == true then 
     begin
-      var1 := false;
+      var1 := false
     end
 
-end
+end;
 
 function function1 (par1 : bool, par2 : bool) : bool
 begin
-  return par1 == par2;
-end
+  return par1 == par2
+end;
 
 procedure main ()
 begin
@@ -44,7 +44,7 @@ begin
       begin
         for i := 0 to 10 step 1
         begin
-          globalVar2 := globalVar2 + 1;
+          globalVar2 := globalVar2 + 1
         end
       end
   end
