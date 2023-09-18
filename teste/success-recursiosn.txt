@@ -1,0 +1,16 @@
+function fib (n : int) : int
+begin 
+  if n <= 1 then
+		begin
+			return 1
+		end
+		else
+			begin
+				return 1
+			end
+end;
+
+begin 
+    var var1 : int;
+    var1 := 5
+end
