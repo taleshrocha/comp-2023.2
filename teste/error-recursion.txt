@@ -3,8 +3,8 @@ begin
   if n <= 1 then
 		begin
 			return 1
-		end
-	return 1
+		end;
+	return fib(1)
 
 end;
 
