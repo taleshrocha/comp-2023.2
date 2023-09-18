@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "recursiveParser.h"
-#include "defines.h"
+#include "terminalDefines.h"
+#include "symbolTable.h"
 #include "lexer.h"
-
 
 
 int getNextToken(){
@@ -20,7 +20,7 @@ void initializeParsing(){
 
 void error(int token){
 	printf("error() - Syntax error. Lookahead did not match the current token. Line : %d\n", yylineno);
-	printf("Expected token %d but found %d.\n", token, lookahead);
+	printf("Expected token %d-%s but found %d-%s.\n", token, terminal_mapping[token-1], lookahead, terminal_mapping[lookahead-1]);
 }
 
 
@@ -602,6 +602,7 @@ void CmdReturnExp(){
 }
 
 void Args(){
+	printf("entrei no args\n");
 	switch (lookahead){
 		case ID: 		ArgsAux(); break;
 		case NOT: 		ArgsAux(); break;
@@ -620,16 +621,16 @@ void Args(){
 
 void ArgsAux(){
 	switch (lookahead){
-		case ID:  		Exp(); 			ArgsAux_(); break;
-		case NOT:  		Exp(); 			ArgsAux_(); break;
-		case PLUS:  	Exp(); 			ArgsAux_(); break;
-		case MINUS:  	Exp(); 			ArgsAux_(); break;
-		case LPAR:  	Exp(); 			ArgsAux_(); break;
-		case V_INT: 	ArgsAux_(); 	break;
-		case V_REAL: 	ArgsAux_(); 	break;
-		case V_BOOL: 	ArgsAux_(); 	break;
-		case V_CHAR: 	ArgsAux_(); 	break;
-		case V_STRING: 	ArgsAux_(); 	break;
+		case ID:  		Exp(); 			ArgsAux_();     break;
+		case NOT:  		Exp(); 			ArgsAux_();     break;
+		case PLUS:  	Exp(); 			ArgsAux_();     break;
+		case MINUS:  	Exp(); 			ArgsAux_();     break;
+		case LPAR:  	Exp(); 			ArgsAux_();     break;
+		case V_INT: 	Exp(); 			ArgsAux_(); 	break;
+		case V_REAL: 	Exp(); 			ArgsAux_(); 	break;
+		case V_BOOL: 	Exp(); 			ArgsAux_(); 	break;
+		case V_CHAR: 	Exp(); 			ArgsAux_(); 	break;
+		case V_STRING: 	Exp(); 			ArgsAux_(); 	break;
 		default: 		printf("Syntax error. Grammar rule: ArgsAux.  Line : %d\n", yylineno);
 	}
 }
@@ -644,7 +645,7 @@ void ArgsAux_(){
 
 int main()
 {
-
+	initializeSymbolTable();
   lookahead = yylex();
 
   if (lookahead != 0) {

@@ -1,7 +1,7 @@
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef TERMINAL_DEFINES_H
+#define TERMINAL_DEFINES_H
 
-// TOKENS
+#define EndOfInput 0
 #define CONST 1
 #define ID 2
 #define ATTRIB 3  // Atribuicao
@@ -59,53 +59,4 @@
 #define ELSE 55
 #define RETURN 56
 
-// NON-TERMINALS
-
-#define Prog 100
-#define Decl 101
-#define Consts 102
-#define Exp 103
-#define Exp_ 104
-#define Terms 105
-#define Terms_ 106
-#define Comps 107
-#define Comps_ 108
-#define Factor 109
-#define AriOp 110
-#define AriOp_ 111
-#define AriOp2 112
-#define AriOp2_ 113
-#define Parenthesis 114
-#define UnaryExp 115
-#define SimpleExp 116
-#define NumExp 117
-#define AcessMemAddr 118
-#define AcessMemAddr_ 119
-#define Types 120
-#define TypeDec 121
-#define Interval 122
-#define Interval_ 123
-#define Fields 124
-#define SubProg 125
-#define ProcedureDecl 126
-#define FunctionDecl 127
-#define Parameters 128
-#define ParametersAux 129
-#define ParametersAux_ 130
-#define Vars 131
-#define CmdBlock 132
-#define Cmds 133
-#define Cmds_ 134
-#define CmdAux 135
-#define CmdAux_ 136
-#define CmdConditional 137
-#define CmdConditionalEnd 138
-#define CmdReturn 139
-#define CmdReturnExp 140
-#define Args 141
-#define ArgsAux 142
-#define ArgsAux_ 143
-
-#define EndOfInput 0
-
-#endif  // DEFINES_H
+#endif  // TERMINAL_DEFINES_H

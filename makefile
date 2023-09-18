@@ -12,7 +12,7 @@ SRC=./src
 INCLUDE=./include
 
 # main target
-all: mkfolders $(BIN)/lexer_test $(BIN)/nonRecursiveParser
+all: mkfolders $(BIN)/lexer_test $(BIN)/nonRecursiveParser $(BIN)/recursiveParser
 
 # create folders
 
@@ -34,6 +34,9 @@ $(BIN)/lexer_test: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/lexerTest.o
 $(BIN)/nonRecursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/nonRecursiveParser.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
+$(BIN)/recursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/recursiveParser.o
+	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
+
 # objects
 
 $(OBJS)/lexer.o: $(SRC)/lexer.l.c
@@ -46,6 +49,9 @@ $(OBJS)/lexerTest.o: $(SRC)/lexerTest.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/nonRecursiveParser.o: $(SRC)/nonRecursiveParser.c
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
+$(OBJS)/recursiveParser.o: $(SRC)/recursiveParser.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources

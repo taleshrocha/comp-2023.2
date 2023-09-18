@@ -1,7 +1,8 @@
 #ifndef NON_RECURSIVE_PARSER_H
 #define NON_RECURSIVE_PARSER_H
 
-#include "defines.h"
+#include "terminalDefines.h"
+#include "nonTerminalDefines.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
