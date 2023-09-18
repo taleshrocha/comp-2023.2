@@ -1,11 +1,10 @@
 function fib (n : int) : int
 begin 
   if n <= 1 then
-		begin
+  	begin
 			return 1
 		end;
 	return fib(1)
-
 end;
 
 begin 
