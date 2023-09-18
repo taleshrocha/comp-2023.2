@@ -1,0 +1,7 @@
+const const1 := 1;
+
+begin
+    var var1 : int;
+    var1 := 1;
+    return
+end

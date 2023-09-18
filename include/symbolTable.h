@@ -9,7 +9,6 @@
 
 #define SCOPE_LEVEL 0
 
-extern SymbolEntry *symbol_table;  // Tabela de símbolos (tamanho inicial: 100)
 extern TokenData yylval;
 
 void initializeSymbolTable();

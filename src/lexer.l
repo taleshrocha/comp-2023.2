@@ -5,17 +5,20 @@
   #include "defines.h"
   #include "typedefs.h"
   #include "symbolTable.h"
-
+  #include "lexer.h"
+  int column_counter;
 %}
 
 %option noyywrap
+%option yylineno
 
 low             [a-z]
 upp             [A-Z]
 number          [0-9]
 letter          [a-zA-Z\_]
-delim           [ \t\n]
+delim           [ \t]
 ws              {delim}+
+newline         [\n]+
 identificador   {letter}({letter}|{number})*
 
 %%
@@ -23,153 +26,167 @@ identificador   {letter}({letter}|{number})*
 "{"([^}]|\n)*"}"   {/* Ignorar tudo entre "{" e "}" */}
 "--".*		  {/* Ignorar tudo após "--" até o final da linha */}
 
-{ws}          {/* No action and no returne*/}
-"bool"        {return T_BOOL;}
-"int"         {return T_INT;}
-"real"        {return T_REAL;}
-"char"        {return T_CHAR;}
+{ws}          {column_counter += strlen(yytext);}
+{newline}     {column_counter = 0;} 
+"bool"        {column_counter += strlen(yytext); return T_BOOL;}
+"int"         {column_counter += strlen(yytext); return T_INT;}
+"real"        {column_counter += strlen(yytext); return T_REAL;}
+"char"        {column_counter += strlen(yytext); return T_CHAR;}
 
-">"         {return '>';}
-"<"         {return '<';}
-">="        {return GEQ;}
-"<="        {return LEQ;}
-"=="        {return EQ;}
-"!="        {return NEQ;}
+">"         {column_counter += strlen(yytext); return GREATER;}
+"<"         {column_counter += strlen(yytext); return LESS;}
+">="        {column_counter += strlen(yytext); return GEQ;}
+"<="        {column_counter += strlen(yytext); return LEQ;}
+"=="        {column_counter += strlen(yytext); return EQ;}
+"!="        {column_counter += strlen(yytext); return NEQ;}
 
-"+"         {return '+';}
-"-"         {return '-';}
-"*"         {return '*';}
-"/"         {return '/';}
-"%"         {return '%';}
+"+"         {column_counter += strlen(yytext); return PLUS;}
+"-"         {column_counter += strlen(yytext); return MINUS;}
+"*"         {column_counter += strlen(yytext); return MULTIPLY;}
+"/"         {column_counter += strlen(yytext); return DIVIDE;}
+"%"         {column_counter += strlen(yytext); return MOD;}
 
-"!"         {return '!';}
-"&&"        {return AND;}
-"||"        {return OR;}
+"!"         {column_counter += strlen(yytext); return NOT;}
+"&&"        {column_counter += strlen(yytext); return AND;}
+"||"        {column_counter += strlen(yytext); return OR;}
 
 
-"("         {return '(';}
-")"         {return ')';}
-"["         {return '[';}
-"]"         {return ']';}
+"("         {column_counter += strlen(yytext); return LPAR;}
+")"         {column_counter += strlen(yytext); return RPAR;}
+"["         {column_counter += strlen(yytext); return LBRA;}
+"]"         {column_counter += strlen(yytext); return RBRA;}
 
-"const"     {return CONST;}
-"var"	      {return VAR;}
-"if"        {return IF;}
-"else"      {return ELSE;}
-"elsif"     {return ELSIF;}
-"loop"      {return LOOP;}
-"begin"     {return _BEGIN;}
-"end"       {return END;}
+"const"     {column_counter += strlen(yytext); return CONST;}
+"var"	      {column_counter += strlen(yytext); return VAR;}
+"if"        {column_counter += strlen(yytext); return IF;}
+"else"      {column_counter += strlen(yytext); return ELSE;}
+"loop"      {column_counter += strlen(yytext); return LOOP;}
+"begin"     {column_counter += strlen(yytext); return _BEGIN;}
+"end"       {column_counter += strlen(yytext); return END;}
 
-"function"  {return FUNCTION;}
-"procedure" {return PROCEDURE;}
+"function"  {column_counter += strlen(yytext); return FUNCTION;}
+"procedure" {column_counter += strlen(yytext); return PROCEDURE;}
 
-"return"    {return RETURN;}
-"break"     {return BREAK;}
-"continue"  {return CONTINUE;}
-"record"    {return RECORD;}
-"of"        {return OF;}
+"return"    {column_counter += strlen(yytext); return RETURN;}
+"break"     {column_counter += strlen(yytext); return BREAK;}
+"continue"  {column_counter += strlen(yytext); return CONTINUE;}
+"record"    {column_counter += strlen(yytext); return RECORD;}
+"of"        {column_counter += strlen(yytext); return OF;}
 
-"\."        {return '.';}
-","         {return ',';}
-":"         {return ':';}
-";"         {return ';';}
-"{"         {return '{';}
-"}"         {return '}';}
+"\."        {column_counter += strlen(yytext); return DOT;}
+","         {column_counter += strlen(yytext); return COMMA;}
+":"         {column_counter += strlen(yytext); return COLON;}
+";"         {column_counter += strlen(yytext); return SEMICOLON;}
 
-"type"      {return TYPE;}
-"array"     {return ARRAY;}
-"exit"      {return EXIT;}
-"when"      {return WHEN;}
-"to"        {return TO;}
-"step"      {return STEP;}
-"then"      {return THEN;}
+"type"      {column_counter += strlen(yytext); return TYPE;}
+"array"     {column_counter += strlen(yytext); return ARRAY;}
+"exit"      {column_counter += strlen(yytext); return EXIT;}
+"when"      {column_counter += strlen(yytext); return WHEN;}
+"to"        {column_counter += strlen(yytext); return TO;}
+"step"      {column_counter += strlen(yytext); return STEP;}
+"then"      {column_counter += strlen(yytext); return THEN;}
 
-":="        {return ATTRIB;}
+":="        {column_counter += strlen(yytext); return ATTRIB;}
 
 "true"|"false"	                          {
                                               yylval.bool_value = yytext[0] == 't' ? true : false;
+                                              column_counter += strlen(yytext);
                                               return V_BOOL;
-                                            }
+                                          }
 
 
 [+-]?{number}+(E[+-]?{number}+)?            {
                                               yylval.int_value = atoi(yytext);
+                                              column_counter += strlen(yytext);
                                               return V_INT;
                                             }
 
 [+-]?{number}+\.{number}+(E[+-]?{number}+)? {
                                               yylval.real_value = strtof(yytext, NULL);
+                                              column_counter += strlen(yytext);
                                               return V_REAL;
                                             }
 
 \'.\'                                       {
                                               //printf("minha string legal: %s\n", yytext);
                                               yylval.char_value = yytext[1];
+                                              column_counter += strlen(yytext);
                                               return V_CHAR;
                                             }
 \".*\"                                      {
                                               yylval.string_value = strdup(yytext+1);
                                               yylval.string_value[yyleng-2] = '\0';
-                                              printf("yyleng: %d\n", yyleng);
+                                              column_counter += strlen(yytext);
                                               return V_STRING; // ?? como indicar uma string?
                                             }
 
 {identificador}                             {
                                               yylval.id_index = addSymbol(yytext);
+                                              column_counter += strlen(yytext);
                                               return ID;
                                             }
 
-.        {printf("ERROR! %s \n", yytext);}
+.                                           {
+                                              column_counter += strlen(yytext);
+                                              printf("ERROR! %s \n", yytext);
+                                            }
 
 %%
 
 
-  /*
-int main()
-{
-  printf("\nInicializando tabela de simbolos...\n");
-  initializeSymbolTable();
-  printf("Iniciando leitura de tokens...\n\n");
-  int token = -1;
-  token = yylex();
+char terminal_mapping[56][16] = {
+    "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
+    "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
+    "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",
+    "LPAR",     "RPAR",     "V_INT",    "V_REAL",    "V_BOOL",    "V_CHAR",
+    "V_STRING", "DOT",      "LBRA",     "RBRA",      "TYPE",      "T_BOOL",
+    "T_INT",    "T_REAL",   "T_CHAR",   "ARRAY",     "OF",        "RECORD",
+    "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
+    "VAR",      "_BEGIN",   "FOR",      "TO",        "STEP",      "LOOP",
+    "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
+    "ELSE",     "RETURN"};
 
-  while (token != 0) {
-      token = yylex();
-      printf("token lido: %d\n", token);
-      switch (token) {
-        case ID:
-          printf("id na posição: %d da symbol table\n", yylval.id_index);
-          break;
-        case V_BOOL:
-          printf("bool com valor: %s\n", yylval.bool_value ? "true" : "false");
-          break;
-        case V_INT:
-          printf("int com valor: %d\n", yylval.int_value);
-          break;
-        case V_REAL:
-          printf("real com valor: %f\n", yylval.real_value);
-          break;
-        case V_CHAR:
-          printf("char com valor: %c\n", yylval.char_value);
-          break;
-        case V_STRING:
-          printf("string com valor: %s\n", yylval.string_value);
-          free(yylval.string_value);
-          break;
-        default:
-          printf("sem valor associado\n");
-          break;
-      }
-  }
-  printf("\nLeitura de tokens finalizada.\n");
-  printFirst10Entries();
-  
-
-  destroySymbolTable();
-  printf("\ntabela de simbolos destruida.\n");
-  yylex_destroy();
-  
-  return 0;
-}
-  */
+char non_terminal_mapping[44][32] = {"Prog",
+                                     "Decl",
+                                     "Consts",
+                                     "Exp",
+                                     "Exp_",
+                                     "Terms",
+                                     "Terms_",
+                                     "Comps",
+                                     "Comps_",
+                                     "Factor",
+                                     "AriOp",
+                                     "AriOp_",
+                                     "AriOp2",
+                                     "AriOp2_",
+                                     "Parenthesis",
+                                     "UnaryExp",
+                                     "SimpleExp",
+                                     "NumExp",
+                                     "AcessMemAddr",
+                                     "AcessMemAddr_",
+                                     "Types",
+                                     "TypeDec",
+                                     "Interval",
+                                     "Interval_",
+                                     "Fields",
+                                     "SubProg",
+                                     "ProcedureDecl",
+                                     "FunctionDecl",
+                                     "Parameters",
+                                     "ParametersAux",
+                                     "ParametersAux_",
+                                     "Vars",
+                                     "CmdBlock",
+                                     "Cmds",
+                                     "Cmds_",
+                                     "CmdAux",
+                                     "CmdAux_",
+                                     "CmdConditional",
+                                     "CmdConditionalEnd",
+                                     "CmdReturn",
+                                     "CmdReturnExp",
+                                     "Args",
+                                     "ArgsAux",
+                                     "ArgsAux_"};

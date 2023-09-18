@@ -3,6 +3,8 @@
 
 # others
 ./test/*
+./bin/*
+./objs/*
 
 # Prerequisites
 *.d
