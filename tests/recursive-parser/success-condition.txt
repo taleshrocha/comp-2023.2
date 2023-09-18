@@ -1,0 +1,39 @@
+const const2 := 2;
+
+function func1 (num : int) : int
+begin 
+  if num < 100 then
+		begin
+			if num < 50 then
+				begin
+					if num < 25 then
+						begin
+							if num < 10 then
+								begin
+									return 0
+								end
+								else
+									begin
+										return 500
+									end
+							end
+							else
+								begin
+									return 1000
+								end
+						end
+						else
+							begin
+								return 200
+							end
+					end
+					else
+						begin
+							return 2000
+						end
+end;
+
+begin 
+    var var2 : int;
+    var2 := 2
+end      
