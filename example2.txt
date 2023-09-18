@@ -1,6 +1,4 @@
 begin
-    for is := 0 to 10 step 1
-    begin
-        globalVar2 := globalVar2 + 1
-    end
+    id :=  3 != false || -3 <= 2;
+    return
 end

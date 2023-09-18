@@ -61,6 +61,7 @@ identificador   {letter}({letter}|{number})*
 "if"        {column_counter += strlen(yytext); return IF;}
 "else"      {column_counter += strlen(yytext); return ELSE;}
 "loop"      {column_counter += strlen(yytext); return LOOP;}
+"for"       {column_counter += strlen(yytext); return FOR;}
 "begin"     {column_counter += strlen(yytext); return _BEGIN;}
 "end"       {column_counter += strlen(yytext); return END;}
 
@@ -72,7 +73,7 @@ identificador   {letter}({letter}|{number})*
 "continue"  {column_counter += strlen(yytext); return CONTINUE;}
 "record"    {column_counter += strlen(yytext); return RECORD;}
 "of"        {column_counter += strlen(yytext); return OF;}
-
+"\.\."      {column_counter += strlen(yytext); return INTERVAL;}
 "\."        {column_counter += strlen(yytext); return DOT;}
 ","         {column_counter += strlen(yytext); return COMMA;}
 ":"         {column_counter += strlen(yytext); return COLON;}
@@ -95,13 +96,13 @@ identificador   {letter}({letter}|{number})*
                                           }
 
 
-[+-]?{number}+(E[+-]?{number}+)?            {
+{number}+(E[+-]?{number}+)?            {
                                               yylval.int_value = atoi(yytext);
                                               column_counter += strlen(yytext);
                                               return V_INT;
                                             }
 
-[+-]?{number}+\.{number}+(E[+-]?{number}+)? {
+{number}+\.{number}+(E[+-]?{number}+)? {
                                               yylval.real_value = strtof(yytext, NULL);
                                               column_counter += strlen(yytext);
                                               return V_REAL;

@@ -25,6 +25,7 @@ void error(int token){
 
 
 void eat(int token){
+	printf("token %d-%s\n", token, terminal_mapping[token-1]);
 	if(token == lookahead){
     printf("\nMatch! - Token: %d\n\n", lookahead);
 		lookahead = getNextToken();

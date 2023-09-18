@@ -47,26 +47,26 @@ begin
           globalVar2 := globalVar2 + 1
         end
       end
-  end
+  end;
 
   loop 
     var test1 : int;
     teste1 := 10;
     if teste1 == 10 then 
     begin
-      teste1 := 0;
+      teste1 := 0
     end
     else
     begin
-      continue;
-    end
-    exit when 3 == 3;
-  end
+      continue
+    end;
+    exit when 3 == 3
+  end;
 
   
   {TESTING ALL EXPRESSIONS}
   if (globalVar1 && true) || function1(true, true) != false || -3 <= 2 ||
-    2 >= -4 || 3 < 4 || 5 > 6 || 2*5 == 10 || 2/3-4+1*2 % 2 == 0 then return; 
+    2 >= -4 || 3 < 4 || 5 > 6 || 2 * 5 == 10 || 2/3-4+1*2 % 2 == 0 then begin return end; 
 
   globalVar6 := 6.65;
   
@@ -74,9 +74,9 @@ begin
   
   globalVar8 := "four";
 
-  return;
+  return
   
-end
+end;
 
 {VARIABLES}
 
@@ -91,3 +91,7 @@ end;
 var globalVar6 : real;
 var globalVar7 : char;
 var globalVar8 : array[0..4] of char;
+
+begin
+  main()
+end
