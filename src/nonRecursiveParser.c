@@ -14,7 +14,7 @@ int matrix[45][56][10] = {
     /*05 Terms*/             {{0}, {Comps, Terms_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {Comps, Terms_,-1}, {Comps, Terms_,-1}, {Comps, Terms_,-1}, {0}, {0}, {0}, {Comps, Terms_,-1}, {0}, {Comps, Terms_,-1}, {Comps, Terms_,-1}, {Comps, Terms_,-1}, {Comps, Terms_,-1}, {Comps, Terms_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*06 Terms_*/            {{0}, {0}, {0}, {-1}, {-1}, {AND, Comps, Terms_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {-1}, {-1}, {0}, {0}, {0}, {0}, {-1}, {0}, {-1}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}},
     /*07 Comps*/             {{0}, {Factor, Comps_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {Factor, Comps_,-1}, {Factor, Comps_,-1}, {Factor, Comps_,-1}, {0}, {0}, {0}, {Factor, Comps_,-1}, {0}, {Factor, Comps_,-1}, {Factor, Comps_,-1}, {Factor, Comps_,-1}, {Factor, Comps_,-1}, {Factor, Comps_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
-    /*08 Comps_*/            {{0}, {0}, {0}, {-1}, {-1}, {-1}, {NEQ, Factor, Comps,-1}, {EQ, Factor,-1}, {LESS, Factor,-1}, {GREATER, Factor,-1}, {LEQ, Factor,-1}, {GEQ, Factor,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {-1}, {-1}, {0}, {0}, {0}, {0}, {-1}, {0}, {-1}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}},
+    /*08 Comps_*/            {{0}, {0}, {0}, {-1}, {-1}, {-1}, {NEQ, Factor,-1}, {EQ, Factor,-1}, {LESS, Factor,-1}, {GREATER, Factor,-1}, {LEQ, Factor,-1}, {GEQ, Factor,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {-1}, {-1}, {0}, {0}, {0}, {0}, {-1}, {0}, {-1}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}},
     /*09 Factor*/            {{0}, {AriOp,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {! AriOp,-1}, {AriOp,-1}, {AriOp,-1}, {0}, {0}, {0}, {AriOp,-1}, {0}, {AriOp,-1}, {AriOp,-1}, {AriOp,-1}, {AriOp,-1}, {AriOp,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*10 AriOp*/             {{0}, {AriOp2, AriOp_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {AriOp2, AriOp_,-1}, {AriOp2, AriOp_,-1}, {0}, {0}, {0}, {AriOp2, AriOp_,-1}, {0}, {AriOp2, AriOp_,-1}, {AriOp2, AriOp_,-1}, {AriOp2, AriOp_,-1}, {AriOp2, AriOp_,-1}, {AriOp2, AriOp_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*11 AriOp_*/            {{0}, {0}, {0}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1}, {0}, {+ AriOp2, AriOp_,-1}, {- AriOp2, AriOp_,-1}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {-1}, {-1}, {0}, {0}, {0}, {0}, {-1}, {0}, {-1}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}},
@@ -62,7 +62,15 @@ void initialize_stack() {
 
 void print_stack() {
   for(int i = 0; i < curr_size; i++) {
-      printf("%d ", stack[i]);
+      char* s;
+      if (stack[i] == 0) {
+        s = "EndOfInput";
+      } else if (stack[i] < 100) {
+          s = terminal_mapping[stack[i]-1];
+      } else {
+          s = non_terminal_mapping[stack[i]-100];
+      }
+      printf("%d-%s ", stack[i], s);
   }
   printf("\n");
 }
@@ -115,24 +123,24 @@ int main() {
   printf("starting!...\n");
   initialize_stack();
   int current_terminal = yylex(); 
-  int current_symbol = pop();
-  while (current_symbol != EndOfInput) {
+  // int current_symbol = pop();
+  while (peek() != EndOfInput) {
+    printf("%d-%s ::: ", current_terminal, terminal_mapping[current_terminal-1]);
+    print_stack();
     // print_stack();
-    // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
+    // printf("symbol: %d-%s is not terminal\n", peek(), non_terminal_mapping[peek()-100]);
     // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
-    if (current_symbol == current_terminal) {
+    if (peek() == current_terminal) {
       current_terminal = yylex(); 
-    //   current_symbol = pop();
-    } else if (current_symbol < 100) {
-        print_stack();
-        printf("symbol: %d-%s is terminal\n", current_symbol, terminal_mapping[current_symbol-1]);
+      pop();
+    } else if (peek() < 100) {
+        printf("symbol: %d-%s is terminal\n", peek(), terminal_mapping[peek()-1]);
         error();
         destroySymbolTable();
         yylex_destroy();
         return -1;
-    } else if (get_symbols(current_symbol-100, current_terminal-1)[0] == 0) {
-        print_stack();
-        printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
+    } else if (get_symbols(peek()-100, current_terminal-1)[0] == 0) {
+        printf("symbol: %d-%s is not terminal\n", peek(), non_terminal_mapping[peek()-100]);
         printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
         printf("Invalid terminal!\n");
         error();
@@ -140,11 +148,12 @@ int main() {
         yylex_destroy();
         return -1;
     } else {
-        // printf("symbol: %d-%s is not terminal\n", current_symbol, non_terminal_mapping[current_symbol-100]);
+        // printf("symbol: %d-%s is not terminal\n", peek(), non_terminal_mapping[peek()-100]);
         // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
-        insert_symbols(get_symbols(current_symbol-100, current_terminal-1));
+        int v = peek();
+        pop();
+        insert_symbols(get_symbols(v-100, current_terminal-1));
     }
-    current_symbol = pop();
   }
   if (current_terminal != EndOfInput) {
     printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
