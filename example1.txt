@@ -85,8 +85,8 @@ var globalVar2 : int;
 var globalVar3 : array[0..99] of int;
 var globalVar4 : type1;
 var globalVar5 : record 
-  a : int
-  b : bool
+  a : int;
+  b : bool;
 end;
 var globalVar6 : real;
 var globalVar7 : char;

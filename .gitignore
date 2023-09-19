@@ -4,6 +4,7 @@
 # others
 ./test/*
 ./bin/*
+bin/*
 ./objs/*
 
 # Prerequisites
