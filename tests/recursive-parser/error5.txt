@@ -1,0 +1,12 @@
+var var1 : int;
+var var2 : real;
+var var3 : bool;
+
+begin
+	var1 := 5800000;
+	var2 := 5.264E10
+	var1 := var1 >= 23 && 5.264E10 < 180.264E-10 || false && 5 % 3 == 0.52 && -0.849646515;
+	var1 := 23
+	var1 := 10;
+	var1 := 50
+end
