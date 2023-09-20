@@ -19,52 +19,52 @@ void initializeParsing(){
 
 
 void error(int token){
-	printf("error() - Syntax error. Lookahead did not match the current token. Line : %d\n", yylineno);
-	printf("Expected token %d-%s but found %d-%s.\n", token, terminal_mapping[token-1], lookahead, terminal_mapping[lookahead-1]);
+	printf("\nerror() - Syntax error. Lookahead did not match the current token.\n");
+	printf("Expected token %d-%s but found %d-%s. Line: %d\n\n", token, terminal_mapping[token-1], lookahead, terminal_mapping[lookahead-1], yylineno);
 }
 
 
 void eat(int token){
-	#ifdef DEBUG
-	printf("token %d-%s\n", token, terminal_mapping[token-1]);
-	#endif
-	if(token == lookahead) {
-		#ifdef DEBUG
-    	printf("\nMatch! - Token: %d\n\n", lookahead);
-		#endif
+	
+	if(token == lookahead){
+		printf("Match %d-%s.\tLine: %d\n", token, terminal_mapping[token-1], yylineno);
 		lookahead = getNextToken();
-	} else {
+	}
+	else{
 		error(token);
 	}
 	
 }
 
 void Prog(){
+  printf("Entrei - Prog()\n");
 	switch (lookahead){
         case CONST: 	Decl(); CmdBlock(); break;
         case TYPE:      Decl(); CmdBlock(); break;
         case PROCEDURE: Decl(); CmdBlock(); break;
         case FUNCTION: 	Decl(); CmdBlock(); break;
-        case VAR: 	    Decl(); CmdBlock(); break;
+        case VAR: 	Decl(); CmdBlock(); break;
         case _BEGIN: 	Decl(); CmdBlock(); break;	
-        default:        printf("Syntax error. Grammar Rule: Prog. Line : %d\n", yylineno);
+        default:        printf("Syntax error. Grammar Rule: Prog. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
     }
 }
 
 void Decl(){
+  printf("Entrei - Decl()\n");
 	switch (lookahead){
         case CONST: 	Consts(); Types(); SubProg(); Vars(); break;
-	    case TYPE: 	    Consts(); Types(); SubProg(); Vars(); break;
+	case TYPE: 	Consts(); Types(); SubProg(); Vars(); break;
         case PROCEDURE: Consts(); Types(); SubProg(); Vars(); break;
         case FUNCTION: 	Consts(); Types(); SubProg(); Vars(); break;
-        case VAR: 	    Consts(); Types(); SubProg(); Vars(); break;
+        case VAR: 	Consts(); Types(); SubProg(); Vars(); break;
         case _BEGIN: 	Consts(); Types(); SubProg(); Vars(); break;
-        default:        printf("Syntax error. Grammar Rule: Decl. Line : %d\n", yylineno);
+        default:        printf("Syntax error. Grammar Rule: Decl. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
     }
 }
 
 
 void Consts(){
+  printf("Entrei - Consts()\n");
 	switch (lookahead){
 		case CONST:		eat(CONST); eat(ID); eat(ATTRIB); Exp(); eat(SEMICOLON); Consts(); break;
 		case TYPE:		break; //lambda - search on FOLLOW. removing Consts from stack...
@@ -72,11 +72,12 @@ void Consts(){
 		case FUNCTION: 	break; //lambda - search on FOLLOW. removing Consts from stack...
 		case VAR: 		break; //lambda - search on FOLLOW. removing Consts from stack...
 		case _BEGIN: 	break; //lambda - search on FOLLOW. removing Consts from stack...
-		default: 		printf("Syntax error. Grammar Rule: Consts. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Consts. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void Exp(){
+  printf("Entrei - Exp()\n");
 	switch (lookahead){
         case ID: 	    Terms(); Exp_(); break;
         case NOT: 	    Terms(); Exp_(); break;
@@ -88,11 +89,12 @@ void Exp(){
         case V_REAL: 	Terms(); Exp_(); break;
         case V_BOOL: 	Terms(); Exp_(); break;
         case V_STRING: 	Terms(); Exp_(); break;
-        default:        printf("Syntax error. Grammar Rule: Exp. Line : %d\n", yylineno);
+        default:        printf("Syntax error. Grammar Rule: Exp. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
     }
 }
 
 void Exp_(){
+  printf("Entrei - Exp_()\n");
 	switch (lookahead){
 		case SEMICOLON:	break; //lambda - search on FOLLOW
 		case RPAR:		break; //lambda - search on FOLLOW
@@ -105,7 +107,7 @@ void Exp_(){
 		case STEP:		break; //lambda - search on FOLLOW
 		case THEN:		break; //lambda - search on FOLLOW
 		case OR: 		eat(OR); Terms(); Exp_(); break;
-		default: 		printf("Syntax error. Grammar Rule: Exp_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Exp_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -121,7 +123,7 @@ void Terms(){
 		case V_REAL: 	Comps(); Terms_(); break;
 		case V_BOOL: 	Comps(); Terms_(); break;
 		case V_STRING: 	Comps(); Terms_(); break;
-		default: 		printf("Syntax error. Grammar Rule: Terms. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Terms. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -139,7 +141,7 @@ void Terms_(){
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
-		default:		printf("Syntax error. Grammar Rule: Terms_. Line : %d\n", yylineno);
+		default:		printf("Syntax error. Grammar Rule: Terms_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -155,7 +157,7 @@ void Comps(){
 		case V_BOOL: 	Factor(); Comps_(); break;
 		case V_CHAR: 	Factor(); Comps_(); break;
 		case V_STRING: 	Factor(); Comps_(); break;
-		default: 		printf("Syntax error. Grammar Rule: Comps. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Comps. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -179,7 +181,7 @@ void Comps_(){
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
-		default: 		printf("Syntax error. Grammar Rule: Comps_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Comps_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -195,7 +197,7 @@ void Factor(){
 		case V_BOOL: 	AriOp(); 	break;
 		case V_CHAR: 	AriOp(); 	break;
 		case V_STRING: 	AriOp(); 	break;
-		default: 		printf("Syntax error. Grammar Rule: Factor. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Factor. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -211,7 +213,7 @@ void AriOp(){
 		case V_BOOL: 	AriOp2(); AriOp_(); break;
 		case V_CHAR: 	AriOp2(); AriOp_(); break;
 		case V_STRING: 	AriOp2(); AriOp_(); break;
-		default: 		printf("Syntax error. Grammar Rule: AriOp. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: AriOp. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -238,7 +240,7 @@ void AriOp_(){
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
-		default: 		printf("Syntax error. Grammar Rule: AriOp_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: AriOp_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 
 }
@@ -254,7 +256,7 @@ void AriOp2(){
 		case V_CHAR: 	Parenthesis(); AriOp2_(); break;
 		case V_BOOL: 	Parenthesis(); AriOp2_(); break;
 		case V_STRING: 	Parenthesis(); AriOp2_(); break;
-		default: 		printf("Syntax error. Grammar Rule: AriOp2. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: AriOp2. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -284,7 +286,7 @@ void AriOp2_(){
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
-		default: 		printf("Syntax error. Grammar Rule: AriOp2_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: AriOp2_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -299,7 +301,7 @@ void Parenthesis(){
 		case V_CHAR: 	UnaryExp();  	break;
 		case V_BOOL: 	UnaryExp(); 	break;
 		case V_STRING: 	UnaryExp(); 	break;
-		default: 		printf("Syntax error. Grammar Rule: Parenthesis. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Parenthesis. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -313,7 +315,7 @@ void UnaryExp(){
 		case V_CHAR: 	SimpleExp();  	break;
 		case V_BOOL: 	SimpleExp(); 	break;
 		case V_STRING: 	SimpleExp(); 	break;
-		default: 		printf("Syntax error. Grammar Rule: UnaryExp. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: UnaryExp. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -325,7 +327,7 @@ void SimpleExp(){
 		case V_CHAR: 	NumExp();  		break;
 		case V_BOOL: 	NumExp(); 		break;
 		case V_STRING: 	NumExp(); 		break;
-		default: 		printf("Syntax error. Grammar Rule: SimpleExp. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: SimpleExp. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -336,14 +338,14 @@ void NumExp(){
 		case V_CHAR: 	eat(V_CHAR);  		break;
 		case V_BOOL: 	eat(V_BOOL); 		break;
 		case V_STRING: 	eat(V_STRING); 		break;
-		default: 		printf("Syntax error. Grammar Rule: NumExp. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: NumExp. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void AcessMemAddr(){
 	switch (lookahead){
 		case ID: 	eat(ID); AcessMemAddr_(); break;
-		default: 	printf("Syntax error. Grammar Rule: AcessMemAddr. Line : %d\n", yylineno);
+		default: 	printf("Syntax error. Grammar Rule: AcessMemAddr. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -376,19 +378,20 @@ void AcessMemAddr_(){
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
-		default: 		printf("Syntax error. Grammar Rule: AcessMemAddr_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: AcessMemAddr_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 
 void Types(){
+  printf("Entrei - Types()\n");
 	switch (lookahead){
 		case TYPE: 		eat(TYPE); eat(ID); eat(ATTRIB); TypeDec(); eat(SEMICOLON); Types(); break;
 		case PROCEDURE: break;
 		case FUNCTION: 	break;
 		case VAR: 		break;
 		case _BEGIN: 	break;
-		default: 		printf("Syntax error. Grammar Rule: Types. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Types. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 
 }
@@ -402,7 +405,7 @@ void TypeDec(){
 		case T_CHAR: 	eat(T_CHAR); 	break;
 		case ARRAY: 	eat(ARRAY); 	eat(LBRA); Interval(); eat(RBRA); eat(OF); TypeDec(); break;
 		case RECORD:	eat(RECORD); 	Fields();  eat(END); break;
-		default: 		printf("Syntax error. Grammar Rule: TypeDec. Line: %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: TypeDec. Lookahead: %s. Line: %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 
 }
@@ -419,7 +422,7 @@ void Interval(){
 		case V_REAL: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
 		case V_CHAR: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
 		case V_STRING: 	Exp(); eat(INTERVAL); Exp(); Interval_(); break;
-		default: 		printf("Syntax error. Grammar Rule: Interval. Line: %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Interval. Lookahead: %s. Line: %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 
 }
@@ -428,7 +431,7 @@ void Interval_(){
 	switch (lookahead){
 		case RBRA: 		break;
 		case COMMA: 	eat(COMMA); Interval(); break;
-		default: 		printf("Syntax error. Grammar Rule: Interval_. Line: %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Interval_. Lookahead: %s. Line: %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -436,7 +439,7 @@ void Fields(){
 	switch (lookahead){
 		case ID:  	eat(ID); eat(COLON); TypeDec(); eat(SEMICOLON); Fields(); break;
 		case END: 	break;
-		default: 	printf("Syntax error. Grammar Rule: Fields. Line: %d\n", yylineno);
+		default: 	printf("Syntax error. Grammar Rule: Fields. Lookahead: %s. Line: %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -446,14 +449,14 @@ void SubProg(){
 		case FUNCTION: 		FunctionDecl(); 	SubProg(); 	break;
 		case VAR: 			break;
 		case _BEGIN: 		break;
-		default: 			printf("Syntax error. Grammar Rule: SubProg. Line: %d\n", yylineno);
+		default: 			printf("Syntax error. Grammar Rule: SubProg. Lookahead: %s. Line: %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void ProcedureDecl(){
 	switch (lookahead){
 		case PROCEDURE: 	eat(PROCEDURE); eat(ID); eat(LPAR); Parameters(); eat(RPAR); CmdBlock(); eat(SEMICOLON); break;
-		default: 			printf("Syntax error. Grammar Rule: ProcedureDecl. Line : %d\n", yylineno);
+		default: 			printf("Syntax error. Grammar Rule: ProcedureDecl. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -461,7 +464,7 @@ void FunctionDecl(){
 	switch (lookahead){
 			//FunctionDecl ::= function Id ( Parameters ) : TypeDec CmdBlock ;
 		case FUNCTION: 		eat(FUNCTION); eat(ID); eat(LPAR); Parameters(); eat(RPAR); eat(COLON); TypeDec(); CmdBlock(); eat(SEMICOLON); break;
-		default: 			printf("Syntax error. Grammar Rule: FunctionDecl. Line : %d\n", yylineno);
+		default: 			printf("Syntax error. Grammar Rule: FunctionDecl. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -469,7 +472,7 @@ void Parameters(){
 	switch (lookahead){
 		case ID: 		ParametersAux(); break;
 		case RPAR: 		break;
-		default: 		printf("Syntax error. Grammar Rule: Parameters. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar Rule: Parameters. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -477,7 +480,7 @@ void ParametersAux(){
 	switch (lookahead){
 			//ParametersAux ::= Id : TypeDec ParametersAux_
 		case ID: 		eat(ID); eat(COLON); TypeDec(); ParametersAux_(); break;
-		default: 		printf("Syntax error. Grammar rule: ParametersAux. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: ParametersAux. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -485,7 +488,7 @@ void ParametersAux_(){
 	switch (lookahead){
 		case RPAR: 		break;
 		case COMMA: 	eat(COMMA); ParametersAux(); break;
-		default: 		printf("Syntax error. Grammar rule: ParametersAux_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: ParametersAux_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -500,14 +503,15 @@ void Vars(){
 		case CONTINUE:	break;
 		case IF:		break;
 		case RETURN:	break;
-		default: 		printf("Syntax error. Grammar rule: Vars. Line: %d. Curr token: %d\n", yylineno, lookahead);
+		default: 		printf("Syntax error. Grammar rule: Vars. Lookahead: %s. Line: %d.\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void CmdBlock(){
+  printf("Entrei - CmdBlock()\n");
 	switch (lookahead){
 		case _BEGIN: 	eat(_BEGIN); Vars(); Cmds(); eat(END); break; 
-		default: 		printf("Syntax error. Grammar rule: CmdBlock. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: CmdBlock. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -521,7 +525,7 @@ void Cmds(){
 		case CONTINUE: 	CmdAux(); Cmds_(); break;
 		case IF: 		CmdAux(); Cmds_(); break;
 		case RETURN: 	CmdAux(); Cmds_(); break;
-		default: 		printf("Syntax error. Grammar rule: Cmds. Line: %d. Curr token: %d\n", yylineno, lookahead); 
+		default: 		printf("Syntax error. Grammar rule: Cmds. Lookahead: %s. Line: %d.\n", terminal_mapping[lookahead-1], yylineno); 
 	}
 }
 
@@ -529,7 +533,7 @@ void Cmds_(){
 	switch (lookahead){
 		case SEMICOLON: eat(SEMICOLON); Cmds(); break;
 		case END: 		break;
-		default: 		printf("Syntax error. Grammar rule: Cmds_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: Cmds_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -544,7 +548,7 @@ void CmdAux(){
 		case IF:		CmdConditional();	break;
 		case RETURN:	CmdReturn();		break;
 		case BREAK: 	eat(BREAK); 		break;
-		default: 		printf("Syntax error. Grammar rule: CmdAux. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: CmdAux. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -553,14 +557,14 @@ void CmdAux_(){
 		case ATTRIB: 	eat(ATTRIB); Exp(); break;
 		case SEMICOLON:	break;
 		case END: 		break;
-		default: 		printf("Syntax error. Grammar rule: CmdAux_. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: CmdAux_. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void CmdConditional(){
 	switch (lookahead){
 		case IF: 	eat(IF); Exp(); eat(THEN); CmdBlock(); CmdConditionalEnd(); break;
-		default: 	printf("Syntax error. Grammar rule: CmdConditional\n");
+		default: 	printf("Syntax error. Grammar rule: CmdConditional. Lookahead: %s. Line: %d.\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -569,14 +573,14 @@ void CmdConditionalEnd(){
 		case SEMICOLON: 	break;
 		case END: 			break;
 		case ELSE: 			eat(ELSE); CmdBlock(); break;
-		default: 			printf("Syntax error. Grammar rule: CmdConditionalEnd. Line : %d\n", yylineno);
+		default: 			printf("Syntax error. Grammar rule: CmdConditionalEnd. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void CmdReturn(){
 	switch (lookahead){
 		case RETURN: 	eat(RETURN); CmdReturnExp(); break;
-		default: 		printf("Syntax error. Grammar rule: CmdReturn. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: CmdReturn. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -594,11 +598,12 @@ void CmdReturnExp(){
 		case V_CHAR: 	Exp(); break;
 		case V_STRING: 	Exp(); break;
 		case END:		break;
-		default: 		printf("Syntax error. Grammar rule: CmdReturnExp. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: CmdReturnExp. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
 void Args(){
+	printf("entrei no args\n");
 	switch (lookahead){
 		case ID: 		ArgsAux(); break;
 		case NOT: 		ArgsAux(); break;
@@ -611,7 +616,7 @@ void Args(){
 		case V_CHAR: 	ArgsAux(); break;
 		case V_STRING: 	ArgsAux(); break;	
 		case RPAR: 		break;
-		default: 		printf("Syntax error. Grammar rule: Args. Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: Args. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -627,7 +632,7 @@ void ArgsAux(){
 		case V_BOOL: 	Exp(); 			ArgsAux_(); 	break;
 		case V_CHAR: 	Exp(); 			ArgsAux_(); 	break;
 		case V_STRING: 	Exp(); 			ArgsAux_(); 	break;
-		default: 		printf("Syntax error. Grammar rule: ArgsAux.  Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: ArgsAux. Lookahead: %s.  Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -635,7 +640,7 @@ void ArgsAux_(){
 	switch (lookahead){
 		case RPAR: 		break;
 		case COMMA: 	eat(COMMA); ArgsAux(); break;
-		default: 		printf("Syntax error. Grammar rule: ArgsAux_.  Line : %d\n", yylineno);
+		default: 		printf("Syntax error. Grammar rule: ArgsAux_. Lookahead: %s.  Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
 
@@ -656,4 +661,3 @@ int main()
   
   return 0;
 }
-
