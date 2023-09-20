@@ -1,0 +1,8 @@
+const size := 10; 
+begin
+  arr: array[1..size] of Integer;
+  if size <= 10 then
+    begin
+      arr[0] := arr[0] + 1;
+    end
+end.
