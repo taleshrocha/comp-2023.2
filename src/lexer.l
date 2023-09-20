@@ -33,6 +33,8 @@ identificador   {letter}({letter}|{number})*
 "real"        {column_counter += strlen(yytext); return T_REAL;}
 "char"        {column_counter += strlen(yytext); return T_CHAR;}
 
+":="        {column_counter += strlen(yytext); return ATTRIB;}
+
 ">"         {column_counter += strlen(yytext); return GREATER;}
 "<"         {column_counter += strlen(yytext); return LESS;}
 ">="        {column_counter += strlen(yytext); return GEQ;}
@@ -56,6 +58,12 @@ identificador   {letter}({letter}|{number})*
 "["         {column_counter += strlen(yytext); return LBRA;}
 "]"         {column_counter += strlen(yytext); return RBRA;}
 
+"\.\."      {column_counter += strlen(yytext); return INTERVAL;}
+"\."        {column_counter += strlen(yytext); return DOT;}
+","         {column_counter += strlen(yytext); return COMMA;}
+":"         {column_counter += strlen(yytext); return COLON;}
+";"         {column_counter += strlen(yytext); return SEMICOLON;}
+
 "const"     {column_counter += strlen(yytext); return CONST;}
 "var"	      {column_counter += strlen(yytext); return VAR;}
 "if"        {column_counter += strlen(yytext); return IF;}
@@ -72,22 +80,15 @@ identificador   {letter}({letter}|{number})*
 "break"     {column_counter += strlen(yytext); return BREAK;}
 "continue"  {column_counter += strlen(yytext); return CONTINUE;}
 "record"    {column_counter += strlen(yytext); return RECORD;}
+"array"     {column_counter += strlen(yytext); return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
-"\.\."      {column_counter += strlen(yytext); return INTERVAL;}
-"\."        {column_counter += strlen(yytext); return DOT;}
-","         {column_counter += strlen(yytext); return COMMA;}
-":"         {column_counter += strlen(yytext); return COLON;}
-";"         {column_counter += strlen(yytext); return SEMICOLON;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
-"array"     {column_counter += strlen(yytext); return ARRAY;}
 "exit"      {column_counter += strlen(yytext); return EXIT;}
 "when"      {column_counter += strlen(yytext); return WHEN;}
 "to"        {column_counter += strlen(yytext); return TO;}
 "step"      {column_counter += strlen(yytext); return STEP;}
 "then"      {column_counter += strlen(yytext); return THEN;}
-
-":="        {column_counter += strlen(yytext); return ATTRIB;}
 
 "true"|"false"	                          {
                                               yylval.bool_value = yytext[0] == 't' ? true : false;
@@ -122,7 +123,7 @@ identificador   {letter}({letter}|{number})*
                                             }
 
 {identificador}                             {
-                                              yylval.id_index = addSymbol(yytext);
+                                             // yylval.id_index = addSymbol(yytext);
                                               column_counter += strlen(yytext);
                                               return ID;
                                             }

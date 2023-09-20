@@ -123,13 +123,11 @@ int main() {
   printf("starting!...\n");
   initialize_stack();
   int current_terminal = yylex(); 
-  // int current_symbol = pop();
   while (peek() != EndOfInput) {
+    #ifdef DEBUG
     printf("%d-%s ::: ", current_terminal, terminal_mapping[current_terminal-1]);
     print_stack();
-    // print_stack();
-    // printf("symbol: %d-%s is not terminal\n", peek(), non_terminal_mapping[peek()-100]);
-    // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
+    #endif
     if (peek() == current_terminal) {
       current_terminal = yylex(); 
       pop();

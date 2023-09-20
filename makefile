@@ -25,6 +25,9 @@ mkfolders:
 debug: CFLAGS += -DDEBUG -g -O0 #-fsanitize=address -fno-omit-frame-pointer
 debug: all
 
+release: CFLAGS += -O3
+release: all
+
 
 # executables
 

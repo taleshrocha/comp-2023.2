@@ -25,19 +25,21 @@ void error(int token){
 
 
 void eat(int token){
+	#ifdef DEBUG
 	printf("token %d-%s\n", token, terminal_mapping[token-1]);
-	if(token == lookahead){
-    printf("\nMatch! - Token: %d\n\n", lookahead);
+	#endif
+	if(token == lookahead) {
+		#ifdef DEBUG
+    	printf("\nMatch! - Token: %d\n\n", lookahead);
+		#endif
 		lookahead = getNextToken();
-	}
-	else{
+	} else {
 		error(token);
 	}
 	
 }
 
 void Prog(){
-  printf("Entrei - Prog()\n");
 	switch (lookahead){
         case CONST: 	Decl(); CmdBlock(); break;
         case TYPE:      Decl(); CmdBlock(); break;
@@ -50,7 +52,6 @@ void Prog(){
 }
 
 void Decl(){
-  printf("Entrei - Decl()\n");
 	switch (lookahead){
         case CONST: 	Consts(); Types(); SubProg(); Vars(); break;
 	    case TYPE: 	    Consts(); Types(); SubProg(); Vars(); break;
@@ -64,7 +65,6 @@ void Decl(){
 
 
 void Consts(){
-  printf("Entrei - Consts()\n");
 	switch (lookahead){
 		case CONST:		eat(CONST); eat(ID); eat(ATTRIB); Exp(); eat(SEMICOLON); Consts(); break;
 		case TYPE:		break; //lambda - search on FOLLOW. removing Consts from stack...
@@ -77,7 +77,6 @@ void Consts(){
 }
 
 void Exp(){
-  printf("Entrei - Exp()\n");
 	switch (lookahead){
         case ID: 	    Terms(); Exp_(); break;
         case NOT: 	    Terms(); Exp_(); break;
@@ -94,7 +93,6 @@ void Exp(){
 }
 
 void Exp_(){
-  printf("Entrei - Exp_()\n");
 	switch (lookahead){
 		case SEMICOLON:	break; //lambda - search on FOLLOW
 		case RPAR:		break; //lambda - search on FOLLOW
@@ -384,7 +382,6 @@ void AcessMemAddr_(){
 
 
 void Types(){
-  printf("Entrei - Types()\n");
 	switch (lookahead){
 		case TYPE: 		eat(TYPE); eat(ID); eat(ATTRIB); TypeDec(); eat(SEMICOLON); Types(); break;
 		case PROCEDURE: break;
@@ -508,7 +505,6 @@ void Vars(){
 }
 
 void CmdBlock(){
-  printf("Entrei - CmdBlock()\n");
 	switch (lookahead){
 		case _BEGIN: 	eat(_BEGIN); Vars(); Cmds(); eat(END); break; 
 		default: 		printf("Syntax error. Grammar rule: CmdBlock. Line : %d\n", yylineno);
@@ -603,7 +599,6 @@ void CmdReturnExp(){
 }
 
 void Args(){
-	printf("entrei no args\n");
 	switch (lookahead){
 		case ID: 		ArgsAux(); break;
 		case NOT: 		ArgsAux(); break;
