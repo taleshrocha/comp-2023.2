@@ -12,7 +12,7 @@ int SCOPE = SCOPE_LEVEL;
 // Dynamic array
 ScopeEntry* curr_scope;
 size_t numSymbols = 0;
-TokenData yylval;
+// TokenData yylval;
 
 void initializeSymbolTable() {
   curr_scope = (ScopeEntry*)malloc(sizeof(ScopeEntry));

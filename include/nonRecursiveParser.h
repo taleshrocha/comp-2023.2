@@ -1,11 +1,11 @@
 #ifndef NON_RECURSIVE_PARSER_H
 #define NON_RECURSIVE_PARSER_H
 
-#include "terminalDefines.h"
 #include "nonTerminalDefines.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include "parser.y.h"
 
 extern int capacity;
 extern int curr_size;

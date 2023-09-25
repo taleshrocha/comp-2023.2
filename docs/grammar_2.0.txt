@@ -35,8 +35,7 @@ ParametersAux := ''
 
 CmdBlock ::= begin Vars Cmds end
 
-Cmds := CmdAux | CmdAux ';' Cmd
-Cmds := ''
+Cmds := CmdAux | CmdAux ';' Cmds
 
 CmdAux ::= AcessMemAddr CmdAux_
 CmdAux_ ::= := Exp

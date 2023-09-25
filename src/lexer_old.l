@@ -3,12 +3,12 @@
   #include <stdlib.h>
   #include <string.h>
   #include "parser.y.h"
+  #include "typedefs.h"
   #include "symbolTable.h"
   #include "lexer.h"
   int column_counter;
 %}
 
-%option noinput nounput
 %option noyywrap
 %option yylineno
 
@@ -89,39 +89,39 @@ identificador   {letter}({letter}|{number})*
 "then"      {column_counter += strlen(yytext); return THEN;}
 
 "true"|"false"	                          {
-                                              // // yylval.bool_value = yytext[0] == 't' ? true : false;
+                                              yylval.bool_value = yytext[0] == 't' ? true : false;
                                               column_counter += strlen(yytext);
                                               return V_BOOL;
                                           }
 
 
 {number}+(E[+-]?{number}+)?            {
-                                              // yylval.int_value = atoi(yytext);
+                                              yylval.int_value = atoi(yytext);
                                               column_counter += strlen(yytext);
                                               return V_INT;
                                             }
 
 {number}+\.{number}+(E[+-]?{number}+)? {
-                                              // yylval.real_value = strtof(yytext, NULL);
+                                              yylval.real_value = strtof(yytext, NULL);
                                               column_counter += strlen(yytext);
                                               return V_REAL;
                                             }
 
 \'.\'                                       {
                                               //printf("minha string legal: %s\n", yytext);
-                                              // yylval.char_value = yytext[1];
+                                              yylval.char_value = yytext[1];
                                               column_counter += strlen(yytext);
                                               return V_CHAR;
                                             }
 \".*\"                                      {
-                                              // yylval.string_value = strdup(yytext+1);
-                                              // yylval.string_value[yyleng-2] = '\0';
+                                              yylval.string_value = strdup(yytext+1);
+                                              yylval.string_value[yyleng-2] = '\0';
                                               column_counter += strlen(yytext);
                                               return V_STRING; // ?? como indicar uma string?
                                             }
 
 {identificador}                             {
-                                            //  // yylval.id_index = addSymbol(yytext);
+                                             // yylval.id_index = addSymbol(yytext);
                                               column_counter += strlen(yytext);
                                               return ID;
                                             }

@@ -1,8 +1,8 @@
 const size := 10; 
 begin
-  arr: array[1..size] of Integer;
+  var arr: array[1 .. size] of int;
   if size <= 10 then
-    begin
-      arr[0] := arr[0] + 1;
-    end
-end.
+  begin
+    arr[0] := arr[0] + 1
+  end
+end

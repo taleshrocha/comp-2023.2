@@ -9,7 +9,7 @@
 
 #define SCOPE_LEVEL 0
 
-extern TokenData yylval;
+// extern TokenData yylval;
 
 void initializeSymbolTable();
 unsigned int addSymbol(const char *name);

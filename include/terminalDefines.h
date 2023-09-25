@@ -1,7 +1,7 @@
 #ifndef TERMINAL_DEFINES_H
 #define TERMINAL_DEFINES_H
 
-#define EndOfInput 0
+#define YYEOF 0
 #define CONST 1
 #define ID 2
 #define ATTRIB 3  // Atribuicao
@@ -45,7 +45,7 @@
 #define PROCEDURE 41
 #define FUNCTION 42
 #define VAR 43
-#define _BEGIN 44
+#define BEGIN_ 44
 #define FOR 45
 #define TO 46
 #define STEP 47
