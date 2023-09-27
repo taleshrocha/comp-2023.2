@@ -67,7 +67,7 @@ $(OBJS)/recursiveParser.o: $(SRC)/recursiveParser.c
 # sources
 
 $(SRC)/lexer.l.c: $(SRC)/lexer.l
-	$(LEX) -t $< > $@ 
+	$(LEX) -t --header-file=$(INCLUDE)/lexer.l.h $< > $@ 
 
 $(SRC)/parser.y.c: $(SRC)/parser.y
 	$(YACC) -d -Wother -Wcex $< -o $@ 
