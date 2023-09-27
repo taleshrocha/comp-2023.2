@@ -1,10 +1,20 @@
 %{
 #include <stdio.h>
+#include <lexer.h>
+
+void yyerror(char* txt) {
+    printf("%s",txt);
+}
+
 %}
 
 %token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN    
 %left PLUS MINUS
 %left MULTIPLY DIVIDE MOD
+%left AND OR 
+%left NOT
+%left LESS GREATER LEQ GEQ NEQ EQ
+
 
 %start Prog 
 
@@ -94,7 +104,6 @@ CmdAux_ : ATTRIB Exp
 |       /* NOTHING */
 ;
 
-
 AcessMemAddr: 
         ID
 |       AcessMemAddr DOT ID
@@ -121,58 +130,27 @@ CmdReturnExp:
 ;
 
 Exp:
-        Exp OR Terms
-|       Terms
-;
-
-Terms:
-        Terms AND Comps
-|       Comps
-;
-
-Comps: 
-        Factor NEQ Factor
-|       Factor EQ Factor 
-|       Factor LESS Factor
-|       Factor GREATER Factor 
-|       Factor LEQ Factor
-|       Factor GEQ Factor 
-|       Factor 
-;
-
-Factor:
-        NOT AriOp
-|       AriOp
-;
-
-AriOp:
-        AriOp PLUS AriOp2
-|       AriOp MINUS AriOp2
-|       AriOp2
-;
-
-AriOp2:
-        AriOp2 MULTIPLY Parenthesis
-|       AriOp2 DIVIDE Parenthesis
-|       AriOp2 MOD Parenthesis
-|       Parenthesis
-;
-
-Parenthesis:
-        UnaryExp
+        Exp OR Exp
+|       Exp AND Exp
+|       Exp NEQ Exp
+|       Exp EQ Exp
+|       Exp LESS Exp
+|       Exp GREATER Exp
+|       Exp LEQ Exp
+|       Exp GEQ Exp
+|       Exp PLUS Exp
+|       Exp MINUS Exp
+|       Exp MULTIPLY Exp
+|       Exp DIVIDE Exp
+|       Exp MOD Exp
 |       LPAR Exp RPAR 
+|       PLUS Exp
+|       MINUS Exp
+|       NOT Exp
+|       NumExp
+|       AcessMemAddr
 ;
 
-UnaryExp:
-        PLUS SimpleExp
-|       MINUS SimpleExp
-|       SimpleExp
-;
-
-SimpleExp:
-    NumExp
-|   AcessMemAddr
-;
 
 NumExp:
         V_INT
@@ -193,13 +171,6 @@ ArgsAux : COMMA Args
 
 %%
 
-void yyerror(char * s)
-/* yacc error handler */
-{  
- fprintf (stderr, "%s\n", s);
+int main(void) {
+    return yyparse();
 }
-  
-int main(void)
- {
- return yyparse();
- }
