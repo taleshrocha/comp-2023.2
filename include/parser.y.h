@@ -177,7 +177,27 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 17 "src/parser.y"
+
+    struct {
+        int type;
+        char* name;
+        union {
+            int v_int;
+            int v_bool;
+            double v_real;
+            char v_char;
+            char* v_string;
+        } val;
+        struct Node* tree;
+    } info;
+
+#line 198 "src/parser.y.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

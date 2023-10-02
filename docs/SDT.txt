@@ -1,0 +1,250 @@
+Prog : 
+        Decl CmdBlock {}
+;
+Decl : 
+        Consts Types SubProg Vars {}
+;
+Consts :
+        CONST ID ATTRIB Exp SEMICOLON Consts {}
+|       /* NOTHING */
+;
+Vars : 
+        VAR ID COLON TypeDec SEMICOLON Vars {}
+|       /* NOTHING */
+;
+Types :
+        TYPE ID ATTRIB TypeDec SEMICOLON Types {}
+|       /* NOTHING */
+;
+TypeDec :
+        T_BOOL {}
+|       T_INT {}
+|       T_REAL {}
+|       T_CHAR {}
+|       ID {}
+|       ARRAY LBRA Interval RBRA OF TypeDec  {}
+|       RECORD Fields END {}
+;
+Interval :
+        Exp INTERVAL Exp {}
+|       Exp INTERVAL Exp COMMA Interval {}
+;
+Fields :
+        ID COLON TypeDec SEMICOLON Fields {}
+|       /* NOTHING */ {}
+;
+SubProg : 
+        ProcedureDecl SubProg {}
+|       FunctionDecl SubProg {}
+|       /* NOTHING */ {}
+;
+
+ProcedureDecl :
+        PROCEDURE ID LPAR Parameters RPAR CmdBlock SEMICOLON {}
+;
+
+Parameters:
+        ID COLON TypeDec ParametersAux {}
+|       /* NOTHING */ {}
+;
+
+ParametersAux:
+        COMMA Parameters {}
+|       /* NOTHING */ {}
+;
+
+FunctionDecl:
+        FUNCTION ID LPAR Parameters RPAR COLON TypeDec CmdBlock SEMICOLON {}
+;
+
+CmdBlock :
+        BEGIN_ Vars Cmds END {}
+;
+
+Cmds:
+        CmdAux {}
+|       CmdAux SEMICOLON Cmds {}
+;
+
+CmdAux:
+        AcessMemAddr CmdAux_ {}
+|       CmdBlock {}
+|       CmdConditional {}
+|       CONTINUE {}
+|       BREAK {}
+|       FOR ID ATTRIB Exp TO Exp STEP Exp CmdBlock {}
+|       LOOP Vars Cmds END {}
+|       EXIT WHEN Exp {}
+|       CmdReturn {}
+;
+
+CmdAux_ : ATTRIB Exp {}
+|       /* NOTHING */ {}
+;
+
+AcessMemAddr: 
+        ID { type = lookup(ID.name).type }
+|       AcessMemAddr DOT ID { type = check_field(type_lookup(AcessMemAddr.type), ID.name).type }
+|       AcessMemAddr LBRA Exp RBRA { type = get_array_type(type_lookup(AcessMemAddr.type)) }
+|       AcessMemAddr LPAR Args RPAR { type = get_return_type(type_lookup(AcessMemAddr.type)) }
+;
+
+CmdConditional:
+        IF Exp THEN CmdBlock CmdConditionalEnd {}
+;
+
+CmdConditionalEnd:
+        ELSE CmdBlock {}
+|       /* NOTHING */ {}
+;
+
+CmdReturn:
+        RETURN CmdReturnExp {}
+;
+
+CmdReturnExp:
+        Exp {}
+|       /* NOTHING */ {}
+;
+
+Exp:
+        Exp OR Terms {}
+|       Terms {}
+;
+
+Terms:
+        Terms AND Comps {}
+|       Comps {}
+;
+
+Comps: 
+        Factor NEQ Factor {}
+|       Factor EQ Factor  {}
+|       Factor LESS Factor {}
+|       Factor GREATER Factor  {}
+|       Factor LEQ Factor {}
+|       Factor GEQ Factor  {}
+|       Factor  {}
+;
+
+Factor:
+        NOT AriOp {
+        if (AriOp.type == BOOL) {
+            this.type = AriOp.type 
+        } else { error! }
+        tree = NODE('!', [AriOp.tree]);
+        }
+|       AriOp { this.type = AriOp.type ; tree = AriOp.tree }
+;
+
+AriOp:
+        AriOp PLUS AriOp2 {
+        if (AriOp.type == INT and AriOp2.type == INT) {
+            this.type = INT
+        } else if (AriOp.type == INT and AriOp2.type == REAL) {
+            this.type = REAL
+        } else if (AriOp.type == REAL and AriOp2.type == INT) {
+            this.type = REAL
+        } else if (AriOp.type == REAL and AriOp2.type == REAL) {
+            this.type = REAL
+        } else { error! }
+        tree = NODE('+', [AriOp.tree, AriOp2.tree]);
+        }
+|       AriOp MINUS AriOp2 {
+        if (AriOp.type == INT and AriOp2.type == INT) {
+            this.type = INT
+        } else if (AriOp.type == INT and AriOp2.type == REAL) {
+            this.type = REAL
+        } else if (AriOp.type == REAL and AriOp2.type == INT) {
+            this.type = REAL
+        } else if (AriOp.type == REAL and AriOp2.type == REAL) {
+            this.type = REAL
+        } else { error! }
+        tree = NODE('-', [AriOp.tree, AriOp2.tree]);
+}
+|       AriOp2 { this.type = AriOp2.type ; tree = AriOp2.tree }
+;
+
+AriOp2:
+        AriOp2 MULTIPLY Parenthesis {
+        if (AriOp2.type == INT and Parenthesis.type == INT) {
+            this.type = INT
+        } else if (AriOp2.type == INT and Parenthesis.type == REAL) {
+            this.type = REAL
+        } else if (AriOp2.type == REAL and Parenthesis.type == INT) {
+            this.type = REAL
+        } else if (AriOp2.type == REAL and Parenthesis.type == REAL) {
+            this.type = REAL
+        } else { error! }
+        tree = NODE('*', [AriOp2.tree, Parenthesis.tree]);
+}
+|       AriOp2 DIVIDE Parenthesis {
+        if (AriOp2.type == INT and Parenthesis.type == INT) {
+            this.type = INT
+        } else if (AriOp2.type == INT and Parenthesis.type == REAL) {
+            this.type = REAL
+        } else if (AriOp2.type == REAL and Parenthesis.type == INT) {
+            this.type = REAL
+        } else if (AriOp2.type == REAL and Parenthesis.type == REAL) {
+            this.type = REAL
+        } else { error! }
+        tree = NODE('/', [AriOp2.tree, Parenthesis.tree]);
+}
+|       AriOp2 MOD Parenthesis {
+        if (AriOp2.type == INT and Parenthesis.type == INT) {
+            this.type = INT
+        } else if (AriOp2.type == INT and Parenthesis.type == REAL) {
+            this.type = REAL
+        } else if (AriOp2.type == REAL and Parenthesis.type == INT) {
+            this.type = REAL
+        } else if (AriOp2.type == REAL and Parenthesis.type == REAL) {
+            this.type = REAL
+        } else { error! }
+        tree = NODE('%', [AriOp2.tree, Parenthesis.tree]);
+}
+|       Parenthesis { this.type = Parenthesis.type ; tree = Parenthesis.tree }
+;
+
+Parenthesis:
+        UnaryExp { this.type = UnaryExp.type ; tree = UnaryExp.tree }
+|       LPAR Exp RPAR { this.type = Exp.type; tree = Exp.tree }
+;
+
+UnaryExp:
+        PLUS SimpleExp {
+        if (SimpleExp.type == INT or SimpleExp.type == REAL) {
+            this.type = SimpleExp.type 
+        } else { error! }
+        tree = NODE('+', [SimpleExp.tree]);
+}
+|       MINUS SimpleExp {
+        if (SimpleExp.type == INT or SimpleExp.type == REAL) {
+            this.type = SimpleExp.type 
+        } else { error! }
+        tree = NODE('-', [SimpleExp.tree]);
+
+}
+|       SimpleExp { this.type = SimpleExp.type; tree = SimpleExp.tree }
+;
+
+SimpleExp:
+    NumExp { this.type = NumExp.type; tree = NumExp.tree}
+|   AcessMemAddr { this.type = AcessMemAddr.type; tree = NODE('id', []); }
+;
+
+NumExp:
+        V_INT    { type = INT;  tree = NODE('int', []); intval = get_value();}
+|       V_REAL   { type = REAL; tree = NODE('real', []); realval = get_value();}
+|       V_BOOL   { type = BOOL; tree = NODE('bool', []); boolval = get_value();}
+|       V_CHAR   { type = CHAR; tree = NODE('char', []); charval = get_value();}
+|       V_STRING { type = ARRAY of CHAR with SIZE = get_size() ; tree = NODE('array', []);  TODO! lookup(string_{string_counter});}
+;
+
+Args : 
+        Exp ArgsAux {}
+|       /* NOTHING */ {}
+;
+
+ArgsAux : COMMA Args {}
+|       /* NOTHING */ {}
+;

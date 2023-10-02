@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <lexer.l.h>
 
+extern struct Node;
+
 extern int column_counter;
 
 void yyerror(char* s) {
@@ -12,7 +14,24 @@ void yyerror(char* s) {
 
 %token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN    
 
+%union {
+    struct {
+        int type;
+        char* name;
+        union {
+            int v_int;
+            int v_bool;
+            double v_real;
+            char v_char;
+            char* v_string;
+        } val;
+        struct Node* tree;
+    } info;
+}
+
 %start Prog 
+
+%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp
 
 %%
 
@@ -158,34 +177,46 @@ AriOp:
 ;
 
 AriOp2:
-        AriOp2 MULTIPLY Parenthesis {}
+        AriOp2 MULTIPLY Parenthesis {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_INT;
+        } else if ($1.type == T_INT && $3.type == T_REAL) {
+            $$.type = T_REAL;
+        } else if ($1.type == T_REAL && $3.type == T_INT) {
+            $$.type = T_REAL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_REAL;
+        } else {
+            printf("ERROR! TODO...\n");
+        }
+        }
 |       AriOp2 DIVIDE Parenthesis {}
 |       AriOp2 MOD Parenthesis {}
-|       Parenthesis {}
+|       Parenthesis { $$.type = $1.type; }
 ;
 
 Parenthesis:
-        UnaryExp {}
-|       LPAR Exp RPAR {}
+        UnaryExp { $$.type = $1.type; }
+|       LPAR Exp RPAR { $$.type = $2.type; }
 ;
 
 UnaryExp:
-        PLUS SimpleExp {}
-|       MINUS SimpleExp {}
-|       SimpleExp {}
+        PLUS SimpleExp { $$.type = $2.type; }
+|       MINUS SimpleExp { $$.type = $2.type; }
+|       SimpleExp { $$.type = $1.type; }
 ;
 
 SimpleExp:
-    NumExp {}
+    NumExp { $$.type = $1.type; }
 |   AcessMemAddr {}
 ;
 
 NumExp:
-        V_INT {}
-|       V_REAL {}
-|       V_BOOL {}
-|       V_CHAR {}
-|       V_STRING {}
+        V_INT    { $$.type = T_INT;  }
+|       V_REAL   { $$.type = T_REAL; }
+|       V_BOOL   { $$.type = T_BOOL; }
+|       V_CHAR   { $$.type = T_CHAR; }
+|       V_STRING { $$.type = ARRAY; /*TODO*/}
 ;
 
 Args : 

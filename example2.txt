@@ -1,4 +1,4 @@
 begin
-    id :=  3 != false || -3 <= 2;
+    id := 3 * true;
     return
 end
