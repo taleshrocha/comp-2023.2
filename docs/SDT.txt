@@ -108,12 +108,26 @@ CmdReturnExp:
 ;
 
 Exp:
-        Exp OR Terms {}
+        Exp OR Terms {
+            if (Exp.type == BOOL and Terms.type == BOOL) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE("||", [Terms.tree], [Comps.tree]);
+        }
 |       Terms {}
 ;
 
 Terms:
-        Terms AND Comps {}
+        Terms AND Comps {
+            if (Terms.type == BOOL and Comps.type == BOOL) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE("&&", [Terms.tree], [Comps.tree]);
+        }
 |       Comps {}
 ;
 
