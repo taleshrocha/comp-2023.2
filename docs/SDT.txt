@@ -137,9 +137,45 @@ Comps:
             } else {
                 printf("ERROR! Incompatible type. \n");
             }
+            tree = NODE('>', [Factor.tree], [Factor.tree]); 
+            // Note que são factors diferentes, tanto aqui quantos nos ifs
         }
-|       Factor LEQ Factor {}
-|       Factor GEQ Factor  {}
+|       Factor LEQ Factor {
+            if (Factor.type == INT and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == INT and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == CHAR and Factor.type == CHAR) {
+                this.type = BOOL;
+            } else if (Factor.type == STRING and Factor.type == STRING) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE('<=', [Factor.tree], [Factor.tree]); 
+        }
+|       Factor GEQ Factor  {
+            if (Factor.type == INT and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == INT and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == CHAR and Factor.type == CHAR) {
+                this.type = BOOL;
+            } else if (Factor.type == STRING and Factor.type == STRING) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE('>=', [Factor.tree], [Factor.tree]); 
+        }
 |       Factor  {}
 ;
 
