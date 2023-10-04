@@ -109,139 +109,61 @@ CmdReturnExp:
 
 Exp:
         Exp OR Terms {
-            if (Exp.type == BOOL and Terms.type == BOOL) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE("||", [Terms.tree], [Comps.tree]);
+          if ($1.type == T_BOOL && $3.type == T_BOOL) {
+              $$.type = T_BOOL;
+          } else {
+            printf("ERROR! TODO...\n");
+          }
+          //tree = NODE('==', [Factor.tree, Factor.tree]);
         }
-|       Terms {}
+|       Terms {
+          $$.type = $1.type; 
+          //tree = AriOp2.tree;
+        }
 ;
 
 Terms:
         Terms AND Comps {
-            if (Terms.type == BOOL and Comps.type == BOOL) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE("&&", [Terms.tree], [Comps.tree]);
+          if ($1.type == T_BOOL && $3.type == T_BOOL) {
+              $$.type = T_BOOL;
+          } else {
+            printf("ERROR! TODO...\n");
+          }
+          //tree = NODE('==', [Factor.tree, Factor.tree]);
         }
-|       Comps {}
+|       Comps {
+          $$.type = $1.type; 
+          //tree = AriOp2.tree;
+        }
 ;
 
 Comps: 
         Factor NEQ Factor {
-             if (Factor.type == INT and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == INT and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == CHAR and Factor.type == CHAR) {
-                this.type = BOOL;
-            } else if (Factor.type == STRING and Factor.type == STRING) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE('!=', [Factor.tree], [Factor.tree]); 
+          $$.type = T_BOOL
+          //tree = NODE('!=', [Factor.tree, Factor.tree]);
         }
 |       Factor EQ Factor  {
-             if (Factor.type == INT and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == INT and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == CHAR and Factor.type == CHAR) {
-                this.type = BOOL;
-            } else if (Factor.type == STRING and Factor.type == STRING) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE('==', [Factor.tree], [Factor.tree]); 
         }
 |       Factor LESS Factor {
-             if (Factor.type == INT and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == INT and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == CHAR and Factor.type == CHAR) {
-                this.type = BOOL;
-            } else if (Factor.type == STRING and Factor.type == STRING) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE('<', [Factor.tree], [Factor.tree]); 
+          if ($1.type == $3.type
+            || $1.type == T_REAL && $3.type == T_INT
+            || $1.type == T_INT && $3.type == T_REAL) {
+              $$.type = T_BOOL;
+          } else {
+            printf("ERROR! TODO...\n");
+          }
+          //tree = NODE('==', [Factor.tree, Factor.tree]);
         }
-|       Factor GREATER Factor  {
-            if (Factor.type == INT and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == INT and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == CHAR and Factor.type == CHAR) {
-                this.type = BOOL;
-            } else if (Factor.type == STRING and Factor.type == STRING) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE('>', [Factor.tree], [Factor.tree]); 
-            // Note que são factors diferentes, tanto aqui quantos nos ifs
+|       Factor LESS Factor {}
+|       Factor EQ Factor  {}
+|       Factor LESS Factor {}
+|       Factor GREATER Factor  {}
+|       Factor LEQ Factor {}
+|       Factor GEQ Factor  {}
+|       Factor  {
+          $$.type = $1.type; 
+          //tree = AriOp2.tree;
         }
-|       Factor LEQ Factor {
-            if (Factor.type == INT and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == INT and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == CHAR and Factor.type == CHAR) {
-                this.type = BOOL;
-            } else if (Factor.type == STRING and Factor.type == STRING) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE('<=', [Factor.tree], [Factor.tree]); 
-        }
-|       Factor GEQ Factor  {
-            if (Factor.type == INT and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == INT and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == INT) {
-                this.type = BOOL;
-            } else if (Factor.type == REAL and Factor.type == REAL) {
-                this.type = BOOL;
-            } else if (Factor.type == CHAR and Factor.type == CHAR) {
-                this.type = BOOL;
-            } else if (Factor.type == STRING and Factor.type == STRING) {
-                this.type = BOOL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
-            tree = NODE('>=', [Factor.tree], [Factor.tree]); 
-        }
-|       Factor  {}
 ;
 
 Factor:
