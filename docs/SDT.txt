@@ -118,9 +118,60 @@ Terms:
 ;
 
 Comps: 
-        Factor NEQ Factor {}
-|       Factor EQ Factor  {}
-|       Factor LESS Factor {}
+        Factor NEQ Factor {
+             if (Factor.type == INT and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == INT and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == CHAR and Factor.type == CHAR) {
+                this.type = BOOL;
+            } else if (Factor.type == STRING and Factor.type == STRING) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE('!=', [Factor.tree], [Factor.tree]); 
+        }
+|       Factor EQ Factor  {
+             if (Factor.type == INT and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == INT and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == CHAR and Factor.type == CHAR) {
+                this.type = BOOL;
+            } else if (Factor.type == STRING and Factor.type == STRING) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE('==', [Factor.tree], [Factor.tree]); 
+        }
+|       Factor LESS Factor {
+             if (Factor.type == INT and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == INT and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == INT) {
+                this.type = BOOL;
+            } else if (Factor.type == REAL and Factor.type == REAL) {
+                this.type = BOOL;
+            } else if (Factor.type == CHAR and Factor.type == CHAR) {
+                this.type = BOOL;
+            } else if (Factor.type == STRING and Factor.type == STRING) {
+                this.type = BOOL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+            tree = NODE('<', [Factor.tree], [Factor.tree]); 
+        }
 |       Factor GREATER Factor  {
             if (Factor.type == INT and Factor.type == INT) {
                 this.type = BOOL;
