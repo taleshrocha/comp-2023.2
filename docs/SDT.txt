@@ -132,6 +132,8 @@ Comps:
                 this.type = BOOL;
             } else if (Factor.type == CHAR and Factor.type == CHAR) {
                 this.type = BOOL;
+            } else if (Factor.type == STRING and Factor.type == STRING) {
+                this.type = BOOL;
             } else {
                 printf("ERROR! Incompatible type. \n");
             }
