@@ -178,20 +178,44 @@ AriOp:
 
 AriOp2:
         AriOp2 MULTIPLY Parenthesis {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_INT;
-        } else if ($1.type == T_INT && $3.type == T_REAL) {
-            $$.type = T_REAL;
-        } else if ($1.type == T_REAL && $3.type == T_INT) {
-            $$.type = T_REAL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_REAL;
-        } else {
-            printf("ERROR! TODO...\n");
+            if ($1.type == T_INT && $3.type == T_INT) {
+                $$.type = T_INT;
+            } else if ($1.type == T_INT && $3.type == T_REAL) {
+                $$.type = T_REAL;
+            } else if ($1.type == T_REAL && $3.type == T_INT) {
+                $$.type = T_REAL;
+            } else if ($1.type == T_REAL && $3.type == T_REAL) {
+                $$.type = T_REAL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
         }
+|       AriOp2 DIVIDE Parenthesis {
+            if ($1.type == T_INT && $3.type == T_INT) {
+                $$.type = T_INT;
+            } else if ($1.type == T_INT && $3.type == T_REAL) {
+                $$.type = T_REAL;
+            } else if ($1.type == T_REAL && $3.type == T_INT) {
+                $$.type = T_REAL;
+            } else if ($1.type == T_REAL && $3.type == T_REAL) {
+                $$.type = T_REAL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
         }
-|       AriOp2 DIVIDE Parenthesis {}
-|       AriOp2 MOD Parenthesis {}
+|       AriOp2 MOD Parenthesis {
+            if ($1.type == T_INT && $3.type == T_INT) {
+                $$.type = T_INT;
+            } else if ($1.type == T_INT && $3.type == T_REAL) {
+                $$.type = T_REAL;
+            } else if ($1.type == T_REAL && $3.type == T_INT) {
+                $$.type = T_REAL;
+            } else if ($1.type == T_REAL && $3.type == T_REAL) {
+                $$.type = T_REAL;
+            } else {
+                printf("ERROR! Incompatible type. \n");
+            }
+        }
 |       Parenthesis { $$.type = $1.type; }
 ;
 
