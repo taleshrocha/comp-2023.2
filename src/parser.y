@@ -12,7 +12,7 @@ void yyerror(char* s) {
 }
 %}
 
-%token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN    
+%token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
 
 %union {
     struct {
@@ -82,6 +82,7 @@ ProcedureDecl :
 
 Parameters:
         ID COLON TypeDec ParametersAux {}
+        REF ID COLON TypeDec ParametersAux {}
 |       /* NOTHING */ {}
 ;
 
@@ -225,10 +226,17 @@ Parenthesis:
 ;
 
 UnaryExp:
-        PLUS SimpleExp { $$.type = $2.type; }
-|       MINUS SimpleExp { $$.type = $2.type; }
-|       SimpleExp { $$.type = $1.type; }
+        PLUS CastExp { $$.type = $2.type; }'
+|       MINUS CastExp { $$.type = $2.type; }
+|       CastExp { $$.type = $1.type; }
 ;
+
+CastExp: 
+        LPAR T_INT RPAR SimpleExp
+|       LPAR T_REAL RPAR SimpleExp
+|       LPAR T_CHAR RPAR SimpleExp
+|       LPAR T_BOOL RPAR SimpleExp
+|       SimpleExp
 
 SimpleExp:
     NumExp { $$.type = $1.type; }
