@@ -68,9 +68,16 @@ typedef struct SymbolEntry {
 typedef struct ScopeEntry {
   struct ScopeEntry* previous_scope;
   SymbolEntry* symbol_table;
-  size_t capacity;
-  size_t size;
+  int capacity;
+  int size;
 
 } ScopeEntry;
+
+typedef struct Node {
+  int identifier;
+  Node* children;
+} Node;
+
+Node* createNode(int identifier, Node* children);
 
 #endif  // TYPEDEFS_H

@@ -1,8 +1,14 @@
 %{
 #include <stdio.h>
 #include <lexer.l.h>
+#include <typedefs.h>
 
 extern struct Node;
+
+Node* createNode(int identifier, Node* children) {
+    // TODO
+    return NULL;
+}
 
 extern int column_counter;
 
@@ -12,7 +18,7 @@ void yyerror(char* s) {
 }
 %}
 
-%token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN    
+%token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
 
 %union {
     struct {
@@ -31,225 +37,412 @@ void yyerror(char* s) {
 
 %start Prog 
 
-%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp
+%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr CmdAux
 
 %%
 
 Prog : 
-        Decl CmdBlock {}
+    Decl CmdBlock {}
 ;
 Decl : 
-        Consts Types SubProg Vars {}
+    Consts Types SubProg Vars {}
 ;
 Consts :
-        CONST ID ATTRIB Exp SEMICOLON Consts {}
-|       /* NOTHING */
+    CONST ID ATTRIB Exp SEMICOLON Consts {}
+|   /* NOTHING */
 ;
 Vars : 
-        VAR ID COLON TypeDec SEMICOLON Vars {}
-|       /* NOTHING */
+    VAR ID COLON TypeDec SEMICOLON Vars {}
+|   /* NOTHING */
 ;
 Types :
-        TYPE ID ATTRIB TypeDec SEMICOLON Types {}
-|       /* NOTHING */
+    TYPE ID ATTRIB TypeDec SEMICOLON Types {}
+|   /* NOTHING */
 ;
 TypeDec :
-        T_BOOL {}
-|       T_INT {}
-|       T_REAL {}
-|       T_CHAR {}
-|       ID {}
-|       ARRAY LBRA Interval RBRA OF TypeDec  {}
-|       RECORD Fields END {}
+    T_BOOL {}
+|   T_INT {}
+|   T_REAL {}
+|   T_CHAR {}
+|   ID {}
+|   ARRAY LBRA Interval RBRA OF TypeDec  {}
+|   RECORD Fields END {}
 ;
 Interval :
-        Exp INTERVAL Exp {}
-|       Exp INTERVAL Exp COMMA Interval {}
+    Exp INTERVAL Exp {}
+|   Exp INTERVAL Exp COMMA Interval {}
 ;
 Fields :
-        ID COLON TypeDec SEMICOLON Fields {}
-|       /* NOTHING */ {}
+    ID COLON TypeDec SEMICOLON Fields {}
+|   /* NOTHING */ {}
 ;
 SubProg : 
-        ProcedureDecl SubProg {}
-|       FunctionDecl SubProg {}
-|       /* NOTHING */ {}
+    ProcedureDecl SubProg {}
+|   FunctionDecl SubProg {}
+|   /* NOTHING */ {}
 ;
 
 ProcedureDecl :
-        PROCEDURE ID LPAR Parameters RPAR CmdBlock SEMICOLON {}
+    PROCEDURE ID LPAR Parameters RPAR CmdBlock SEMICOLON {}
 ;
 
 Parameters:
-        ID COLON TypeDec ParametersAux {}
-|       /* NOTHING */ {}
+    ID COLON TypeDec ParametersAux {}
+    REF ID COLON TypeDec ParametersAux {}
+|   /* NOTHING */ {}
 ;
 
 ParametersAux:
-        COMMA Parameters {}
-|       /* NOTHING */ {}
+    COMMA Parameters {}
+|   /* NOTHING */ {}
 ;
 
 FunctionDecl:
-        FUNCTION ID LPAR Parameters RPAR COLON TypeDec CmdBlock SEMICOLON {}
+    FUNCTION ID LPAR Parameters RPAR COLON TypeDec CmdBlock SEMICOLON {}
 ;
 
 CmdBlock :
-        BEGIN_ Vars Cmds END {}
+    BEGIN_ Vars Cmds END {}
 ;
 
 Cmds:
-        CmdAux {}
-|       CmdAux SEMICOLON Cmds {}
+    CmdAux {}
+|   CmdAux SEMICOLON Cmds {}
 ;
 
 CmdAux:
-        AcessMemAddr CmdAux_ {}
-|       CmdBlock {}
-|       CmdConditional {}
-|       CONTINUE {}
-|       BREAK {}
-|       FOR ID ATTRIB Exp TO Exp STEP Exp CmdBlock {}
-|       LOOP Vars Cmds END {}
-|       EXIT WHEN Exp {}
-|       CmdReturn {}
-;
+    AcessMemAddr ATTRIB Exp {
+        if ($$.type != $2.type) {
+            // TODO: ERROR
+        }
+    }
+|   CmdBlock {}
+|   CmdConditional {}
+|   CONTINUE {}
+|   BREAK {}
+|   FOR AcessMemAddr ATTRIB Exp TO Exp STEP Exp CmdBlock {
 
-CmdAux_ : ATTRIB Exp {}
-|       /* NOTHING */ {}
-;
 
+
+
+    }
+|   LOOP Vars Cmds END {}
+|   EXIT WHEN Exp {}
+|   CmdReturn {}
+;
 
 AcessMemAddr: 
-        ID {}
-|       AcessMemAddr DOT ID {}
-|       AcessMemAddr LBRA Exp RBRA {}
-|       AcessMemAddr LPAR Args RPAR {}
+    ID {
+        //TODO
+    }
+|   AcessMemAddr DOT ID {}
+|   AcessMemAddr LBRA Exp RBRA {
+        if ($3.type == T_INT) {
+            $$.type = $3.type;
+        } else {
+            printf("ERROR");
+        }
+}
+|   AcessMemAddr LPAR Args RPAR {}
 ;
 
 CmdConditional:
-        IF Exp THEN CmdBlock CmdConditionalEnd {}
+    IF Exp THEN CmdBlock CmdConditionalEnd {
+        if ($2.type != T_BOOL) {
+            printf("ERROR");
+            // TODO
+        }
+    }
 ;
 
 CmdConditionalEnd:
-        ELSE CmdBlock {}
-|       /* NOTHING */ {}
+    ELSE CmdBlock {}
+|   /* NOTHING */ {}
 ;
 
 CmdReturn:
-        RETURN CmdReturnExp {}
+    RETURN CmdReturnExp {
+        // TODO lookup tipo da função/proc mais próxima
+    }
 ;
 
 CmdReturnExp:
-        Exp {}
-|       /* NOTHING */ {}
+    Exp { $$.type = $1.type; }
+|   /* NOTHING */ {}
 ;
 
 Exp:
-        Exp OR Terms {}
-|       Terms {}
+    Exp OR Terms {
+        if ($1.type == T_BOOL && $3.type == T_BOOL) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Terms { $$.type = $1.type; }
 ;
 
 Terms:
-        Terms AND Comps {}
-|       Comps {}
+    Terms AND Comps {
+        if ($1.type == T_BOOL && $3.type == T_BOOL) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Comps { $$.type = $1.type; }
 ;
 
 Comps: 
-        Factor NEQ Factor {}
-|       Factor EQ Factor  {}
-|       Factor LESS Factor {}
-|       Factor GREATER Factor  {}
-|       Factor LEQ Factor {}
-|       Factor GEQ Factor  {}
-|       Factor  {}
+    Factor NEQ Factor {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_BOOL && $3.type == T_BOOL) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_CHAR && $3.type == T_CHAR) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Factor EQ Factor  {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_BOOL && $3.type == T_BOOL) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_CHAR && $3.type == T_CHAR) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Factor LESS Factor {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Factor GREATER Factor  {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Factor LEQ Factor {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Factor GEQ Factor  {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_BOOL;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_BOOL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   Factor  { $$.type = $1.type; }
 ;
 
 Factor:
-        NOT AriOp {}
-|       AriOp {}
+    NOT AriOp {
+        if ($2.type == T_BOOL ) {
+            $$.type = T_BOOL;
+            $$.val = !$2.val;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   AriOp { $$.type = $1.type; }
 ;
 
 AriOp:
-        AriOp PLUS AriOp2 {}
-|       AriOp MINUS AriOp2 {}
-|       AriOp2 {}
+    AriOp PLUS AriOp2 {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_INT;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_REAL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   AriOp MINUS AriOp2 {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_INT;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_REAL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   AriOp2 { $$.type = $1.type; }
 ;
 
 AriOp2:
-        AriOp2 MULTIPLY Parenthesis {
-            if ($1.type == T_INT && $3.type == T_INT) {
-                $$.type = T_INT;
-            } else if ($1.type == T_INT && $3.type == T_REAL) {
-                $$.type = T_REAL;
-            } else if ($1.type == T_REAL && $3.type == T_INT) {
-                $$.type = T_REAL;
-            } else if ($1.type == T_REAL && $3.type == T_REAL) {
-                $$.type = T_REAL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
+    AriOp2 MULTIPLY Parenthesis {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_INT;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_REAL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
         }
-|       AriOp2 DIVIDE Parenthesis {
-            if ($1.type == T_INT && $3.type == T_INT) {
-                $$.type = T_INT;
-            } else if ($1.type == T_INT && $3.type == T_REAL) {
-                $$.type = T_REAL;
-            } else if ($1.type == T_REAL && $3.type == T_INT) {
-                $$.type = T_REAL;
-            } else if ($1.type == T_REAL && $3.type == T_REAL) {
-                $$.type = T_REAL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
+    }
+|   AriOp2 DIVIDE Parenthesis {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_INT;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            $$.type = T_REAL;
+        } else {
+            printf("ERROR! Incompatible type. \n");
         }
-|       AriOp2 MOD Parenthesis {
-            if ($1.type == T_INT && $3.type == T_INT) {
-                $$.type = T_INT;
-            } else if ($1.type == T_INT && $3.type == T_REAL) {
-                $$.type = T_REAL;
-            } else if ($1.type == T_REAL && $3.type == T_INT) {
-                $$.type = T_REAL;
-            } else if ($1.type == T_REAL && $3.type == T_REAL) {
-                $$.type = T_REAL;
-            } else {
-                printf("ERROR! Incompatible type. \n");
-            }
+    }
+|   AriOp2 MOD Parenthesis {
+        if ($1.type == T_INT && $3.type == T_INT) {
+            $$.type = T_INT;
+        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+            // TODO
+            printf("TODO. \n");
+        } else {
+            printf("ERROR! Incompatible type. \n");
         }
-|       Parenthesis { $$.type = $1.type; }
+    }
+|   Parenthesis { $$.type = $1.type; }
 ;
 
 Parenthesis:
-        UnaryExp { $$.type = $1.type; }
-|       LPAR Exp RPAR { $$.type = $2.type; }
+    UnaryExp { $$.type = $1.type; }
+|   LPAR Exp RPAR { $$.type = $2.type; }
 ;
 
 UnaryExp:
-        PLUS SimpleExp { $$.type = $2.type; }
-|       MINUS SimpleExp { $$.type = $2.type; }
-|       SimpleExp { $$.type = $1.type; }
+    PLUS CastExp { 
+        if ($1.type == INT || $1.type == REAL) {
+            $$.type = $1.type;
+        } else { 
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   MINUS CastExp { 
+        if ($1.type == INT || $1.type == REAL) {
+            $$.type = $1.type;
+        } else { 
+            printf("ERROR! Incompatible type. \n");
+        }
+    }
+|   CastExp { $$.type = $1.type; }
 ;
+
+CastExp:
+    LPAR T_INT RPAR SimpleExp       {
+        if ($4.type == T_INT) {
+            $$.type == T_INT;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_REAL) {
+            $$.type == T_INT;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_BOOL) {
+            $$.type == T_INT;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_CHAR) {
+            $$.type == T_INT;
+            $$.val = $4.val;
+        }
+    }
+|   LPAR T_REAL RPAR SimpleExp      {
+        if ($4.type == T_INT) {
+            $$.type == T_REAL;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_REAL) {
+            $$.type == T_REAL;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_BOOL) {
+            $$.type == T_REAL;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_CHAR) {
+            $$.type == T_REAL;
+            $$.val = $4.val;
+        }
+}
+|   LPAR T_BOOL RPAR SimpleExp      {
+        if ($4.type == T_INT) {
+            $$.type == T_BOOL;
+            $$.val = $4.val > 0;
+        }
+        if ($4.type == T_REAL) {
+            $$.type == T_BOOL;
+            $$.val = $4.val > 0.0;
+        }
+        if ($4.type == T_BOOL) {
+            $$.type == T_BOOL;
+            $$.val = $4.val;
+        }
+        if ($4.type == T_CHAR) {
+            printf("char para bool pode não!\n");
+        }
+}
+|   LPAR T_CHAR RPAR SimpleExp      {
+    if ($4.type == T_INT) {
+        $$.type == T_CHAR;
+        // TODO If
+        $$.val = $4.val;
+    }
+    if ($4.type == T_REAL) {
+        printf("real para char pode não!\n");
+    }
+    if ($4.type == T_BOOL) {
+        printf("bool para char pode não!\n");
+    }
+    if ($4.type == T_CHAR) {
+        $$.type == T_CHAR;
+        $$.val = $4.val;
+    }
+}
+|   SimpleExp                       {
+    $$.type = $1.type;
+}
 
 SimpleExp:
     NumExp { $$.type = $1.type; }
-|   AcessMemAddr {}
+|   AcessMemAddr { $$.type = $1.type; }
 ;
 
 NumExp:
-        V_INT    { $$.type = T_INT;  }
-|       V_REAL   { $$.type = T_REAL; }
-|       V_BOOL   { $$.type = T_BOOL; }
-|       V_CHAR   { $$.type = T_CHAR; }
-|       V_STRING { $$.type = ARRAY; /*TODO*/}
+    V_INT    { $$.type = T_INT;  }
+|   V_REAL   { $$.type = T_REAL; }
+|   V_BOOL   { $$.type = T_BOOL; }
+|   V_CHAR   { $$.type = T_CHAR; }
+|   V_STRING { $$.type = ARRAY; /*TODO*/}
 ;
 
 Args : 
-        Exp ArgsAux {}
-|       /* NOTHING */ {}
+    Exp ArgsAux {}
+|   /* NOTHING */ {}
 ;
 
 ArgsAux : COMMA Args {}
-|       /* NOTHING */ {}
+|   /* NOTHING */ {}
 ;
 
 %%

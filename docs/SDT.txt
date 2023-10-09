@@ -75,18 +75,31 @@ Cmds:
 ;
 
 CmdAux:
-        AcessMemAddr CmdAux_ {}
+        AcessMemAddr CmdAux_ {
+                if AcessMemAddr.type == CmdAux_.type;
+        }
 |       CmdBlock {}
 |       CmdConditional {}
 |       CONTINUE {}
 |       BREAK {}
-|       FOR ID ATTRIB Exp TO Exp STEP Exp CmdBlock {}
+|       FOR ID ATTRIB Exp TO Exp STEP Exp CmdBlock {
+                if (ID.type == Exp1.type and
+                    ID.type == Exp2.type and
+                    ID.type == Exp3.type) {
+
+                } else {
+                        error!
+                }
+        
+}
 |       LOOP Vars Cmds END {}
 |       EXIT WHEN Exp {}
 |       CmdReturn {}
 ;
 
-CmdAux_ : ATTRIB Exp {}
+CmdAux_ : ATTRIB Exp {
+        self.type = Exp.type;
+}
 |       /* NOTHING */ {}
 ;
 
@@ -98,7 +111,11 @@ AcessMemAddr:
 ;
 
 CmdConditional:
-        IF Exp THEN CmdBlock CmdConditionalEnd {}
+        IF Exp THEN CmdBlock CmdConditionalEnd {
+                if (Exp.type != bool) {
+                        error!
+                }
+        }
 ;
 
 CmdConditionalEnd:
