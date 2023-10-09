@@ -63,6 +63,7 @@ identificador   {letter}({letter}|{number})*
 
 "const"     {column_counter += strlen(yytext); return CONST;}
 "var"	      {column_counter += strlen(yytext); return VAR;}
+"ref"	      {column_counter += strlen(yytext); return REF;}
 "if"        {column_counter += strlen(yytext); return IF;}
 "else"      {column_counter += strlen(yytext); return ELSE;}
 "loop"      {column_counter += strlen(yytext); return LOOP;}
@@ -143,7 +144,7 @@ char terminal_mapping[56][16] = {
     "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
     "VAR",      "BEGIN_",   "FOR",      "TO",        "STEP",      "LOOP",
     "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
-    "ELSE",     "RETURN"};
+    "ELSE",     "RETURN", "REF"};
 
 char non_terminal_mapping[44][32] = {"Prog",
                                      "Decl",

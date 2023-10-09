@@ -58,5 +58,6 @@
 #define THEN 54
 #define ELSE 55
 #define RETURN 56
+#define REF 57
 
 #endif  // TERMINAL_DEFINES_H
