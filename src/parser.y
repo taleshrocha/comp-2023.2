@@ -5,6 +5,15 @@
 
 extern struct Node;
 
+#define INT_TYPE 1
+#define REAL_TYPE 2
+#define BOOL_TYPE 3
+#define CHAR_TYPE 4
+
+int type_list[100];
+int args_size;
+int type_counter = 5;
+
 Node* createNode(int identifier, Node* children) {
     // TODO
     return NULL;
@@ -31,13 +40,14 @@ void yyerror(char* s) {
             char v_char;
             char* v_string;
         } val;
+        
         struct Node* tree;
     } info;
 }
 
 %start Prog 
 
-%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr CmdAux
+%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args TypeDec
 
 %%
 
@@ -60,11 +70,11 @@ Types :
 |   /* NOTHING */
 ;
 TypeDec :
-    T_BOOL {}
-|   T_INT {}
-|   T_REAL {}
-|   T_CHAR {}
-|   ID {}
+    T_BOOL {$$.type = BOOL_TYPE;}
+|   T_INT  {$$.type = INT_TYPE;}
+|   T_REAL {$$.type = REAL_TYPE;}
+|   T_CHAR {$$.type = CHAR_TYPE;}
+|   ID     {$$.type = ???;}
 |   ARRAY LBRA Interval RBRA OF TypeDec  {}
 |   RECORD Fields END {}
 ;
@@ -83,22 +93,29 @@ SubProg :
 ;
 
 ProcedureDecl :
-    PROCEDURE ID LPAR Parameters RPAR CmdBlock SEMICOLON {}
+    PROCEDURE ID LPAR {args_size=0;} Parameters RPAR {
+        // inserir na tabela
+        // zerar argsize
+        // 
+    } CmdBlock SEMICOLON
 ;
 
 Parameters:
-    ID COLON TypeDec ParametersAux {}
-    REF ID COLON TypeDec ParametersAux {}
+    ID COLON TypeDec ParametersAux { args_types[args_size++] = $3.type }
+|   REF ID COLON TypeDec ParametersAux { args_types[args_size++] = $3.type }
 |   /* NOTHING */ {}
 ;
 
 ParametersAux:
-    COMMA Parameters {}
+    COMMA Parameters { }
 |   /* NOTHING */ {}
 ;
 
 FunctionDecl:
-    FUNCTION ID LPAR Parameters RPAR COLON TypeDec CmdBlock SEMICOLON {}
+    FUNCTION ID LPAR Parameters RPAR COLON TypeDec {
+        // criar registro na tabela para def
+        // apagar os dados de parametros após salvar a função na tabela de simbolos
+    } CmdBlock SEMICOLON
 ;
 
 CmdBlock :
@@ -112,7 +129,7 @@ Cmds:
 
 CmdAux:
     AcessMemAddr ATTRIB Exp {
-        if ($$.type != $2.type) {
+        if ($1.type != $2.type) {
             // TODO: ERROR
         }
     }
@@ -121,13 +138,18 @@ CmdAux:
 |   CONTINUE {}
 |   BREAK {}
 |   FOR AcessMemAddr ATTRIB Exp TO Exp STEP Exp CmdBlock {
-
-
-
-
+        if ($2.type == $4.type && $6.type == $8.type && $2.type == $6.type) {
+            // TODO
+        } else {
+            printf("ERROR");
+        }
     }
 |   LOOP Vars Cmds END {}
-|   EXIT WHEN Exp {}
+|   EXIT WHEN Exp { 
+        if ($3.type != BOOL_TYPE) {
+            // TODO: error
+        }
+    }
 |   CmdReturn {}
 ;
 
@@ -135,20 +157,30 @@ AcessMemAddr:
     ID {
         //TODO
     }
-|   AcessMemAddr DOT ID {}
+|   AcessMemAddr DOT ID {
+        //TODO  
+    }
+
 |   AcessMemAddr LBRA Exp RBRA {
-        if ($3.type == T_INT) {
+        if ($3.type == INT_TYPE) {
             $$.type = $3.type;
         } else {
             printf("ERROR");
         }
-}
-|   AcessMemAddr LPAR Args RPAR {}
+        // garantir q AcessMemAddr é um array
+        // acessar o tipo do conteudo array e atribuir esse tipo para AcessMemAddr
+    }
+|   AcessMemAddr LPAR Args RPAR {
+    // TODO: comparar args com os parametros da tabela de simbolo do função AcessMemAddr 
+    // desalocar a memoria de args após o uso
+    // atribuir o tipo retornado pela função ao AcessMemAddr
+    // {args_size=0;}
+    }
 ;
 
 CmdConditional:
     IF Exp THEN CmdBlock CmdConditionalEnd {
-        if ($2.type != T_BOOL) {
+        if ($2.type != BOOL_TYPE) {
             printf("ERROR");
             // TODO
         }
@@ -162,19 +194,19 @@ CmdConditionalEnd:
 
 CmdReturn:
     RETURN CmdReturnExp {
-        // TODO lookup tipo da função/proc mais próxima
+        // TODO busca na tabela para tipo compativel 
     }
 ;
 
 CmdReturnExp:
     Exp { $$.type = $1.type; }
-|   /* NOTHING */ {}
+|   /* NOTHING */ { $$.type = -1;}
 ;
 
 Exp:
     Exp OR Terms {
-        if ($1.type == T_BOOL && $3.type == T_BOOL) {
-            $$.type = T_BOOL;
+        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
@@ -184,8 +216,8 @@ Exp:
 
 Terms:
     Terms AND Comps {
-        if ($1.type == T_BOOL && $3.type == T_BOOL) {
-            $$.type = T_BOOL;
+        if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
@@ -195,63 +227,63 @@ Terms:
 
 Comps: 
     Factor NEQ Factor {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_BOOL && $3.type == T_BOOL) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_CHAR && $3.type == T_CHAR) {
-            $$.type = T_BOOL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == CHAR_TYPE && $3.type == CHAR_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   Factor EQ Factor  {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_BOOL && $3.type == T_BOOL) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_CHAR && $3.type == T_CHAR) {
-            $$.type = T_BOOL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == CHAR_TYPE && $3.type == CHAR_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   Factor LESS Factor {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_BOOL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   Factor GREATER Factor  {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_BOOL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   Factor LEQ Factor {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_BOOL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   Factor GEQ Factor  {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_BOOL;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_BOOL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = BOOL_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = BOOL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
@@ -261,8 +293,8 @@ Comps:
 
 Factor:
     NOT AriOp {
-        if ($2.type == T_BOOL ) {
-            $$.type = T_BOOL;
+        if ($2.type == BOOL_TYPE ) {
+            $$.type = BOOL_TYPE;
             $$.val = !$2.val;
         } else {
             printf("ERROR! Incompatible type. \n");
@@ -273,19 +305,19 @@ Factor:
 
 AriOp:
     AriOp PLUS AriOp2 {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_INT;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_REAL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = INT_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = REAL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   AriOp MINUS AriOp2 {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_INT;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_REAL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = INT_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = REAL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
@@ -295,27 +327,27 @@ AriOp:
 
 AriOp2:
     AriOp2 MULTIPLY Parenthesis {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_INT;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_REAL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = INT_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = REAL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   AriOp2 DIVIDE Parenthesis {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_INT;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
-            $$.type = T_REAL;
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = INT_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
+            $$.type = REAL_TYPE;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   AriOp2 MOD Parenthesis {
-        if ($1.type == T_INT && $3.type == T_INT) {
-            $$.type = T_INT;
-        } else if ($1.type == T_REAL && $3.type == T_REAL) {
+        if ($1.type == INT_TYPE && $3.type == INT_TYPE) {
+            $$.type = INT_TYPE;
+        } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             // TODO
             printf("TODO. \n");
         } else {
@@ -350,72 +382,72 @@ UnaryExp:
 
 CastExp:
     LPAR T_INT RPAR SimpleExp       {
-        if ($4.type == T_INT) {
-            $$.type == T_INT;
+        if ($4.type == INT_TYPE) {
+            $$.type == INT_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_REAL) {
-            $$.type == T_INT;
+        if ($4.type == REAL_TYPE) {
+            $$.type == INT_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_BOOL) {
-            $$.type == T_INT;
+        if ($4.type == BOOL_TYPE) {
+            $$.type == INT_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_CHAR) {
-            $$.type == T_INT;
+        if ($4.type == CHAR_TYPE) {
+            $$.type == INT_TYPE;
             $$.val = $4.val;
         }
     }
 |   LPAR T_REAL RPAR SimpleExp      {
-        if ($4.type == T_INT) {
-            $$.type == T_REAL;
+        if ($4.type == INT_TYPE) {
+            $$.type == REAL_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_REAL) {
-            $$.type == T_REAL;
+        if ($4.type == REAL_TYPE) {
+            $$.type == REAL_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_BOOL) {
-            $$.type == T_REAL;
+        if ($4.type == BOOL_TYPE) {
+            $$.type == REAL_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_CHAR) {
-            $$.type == T_REAL;
+        if ($4.type == CHAR_TYPE) {
+            $$.type == REAL_TYPE;
             $$.val = $4.val;
         }
 }
 |   LPAR T_BOOL RPAR SimpleExp      {
-        if ($4.type == T_INT) {
-            $$.type == T_BOOL;
+        if ($4.type == INT_TYPE) {
+            $$.type == BOOL_TYPE;
             $$.val = $4.val > 0;
         }
-        if ($4.type == T_REAL) {
-            $$.type == T_BOOL;
+        if ($4.type == REAL_TYPE) {
+            $$.type == BOOL_TYPE;
             $$.val = $4.val > 0.0;
         }
-        if ($4.type == T_BOOL) {
-            $$.type == T_BOOL;
+        if ($4.type == BOOL_TYPE) {
+            $$.type == BOOL_TYPE;
             $$.val = $4.val;
         }
-        if ($4.type == T_CHAR) {
+        if ($4.type == CHAR_TYPE) {
             printf("char para bool pode não!\n");
         }
 }
 |   LPAR T_CHAR RPAR SimpleExp      {
-    if ($4.type == T_INT) {
-        $$.type == T_CHAR;
+    if ($4.type == INT_TYPE) {
+        $$.type == CHAR_TYPE;
         // TODO If
         $$.val = $4.val;
     }
-    if ($4.type == T_REAL) {
+    if ($4.type == REAL_TYPE) {
         printf("real para char pode não!\n");
     }
-    if ($4.type == T_BOOL) {
+    if ($4.type == BOOL_TYPE) {
         printf("bool para char pode não!\n");
     }
-    if ($4.type == T_CHAR) {
-        $$.type == T_CHAR;
+    if ($4.type == CHAR_TYPE) {
+        $$.type == CHAR_TYPE;
         $$.val = $4.val;
     }
 }
@@ -429,10 +461,10 @@ SimpleExp:
 ;
 
 NumExp:
-    V_INT    { $$.type = T_INT;  }
-|   V_REAL   { $$.type = T_REAL; }
-|   V_BOOL   { $$.type = T_BOOL; }
-|   V_CHAR   { $$.type = T_CHAR; }
+    V_INT    { $$.type = INT_TYPE;  }
+|   V_REAL   { $$.type = REAL_TYPE; }
+|   V_BOOL   { $$.type = BOOL_TYPE; }
+|   V_CHAR   { $$.type = CHAR_TYPE; }
 |   V_STRING { $$.type = ARRAY; /*TODO*/}
 ;
 
