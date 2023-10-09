@@ -1,3 +1,11 @@
+typedef struct Node_{
+	operator char;
+	struct Node tree*;
+	
+} Node;
+// Ideia para a árvore abstrata
+
+
 Prog : 
         Decl CmdBlock {}
 ;
