@@ -38,6 +38,7 @@ void destroySymbolTable() {
 }
 
 unsigned int addConstant(const char* name, int type, ValueData data) {
+  printf("value: %d", data.v_int);
   for (size_t i = 0; i < curr_scope->size; i++) {
     if (strcmp(curr_scope->symbol_table[i].name, name) == 0) {
       printf(

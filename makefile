@@ -13,7 +13,7 @@ SRC=./src
 INCLUDE=./include
 
 # main target
-all: mkfolders $(BIN)/lexer_test $(BIN)/parser $(BIN)/nonRecursiveParser $(BIN)/recursiveParser
+all: mkfolders  $(BIN)/parser 
 
 # create folders
 
@@ -32,21 +32,21 @@ release: all
 
 # executables
 
-$(BIN)/lexer_test: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/lexerTest.o
-	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
+# $(BIN)/lexer_test: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/lexerTest.o
+# 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
-$(BIN)/nonRecursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/nonRecursiveParser.o
-	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
+# $(BIN)/nonRecursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/nonRecursiveParser.o
+# 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
-$(BIN)/recursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/recursiveParser.o
-	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
+# $(BIN)/recursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/recursiveParser.o
+# 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
-$(BIN)/parser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/parser.o
+$(BIN)/parser: $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/symbolTable.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
 
-$(OBJS)/lexer.o: $(SRC)/lexer.l.c $(SRC)/parser.y.c
+$(OBJS)/lexer.o: $(SRC)/lexer.l.c 
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/parser.o: $(SRC)/parser.y.c

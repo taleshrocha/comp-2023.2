@@ -96,7 +96,7 @@ identificador   {letter}({letter}|{number})*
 
 
 {number}+(E[+-]?{number}+)?            {
-                                              // yylval.int_value = atoi(yytext);
+                                              yylval.info.value.v_int = atoi(yytext);
                                               column_counter += strlen(yytext);
                                               return V_INT;
                                             }
@@ -122,6 +122,7 @@ identificador   {letter}({letter}|{number})*
 
 {identificador}                             {
                                             //  // yylval.id_index = addSymbol(yytext);
+                                              yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return ID;
                                             }

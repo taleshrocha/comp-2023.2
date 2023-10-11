@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <lexer.l.h>
 #include <typedefs.h>
+#include <symbolTable.h>
 
 #define INT_TYPE 1
 #define REAL_TYPE 2
@@ -12,45 +13,64 @@ int args_types[100];
 int args_size;
 int type_counter = 5;
 
-Node* createNode(int identifier, Node* children) {
-    // TODO
-    return NULL;
-}
-
 extern int column_counter;
 
 void yyerror(char* s) {
     fprintf(stderr, "%s at line-column: %d-%d\n", s , yylineno, column_counter);
     fprintf(stderr, "current token is: \"%s\"\n", yytext);
 }
-%}
 
-%token CONST ID ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_INT V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
+Symbol_Table* tabela;
+
+%}
 
 %union {
     struct {
         int type;
         char* name;
-        ValueData;
-        struct Node* tree;
+        union {
+            int v_int;
+            int v_bool;
+            double v_real;
+            char v_char;
+            char* v_string;
+        } value;
     } info;
 }
 
-%start Prog 
+%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
+
+%token <info> ID V_INT
 
 %type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args TypeDec
+
+%start Prog 
 
 %%
 
 Prog : 
-    Decl CmdBlock {}
+    {
+        tabela = create_symbol_table(NULL, 0);
+    } 
+    Decl CmdBlock {
+        // TODO free das tabelas
+    }
 ;
 Decl : 
     Consts Types SubProg Vars {}
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON Consts {
-        addConstant($2.name, $4.type, $4.value)
+        ValueData data;
+        switch ($4.type) {
+            case INT_TYPE:
+                data.v_int = $4.value.v_int;
+                break;
+        }
+        printf("type: %d\n", $4.type);
+        printf("value: %d\n", data.v_int);
+        addConstant($2.name, $4.type, data);
+
     }
 |   /* NOTHING */
 ;
@@ -288,7 +308,7 @@ Factor:
     NOT AriOp {
         if ($2.type == BOOL_TYPE ) {
             $$.type = BOOL_TYPE;
-            $$.v_bool = !$2.v_bool;
+            $$.value.v_bool = !$2.value.v_bool;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
@@ -376,52 +396,52 @@ UnaryExp:
 CastExp:
     LPAR T_INT RPAR SimpleExp       {
         if ($4.type == INT_TYPE) {
-            $$.type == INT_TYPE;
-            $$.v_int = $4.v_int;
+            $$.type = INT_TYPE;
+            $$.value.v_int = $4.value.v_int;
         }
         if ($4.type == REAL_TYPE) {
-            $$.type == INT_TYPE;
-            $$.v_int = $4.v_real;
+            $$.type = INT_TYPE;
+            $$.value.v_int = $4.value.v_real;
         }
         if ($4.type == BOOL_TYPE) {
-            $$.type == INT_TYPE;
-            $$.v_int = $4.v_bool;
+            $$.type = INT_TYPE;
+            $$.value.v_int = $4.value.v_bool;
         }
         if ($4.type == CHAR_TYPE) {
-            $$.type == INT_TYPE;
-            $$.v_int = $4.v_char;
+            $$.type = INT_TYPE;
+            $$.value.v_int = $4.value.v_char;
         }
     }
 |   LPAR T_REAL RPAR SimpleExp      {
         if ($4.type == INT_TYPE) {
-            $$.type == REAL_TYPE;
-            $$.v_real = $4.v_int;
+            $$.type = REAL_TYPE;
+            $$.value.v_real = $4.value.v_int;
         }
         if ($4.type == REAL_TYPE) {
-            $$.type == REAL_TYPE;
-            $$.v_real = $4.v_real;
+            $$.type = REAL_TYPE;
+            $$.value.v_real = $4.value.v_real;
         }
         if ($4.type == BOOL_TYPE) {
-            $$.type == REAL_TYPE;
-            $$.v_real = $4.v_bool;
+            $$.type = REAL_TYPE;
+            $$.value.v_real = $4.value.v_bool;
         }
         if ($4.type == CHAR_TYPE) {
-            $$.type == REAL_TYPE;
-            $$.v_real = $4.v_char;
+            $$.type = REAL_TYPE;
+            $$.value.v_real = $4.value.v_char;
         }
 }
 |   LPAR T_BOOL RPAR SimpleExp      {
         if ($4.type == INT_TYPE) {
-            $$.type == BOOL_TYPE;
-            $$.v_bool = $4.v_int > 0;
+            $$.type = BOOL_TYPE;
+            $$.value.v_bool = $4.value.v_int > 0;
         }
         if ($4.type == REAL_TYPE) {
-            $$.type == BOOL_TYPE;
-            $$.v_bool = $4.v_real > 0.0;
+            $$.type = BOOL_TYPE;
+            $$.value.v_bool = $4.value.v_real > 0.0;
         }
         if ($4.type == BOOL_TYPE) {
-            $$.type == BOOL_TYPE;
-            $$.v_bool = $4.v_bool;
+            $$.type = BOOL_TYPE;
+            $$.value.v_bool = $4.value.v_bool;
         }
         if ($4.type == CHAR_TYPE) {
             printf("char para bool pode não!\n");
@@ -429,9 +449,9 @@ CastExp:
 }
 |   LPAR T_CHAR RPAR SimpleExp      {
     if ($4.type == INT_TYPE) {
-        $$.type == CHAR_TYPE;
+        $$.type = CHAR_TYPE;
         // TODO If
-        $$.v_char = $4.v_int;
+        $$.value.v_char = $4.value.v_int;
     }
     if ($4.type == REAL_TYPE) {
         printf("real para char pode não!\n");
@@ -440,8 +460,8 @@ CastExp:
         printf("bool para char pode não!\n");
     }
     if ($4.type == CHAR_TYPE) {
-        $$.type == CHAR_TYPE;
-        $$.v_char = $4.v_char;
+        $$.type = CHAR_TYPE;
+        $$.value.v_char = $4.value.v_char;
     }
 }
 |   SimpleExp                       {
@@ -454,7 +474,7 @@ SimpleExp:
 ;
 
 NumExp:
-    V_INT    { $$.type = INT_TYPE;  }
+    V_INT    { $$.type = INT_TYPE; $$.value.v_int = $1.value.v_int; }
 |   V_REAL   { $$.type = REAL_TYPE; }
 |   V_BOOL   { $$.type = BOOL_TYPE; }
 |   V_CHAR   { $$.type = CHAR_TYPE; }

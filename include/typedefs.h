@@ -16,14 +16,6 @@ typedef enum E_TYPE {
   E_PROCEDURE
 } E_TYPE;
 
-typedef union ValueData {
-    int v_int;
-    int v_bool;
-    double v_real;
-    char v_char;
-    char* v_string;
-} ValueData;
-
 typedef struct ArrayData {
   E_TYPE type;
   int size;

@@ -1,3 +1,6 @@
+
+const const1 := 1;
+
 begin
     var id: int;
     id := 3 * true;

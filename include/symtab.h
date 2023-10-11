@@ -4,6 +4,19 @@
 #include <stdio.h> 
 #include <stdlib.h>
 
+typedef struct Variable
+{
+    int is_constant;
+    union Value {
+        int v_int;
+        int v_bool;
+        double v_real;
+        char v_char;
+        char* v_string;
+    } value;
+    
+} Variable;
+
 typedef struct Function
 {
     int return_type;
@@ -25,6 +38,7 @@ typedef struct Symbol_Entry
     {
         Function    f_data;
         Procedure   p_data;
+        Variable    v_data;
     }data;
     struct Symbol_Entry * next;
 } Symbol_Entry;
