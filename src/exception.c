@@ -37,7 +37,9 @@ void printMessage(enum MessageType messageType, const char *message, ...) {
     va_end(vars);
 }
 /*
+(Lembrar de adicionar o enum)
 Exemplos de uso:
+
     int x = 15, nive = 5555;
     printMessage(SUCCESS, "Sua gambiarra deu certo! %d\n", x);
     printMessage(ERROR, "Sua gambiarra não deu certo :( verifique seu código novamente ! %d %c\n", 15, 'c');
