@@ -134,7 +134,7 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
-char terminal_mapping[56][16] = {
+char terminal_mapping[57][16] = {
     "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
     "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
     "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",

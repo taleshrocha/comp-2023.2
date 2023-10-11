@@ -1,11 +1,10 @@
+#include "typedefs.h"
 #include "symbolTable.h"
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "typedefs.h"
 
 size_t maxNumSymbols = SYMBOL_TABLE_INITIAL_SIZE;
 int SCOPE = SCOPE_LEVEL;
@@ -36,6 +35,44 @@ void destroySymbolTable() {
   }
   free(curr_scope->symbol_table);
   free(curr_scope);
+}
+
+unsigned int addConstant(const char* name, int type, ValueData data) {
+  for (size_t i = 0; i < curr_scope->size; i++) {
+    if (strcmp(curr_scope->symbol_table[i].name, name) == 0) {
+      printf(
+          "Ja existe um token na tabela de simbolos com o lexema \"%s\".\n",
+          name);
+      return i;
+    }
+  }
+  if (curr_scope->size == curr_scope->capacity) {
+    increaseTableSize();
+  }
+
+  curr_scope->symbol_table[curr_scope->size].name = strdup(name);
+  switch (type) {
+    case 1:
+      curr_scope->symbol_table[curr_scope->size].type = E_BOOL;
+      curr_scope->symbol_table[curr_scope->size].bool_data = data.v_bool;
+    break;
+    case 2:
+      curr_scope->symbol_table[curr_scope->size].type = E_INT;
+      curr_scope->symbol_table[curr_scope->size].int_data = data.v_int;
+    break;
+    case 3:
+      curr_scope->symbol_table[curr_scope->size].type = E_REAL;
+      curr_scope->symbol_table[curr_scope->size].real_data = data.v_real;
+    break;
+    case 4:
+      curr_scope->symbol_table[curr_scope->size].type = E_CHAR;
+      curr_scope->symbol_table[curr_scope->size].char_data = data.v_char;
+    break;
+  default:
+    printf("Erro ao adicionar constantes. %d\n", type);
+    break;
+  }
+  return curr_scope->size++;
 }
 
 unsigned int addSymbol(const char* name) {

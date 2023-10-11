@@ -16,9 +16,18 @@ typedef enum E_TYPE {
   E_PROCEDURE
 } E_TYPE;
 
+typedef union ValueData {
+    int v_int;
+    int v_bool;
+    double v_real;
+    char v_char;
+    char* v_string;
+} ValueData;
+
 typedef struct ArrayData {
   E_TYPE type;
   int size;
+  int id;
 } ArrayData;
 
 typedef struct TypeNamePair {
@@ -28,21 +37,21 @@ typedef struct TypeNamePair {
 
 typedef struct RecordData {
   TypeNamePair* fields;
-  char* name;  // um record obrigatoriamente precisa ter um nome?
+  int id;
 } RecordData;
 
 typedef struct FunctionData {
   TypeNamePair* params;
   E_TYPE return_type;
   // ??? comandos ???
-  char* name;  // a função sabe seu proprio nome?
+  int id;
 } FunctionData;
 
 typedef struct ProcedureData {  // ??? precisa ser uma struct diferente entre
                                 // function e procedure?
   TypeNamePair* params;
   // ??? comandos ???
-  char* name;  // o procedure sabe seu proprio nome?
+  int id;
 } ProcedureData;
 
 typedef union TokenData {
@@ -62,20 +71,28 @@ typedef struct SymbolEntry {
     RecordData record_data;
     FunctionData function_data;
     ProcedureData procedure_data;
+    bool bool_data;
+    int int_data;
+    float real_data;
+    char char_data;
+    char* string_data;
+    // VarData var_data
   };
 } SymbolEntry;
 
 typedef struct ScopeEntry {
-  struct ScopeEntry* previous_scope;
   SymbolEntry* symbol_table;
-  int capacity;
-  int size;
+  size_t capacity;
+  size_t size;
+  struct ScopeEntry* previous_scope;
+  struct ScopeEntry* next_scopes;
+  size_t next_scopes_size;
 
 } ScopeEntry;
-
+struct Node;
 typedef struct Node {
   int identifier;
-  Node* children;
+  struct Node* children;
 } Node;
 
 Node* createNode(int identifier, Node* children);

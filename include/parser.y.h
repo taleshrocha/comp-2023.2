@@ -109,7 +109,8 @@ extern int yydebug;
     IF = 310,                      /* IF  */
     THEN = 311,                    /* THEN  */
     ELSE = 312,                    /* ELSE  */
-    RETURN = 313                   /* RETURN  */
+    RETURN = 313,                  /* RETURN  */
+    REF = 314                      /* REF  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -174,12 +175,13 @@ extern int yydebug;
 #define THEN 311
 #define ELSE 312
 #define RETURN 313
+#define REF 314
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 17 "src/parser.y"
+#line 30 "src/parser.y"
 
     struct {
         int type;
@@ -190,11 +192,11 @@ union YYSTYPE
             double v_real;
             char v_char;
             char* v_string;
-        } val;
+        };
         struct Node* tree;
     } info;
 
-#line 198 "src/parser.y.h"
+#line 200 "src/parser.y.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

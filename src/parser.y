@@ -3,14 +3,12 @@
 #include <lexer.l.h>
 #include <typedefs.h>
 
-extern struct Node;
-
 #define INT_TYPE 1
 #define REAL_TYPE 2
 #define BOOL_TYPE 3
 #define CHAR_TYPE 4
 
-int type_list[100];
+int args_types[100];
 int args_size;
 int type_counter = 5;
 
@@ -33,14 +31,7 @@ void yyerror(char* s) {
     struct {
         int type;
         char* name;
-        union {
-            int v_int;
-            int v_bool;
-            double v_real;
-            char v_char;
-            char* v_string;
-        } val;
-        
+        ValueData;
         struct Node* tree;
     } info;
 }
@@ -58,7 +49,9 @@ Decl :
     Consts Types SubProg Vars {}
 ;
 Consts :
-    CONST ID ATTRIB Exp SEMICOLON Consts {}
+    CONST ID ATTRIB Exp SEMICOLON Consts {
+        addConstant($2.name, $4.type, $4.value)
+    }
 |   /* NOTHING */
 ;
 Vars : 
@@ -74,7 +67,7 @@ TypeDec :
 |   T_INT  {$$.type = INT_TYPE;}
 |   T_REAL {$$.type = REAL_TYPE;}
 |   T_CHAR {$$.type = CHAR_TYPE;}
-|   ID     {$$.type = ???;}
+|   ID     {$$.type = 0 /*TODO*/;}
 |   ARRAY LBRA Interval RBRA OF TypeDec  {}
 |   RECORD Fields END {}
 ;
@@ -101,8 +94,8 @@ ProcedureDecl :
 ;
 
 Parameters:
-    ID COLON TypeDec ParametersAux { args_types[args_size++] = $3.type }
-|   REF ID COLON TypeDec ParametersAux { args_types[args_size++] = $3.type }
+    ID COLON TypeDec ParametersAux { args_types[args_size++] = $3.type; }
+|   REF ID COLON TypeDec ParametersAux { args_types[args_size++] = $4.type; }
 |   /* NOTHING */ {}
 ;
 
@@ -129,7 +122,7 @@ Cmds:
 
 CmdAux:
     AcessMemAddr ATTRIB Exp {
-        if ($1.type != $2.type) {
+        if ($1.type != $3.type) {
             // TODO: ERROR
         }
     }
@@ -295,7 +288,7 @@ Factor:
     NOT AriOp {
         if ($2.type == BOOL_TYPE ) {
             $$.type = BOOL_TYPE;
-            $$.val = !$2.val;
+            $$.v_bool = !$2.v_bool;
         } else {
             printf("ERROR! Incompatible type. \n");
         }
@@ -364,15 +357,15 @@ Parenthesis:
 
 UnaryExp:
     PLUS CastExp { 
-        if ($1.type == INT || $1.type == REAL) {
-            $$.type = $1.type;
+        if ($2.type == INT_TYPE || $2.type == REAL_TYPE) {
+            $$.type = $2.type;
         } else { 
             printf("ERROR! Incompatible type. \n");
         }
     }
 |   MINUS CastExp { 
-        if ($1.type == INT || $1.type == REAL) {
-            $$.type = $1.type;
+        if ($2.type == INT_TYPE || $2.type == REAL_TYPE) {
+            $$.type = $2.type;
         } else { 
             printf("ERROR! Incompatible type. \n");
         }
@@ -384,51 +377,51 @@ CastExp:
     LPAR T_INT RPAR SimpleExp       {
         if ($4.type == INT_TYPE) {
             $$.type == INT_TYPE;
-            $$.val = $4.val;
+            $$.v_int = $4.v_int;
         }
         if ($4.type == REAL_TYPE) {
             $$.type == INT_TYPE;
-            $$.val = $4.val;
+            $$.v_int = $4.v_real;
         }
         if ($4.type == BOOL_TYPE) {
             $$.type == INT_TYPE;
-            $$.val = $4.val;
+            $$.v_int = $4.v_bool;
         }
         if ($4.type == CHAR_TYPE) {
             $$.type == INT_TYPE;
-            $$.val = $4.val;
+            $$.v_int = $4.v_char;
         }
     }
 |   LPAR T_REAL RPAR SimpleExp      {
         if ($4.type == INT_TYPE) {
             $$.type == REAL_TYPE;
-            $$.val = $4.val;
+            $$.v_real = $4.v_int;
         }
         if ($4.type == REAL_TYPE) {
             $$.type == REAL_TYPE;
-            $$.val = $4.val;
+            $$.v_real = $4.v_real;
         }
         if ($4.type == BOOL_TYPE) {
             $$.type == REAL_TYPE;
-            $$.val = $4.val;
+            $$.v_real = $4.v_bool;
         }
         if ($4.type == CHAR_TYPE) {
             $$.type == REAL_TYPE;
-            $$.val = $4.val;
+            $$.v_real = $4.v_char;
         }
 }
 |   LPAR T_BOOL RPAR SimpleExp      {
         if ($4.type == INT_TYPE) {
             $$.type == BOOL_TYPE;
-            $$.val = $4.val > 0;
+            $$.v_bool = $4.v_int > 0;
         }
         if ($4.type == REAL_TYPE) {
             $$.type == BOOL_TYPE;
-            $$.val = $4.val > 0.0;
+            $$.v_bool = $4.v_real > 0.0;
         }
         if ($4.type == BOOL_TYPE) {
             $$.type == BOOL_TYPE;
-            $$.val = $4.val;
+            $$.v_bool = $4.v_bool;
         }
         if ($4.type == CHAR_TYPE) {
             printf("char para bool pode não!\n");
@@ -438,7 +431,7 @@ CastExp:
     if ($4.type == INT_TYPE) {
         $$.type == CHAR_TYPE;
         // TODO If
-        $$.val = $4.val;
+        $$.v_char = $4.v_int;
     }
     if ($4.type == REAL_TYPE) {
         printf("real para char pode não!\n");
@@ -448,7 +441,7 @@ CastExp:
     }
     if ($4.type == CHAR_TYPE) {
         $$.type == CHAR_TYPE;
-        $$.val = $4.val;
+        $$.v_char = $4.v_char;
     }
 }
 |   SimpleExp                       {

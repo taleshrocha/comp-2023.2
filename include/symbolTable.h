@@ -1,9 +1,8 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
-#include <stdbool.h>
-
 #include "typedefs.h"
+#include <stdbool.h>
 
 #define SYMBOL_TABLE_INITIAL_SIZE 100
 
@@ -13,6 +12,7 @@
 
 void initializeSymbolTable();
 unsigned int addSymbol(const char *name);
+unsigned int addConstant(const char* name, int type, ValueData data);
 void printFirst10Entries();
 void increaseTableSize();
 void destroySymbolTable();
