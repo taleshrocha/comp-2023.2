@@ -36,3 +36,10 @@ void printMessage(enum MessageType messageType, const char *message, ...) {
     
     va_end(vars);
 }
+/*
+Exemplos de uso:
+    int x = 15, nive = 5555;
+    printMessage(SUCCESS, "Sua gambiarra deu certo! %d\n", x);
+    printMessage(ERROR, "Sua gambiarra não deu certo :( verifique seu código novamente ! %d %c\n", 15, 'c');
+    printMessage(WARNING, "Sua gambiarra foi mais ou menos, checa essa parada aí irmão %d %s \n", nive, "String teste \n"); 
+*/
