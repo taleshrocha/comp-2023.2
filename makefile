@@ -41,7 +41,7 @@ release: all
 # $(BIN)/recursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/recursiveParser.o
 # 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
-$(BIN)/parser: $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/symbolTable.o
+$(BIN)/parser: $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/symbolTable.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -55,14 +55,17 @@ $(OBJS)/parser.o: $(SRC)/parser.y.c
 $(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
+$(OBJS)/symtab.o: $(SRC)/symtab.c
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
 $(OBJS)/lexerTest.o: $(SRC)/lexerTest.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
-$(OBJS)/nonRecursiveParser.o: $(SRC)/nonRecursiveParser.c
-	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+# $(OBJS)/nonRecursiveParser.o: $(SRC)/nonRecursiveParser.c
+# 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
-$(OBJS)/recursiveParser.o: $(SRC)/recursiveParser.c
-	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+# $(OBJS)/recursiveParser.o: $(SRC)/recursiveParser.c
+# 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources
 

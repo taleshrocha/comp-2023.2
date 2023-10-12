@@ -3,6 +3,7 @@
 #include <lexer.l.h>
 #include <typedefs.h>
 #include <symbolTable.h>
+#include <symtab.h>
 
 #define INT_TYPE 1
 #define REAL_TYPE 2
@@ -50,7 +51,7 @@ Symbol_Table* tabela;
 
 Prog : 
     {
-        tabela = create_symbol_table(NULL, 0);
+        tabela = createSymbolTable(NULL);
     } 
     Decl CmdBlock {
         // TODO free das tabelas

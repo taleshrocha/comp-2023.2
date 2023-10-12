@@ -30,6 +30,7 @@ typedef struct Procedure
     int params_size;
 } Procedure;
 
+/*   Entry of Symbol Table   */
 typedef struct Symbol_Entry
 {
     char *  name;
@@ -39,25 +40,29 @@ typedef struct Symbol_Entry
         Function    f_data;
         Procedure   p_data;
         Variable    v_data;
-    }data;
-    struct Symbol_Entry * next;
+    } data;
 } Symbol_Entry;
 
-
+/*   Symbol Table (SCOPE)   */
 typedef struct Symbol_Table
 {
-    int scope;
-    Symbol_Entry * symbol_head; //simbolos definidos no escopo atual
+    Symbol_Entry * symbols; //simbolos definidos no escopo atual - array dinamico
+    size_t size;
+    size_t capacity;
     struct Symbol_Table * parent;  //utilizar para busca de simbolo no "escopo-pai"
 
 } Symbol_Table;
 
-Function * get_function_symbol(Symbol_Table * symbolTable, char * functionName);
-int get_function_return_type(Symbol_Table * symbolTable, char * functionName);
 
-Symbol_Table * create_symbol_table(Symbol_Table * parent, int scope);
-void insert_symbol(Symbol_Table * symbolTable, Symbol_Entry symbol);
-Symbol_Entry * search_symbol(Symbol_Table * symbolTable, char * name);
-Symbol_Entry * get_last_symbol_in_table(Symbol_Table * symbolTable);
+
+
+void increaseSymbolTableSize(Symbol_Table * symbolTable);
+
+Function * getFunctionSymbol(Symbol_Table * symbolTable, char * functionName);
+int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName);
+
+Symbol_Table * createSymbolTable(Symbol_Table * parent);
+Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol);
+Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name);
 
 #endif
