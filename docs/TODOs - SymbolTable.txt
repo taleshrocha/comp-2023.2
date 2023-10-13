@@ -1,0 +1,10 @@
+1. Adicionar ponteiro, na struct Symbol_Table, para o escopo filho.
+    Hoje, há um ponteiro somente para o pai.
+
+2. Symbol_Entry - Adicionar 'Array' e 'UserType' no union 'data'.
+
+3. Criar função para desalocar memória heap utilizada pela tabela de símbolos.
+    > Por isso a necessidade de ponteiro para o escopo filho (ver item 1).
+
+4. (Opcional) Adicionar campo "scope" na struct Symbol_Table.
+    > Podemos organizar os prints com base nesse campo, para facilitar o debugging.

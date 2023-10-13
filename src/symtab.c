@@ -58,7 +58,7 @@ void increaseSymbolTableSize(Symbol_Table * symbolTable){
     Symbol_Entry *newSymbols = (Symbol_Entry *)malloc(sizeof(Symbol_Entry) * newCapacity);
 
     if(newSymbols == NULL){
-        printf("Error: could not increase Symbol Table. No free memory available.\n");
+        printf("\nError: could not increase Symbol Table. No free memory available.\n");
         exit(1);
     }
 
@@ -76,7 +76,7 @@ void increaseSymbolTableSize(Symbol_Table * symbolTable){
 Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol){   
     Symbol_Entry * searchResult = searchSymbol(symbolTable, symbol->name) ; 
     if(searchResult != NULL){
-        printf("Symbol '%s' is already present in the symbol table.", symbol->name);
+        printf("\nSymbol '%s' is already present in the symbol table.", symbol->name);
         return searchResult;
     }
 
