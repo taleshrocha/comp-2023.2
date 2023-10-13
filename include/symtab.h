@@ -65,4 +65,6 @@ Symbol_Table * createSymbolTable(Symbol_Table * parent);
 Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol);
 Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name);
 
+void printCurrentScope(Symbol_Table * symbolTable);
+
 #endif

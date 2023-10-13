@@ -9,6 +9,7 @@
 #define REAL_TYPE 2
 #define BOOL_TYPE 3
 #define CHAR_TYPE 4
+#define STRING_TYPE 5
 
 int args_types[100];
 int args_size;
@@ -62,16 +63,38 @@ Decl :
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON Consts {
-        ValueData data;
+        Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
+        newSymbol->name = $2.name;
+        newSymbol->type = $4.type;
+
+        Variable var_data;
+        var_data.is_constant = 1;
         switch ($4.type) {
             case INT_TYPE:
-                data.v_int = $4.value.v_int;
+                var_data.value.v_int = $4.value.v_int;
                 break;
+            case REAL_TYPE:
+                var_data.value.v_real = $4.value.v_real;
+                break;
+            case BOOL_TYPE:
+                var_data.value.v_bool = $4.value.v_bool;
+                break;
+            case CHAR_TYPE:
+                var_data.value.v_char = $4.value.v_char;
+                break;
+            case STRING_TYPE:
+                var_data.value.v_string = $4.value.v_string;
+                break;
+            default:
+                printf("Constant value type not known.");
+                exit(1); //TODO: tratar melhor este caso.
         }
+        newSymbol->data.v_data = var_data;
         printf("type: %d\n", $4.type);
-        printf("value: %d\n", data.v_int);
-        addConstant($2.name, $4.type, data);
-
+        printf("value: %d\n", var_data.value.v_int);
+        //addConstant($2.name, $4.type, data);
+        insertSymbol(tabela, newSymbol);
+        printCurrentScope(tabela);
     }
 |   /* NOTHING */
 ;

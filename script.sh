@@ -5,4 +5,4 @@ echo "Compiling...\n"
 make
 echo "\n"
 echo "Executing...\n\n"
-./bin/lexer < ./tests/recursive-parser/success1.txt
+./bin/parser < example2.txt

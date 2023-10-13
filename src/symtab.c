@@ -86,3 +86,21 @@ Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol){
     symbolTable->symbols[symbolTable->size++] = *symbol;
     return symbol;
 }
+
+void printCurrentScope(Symbol_Table * symbolTable){
+    if(symbolTable->size == 0){
+        printf("No symbols in the current scope.");
+        return;
+    }
+    
+    printf("\n\n\t Symbol Table - Current Scope\n");
+    for (size_t i = 0; i < symbolTable->size; i++)
+    {
+        printf(
+            "%ld. Name: %s. Type: %d\n",
+            i, 
+            symbolTable->symbols[i].name,
+            symbolTable->symbols[i].type);
+    }
+    printf("\n");
+}

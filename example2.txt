@@ -1,5 +1,6 @@
 
 const const1 := 1;
+const const1 := 1;
 
 begin
     var id: int;
