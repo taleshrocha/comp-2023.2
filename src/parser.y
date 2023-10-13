@@ -169,6 +169,7 @@ CmdAux:
         if ($1.type != $3.type) {
             // TODO: ERROR
         }
+        //TODO: Adicionar checagem para atribuição a constantes
     }
 |   CmdBlock {}
 |   CmdConditional {}
