@@ -14,7 +14,7 @@
 #define PROCEDURE_TYPE 7
 
 int args_types[100];
-char args_names[100];
+char args_names[100][100];
 int args_size;
 int type_counter = 5;
 
@@ -100,7 +100,7 @@ Consts :
         // printf("value: %d\n", var_data.value.v_int);
         //addConstant($2.name, $4.type, data);
         insertSymbol(getCurrentScope(), newSymbol);
-        printCurrentScope(getCurrentScope());
+        //printCurrentScope(getCurrentScope());
     }
 |   /* NOTHING */
 ;
@@ -168,7 +168,7 @@ SubProg :
 
 ProcedureDecl :
     PROCEDURE ID LPAR {args_size=0;} Parameters RPAR {
-        printf("\n\tProcessing procedure...\n");
+        printf("\n\tProcessing procedure...\n\n");
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
 
         printf("Procedure name: %s\n", $2.name);
@@ -176,19 +176,22 @@ ProcedureDecl :
         newSymbol->type = PROCEDURE_TYPE;
 
         Procedure procedure;
+        printf("\nPARAMETROS IDENTIFICADOS - PROCEDURE: %s\n", $2.name);
         for(int i = 0; i < args_size; i++){
             printf(
-                "Param %d Type: %d\n", 
+                "\tParam %d Type: %d\n", 
                 i+1, args_types[i]
             );
             procedure.params[i] = args_types[i];
         }
         procedure.params_size = args_size;
-        args_size=0;
+        //args_size=0;// Comentado para nao ser zerado 
+                        //- ainda falta inserir os parametros na tabela de simbolos do procedimento
 
         newSymbol->data.p_data = procedure;
+
+        // criar registro na tabela
         insertSymbol(getCurrentScope(), newSymbol);
-        //printCurrentScope(getCurrentScope());
         
     } CmdBlock SEMICOLON
     {
@@ -198,6 +201,7 @@ ProcedureDecl :
 
 Parameters:
     ID COLON TypeDec ParametersAux { 
+        strcpy(args_names[args_size], $1.name);
         args_types[args_size++] = $3.type; 
     }
 |   REF ID COLON TypeDec ParametersAux { args_types[args_size++] = $4.type; }
@@ -211,7 +215,7 @@ ParametersAux:
 
 FunctionDecl:
     FUNCTION ID LPAR {args_size=0;} Parameters RPAR COLON TypeDec {
-        printf("\n\tProcessing function...\n");
+        printf("\n\tProcessing function...\n\n");
 
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
 
@@ -222,10 +226,10 @@ FunctionDecl:
         Function function;
         printf("Return type: %d\n", $8.type);
         function.return_type = $8.type;
-
+        printf("\nPARAMETROS IDENTIFICADOS - FUNCTION: %s\n", $2.name);
         for(int i = 0; i < args_size; i++){
             printf(
-                "Param %d Type: %d\n", 
+                "\tParam %d Type: %d\n", 
                 i+1, args_types[i]
             );
             function.params[i] = args_types[i];
@@ -236,10 +240,10 @@ FunctionDecl:
 
         // criar registro na tabela
         insertSymbol(getCurrentScope(), newSymbol);
-        //printCurrentScope(getCurrentScope());
 
         // apagar os dados de parametros após salvar a função na tabela de simbolos
-        args_size=0;
+        //args_size=0; // Comentado para nao ser zerado 
+                        //- ainda falta inserir os parametros na tabela de simbolos da funcao
     } CmdBlock SEMICOLON
     {
         printf("\n\t End of Function...\n");
@@ -250,9 +254,19 @@ CmdBlock :
     BEGIN_ {
         printCurrentScope(getCurrentScope());
         createSymbolTable(getCurrentScope());
+        if(args_size > 0 && args_size < 101){
+            for(int i = 0; i < args_size; i++){
+                Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
+                newSymbol->name = args_names[i];
+                newSymbol->type = args_types[i];
+                // criar registro na tabela
+                insertSymbol(getCurrentScope(), newSymbol);
+            }
+            args_size=0;
+        }
     } Vars Cmds 
     END {
-        //printCurrentScope(getCurrentScope());
+        printCurrentScope(getCurrentScope());
         popScope();  //Leaving scope, returning to the last scope (which is the parent scope)
     }
 ;
