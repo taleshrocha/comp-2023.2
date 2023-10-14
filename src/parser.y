@@ -10,8 +10,11 @@
 #define BOOL_TYPE 3
 #define CHAR_TYPE 4
 #define STRING_TYPE 5
+#define FUNCTION_TYPE 6
+#define PROCEDURE_TYPE 7
 
 int args_types[100];
+char args_names[100];
 int args_size;
 int type_counter = 5;
 
@@ -132,7 +135,7 @@ Vars :
 
         Symbol_Table* tabela = getCurrentScope();
         insertSymbol(tabela, newSymbol);
-        printCurrentScope(tabela);
+        //printCurrentScope(tabela);
     } Vars {}
 |   /* NOTHING */
 ;
@@ -165,14 +168,38 @@ SubProg :
 
 ProcedureDecl :
     PROCEDURE ID LPAR {args_size=0;} Parameters RPAR {
-        // inserir na tabela
-        // zerar argsize
-        // 
+        printf("\n\tProcessing procedure...\n");
+        Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
+
+        printf("Procedure name: %s\n", $2.name);
+        newSymbol->name = $2.name;
+        newSymbol->type = PROCEDURE_TYPE;
+
+        Procedure procedure;
+        for(int i = 0; i < args_size; i++){
+            printf(
+                "Param %d Type: %d\n", 
+                i+1, args_types[i]
+            );
+            procedure.params[i] = args_types[i];
+        }
+        procedure.params_size = args_size;
+        args_size=0;
+
+        newSymbol->data.p_data = procedure;
+        insertSymbol(getCurrentScope(), newSymbol);
+        //printCurrentScope(getCurrentScope());
+        
     } CmdBlock SEMICOLON
+    {
+        printf("\n\t End of Procedure...\n");
+    }
 ;
 
 Parameters:
-    ID COLON TypeDec ParametersAux { args_types[args_size++] = $3.type; }
+    ID COLON TypeDec ParametersAux { 
+        args_types[args_size++] = $3.type; 
+    }
 |   REF ID COLON TypeDec ParametersAux { args_types[args_size++] = $4.type; }
 |   /* NOTHING */ {}
 ;
@@ -183,14 +210,45 @@ ParametersAux:
 ;
 
 FunctionDecl:
-    FUNCTION ID LPAR Parameters RPAR COLON TypeDec {
-        // criar registro na tabela para def
+    FUNCTION ID LPAR {args_size=0;} Parameters RPAR COLON TypeDec {
+        printf("\n\tProcessing function...\n");
+
+        Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
+
+        printf("Function name: %s\n", $2.name);
+        newSymbol->name = $2.name;
+        newSymbol->type = FUNCTION_TYPE;
+
+        Function function;
+        printf("Return type: %d\n", $8.type);
+        function.return_type = $8.type;
+
+        for(int i = 0; i < args_size; i++){
+            printf(
+                "Param %d Type: %d\n", 
+                i+1, args_types[i]
+            );
+            function.params[i] = args_types[i];
+        }
+
+        function.params_size = args_size;
+        newSymbol->data.f_data = function;
+
+        // criar registro na tabela
+        insertSymbol(getCurrentScope(), newSymbol);
+        //printCurrentScope(getCurrentScope());
+
         // apagar os dados de parametros após salvar a função na tabela de simbolos
+        args_size=0;
     } CmdBlock SEMICOLON
+    {
+        printf("\n\t End of Function...\n");
+    }
 ;
 
 CmdBlock :
     BEGIN_ {
+        printCurrentScope(getCurrentScope());
         createSymbolTable(getCurrentScope());
     } Vars Cmds 
     END {
@@ -272,7 +330,7 @@ AcessMemAddr:
         if ($3.type == INT_TYPE) {
             $$.type = $3.type;
         } else {
-            printf("ERROR");
+            printf("ERROR - AcessMemAddr\n");
         }
         // garantir q AcessMemAddr é um array
         // acessar o tipo do conteudo array e atribuir esse tipo para AcessMemAddr
@@ -315,7 +373,7 @@ Exp:
         if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Exp \n");
         }
     }
 |   Terms { $$.type = $1.type; }
@@ -326,7 +384,7 @@ Terms:
         if ($1.type == BOOL_TYPE && $3.type == BOOL_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Terms\n");
         }
     }
 |   Comps { $$.type = $1.type; }
@@ -343,7 +401,7 @@ Comps:
         } else if ($1.type == CHAR_TYPE && $3.type == CHAR_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Comps \n");
         }
     }
 |   Factor EQ Factor  {
@@ -356,7 +414,7 @@ Comps:
         } else if ($1.type == CHAR_TYPE && $3.type == CHAR_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Comps \n");
         }
     }
 |   Factor LESS Factor {
@@ -365,7 +423,7 @@ Comps:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Comps \n");
         }
     }
 |   Factor GREATER Factor  {
@@ -374,7 +432,7 @@ Comps:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Comps \n");
         }
     }
 |   Factor LEQ Factor {
@@ -383,7 +441,7 @@ Comps:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Comps \n");
         }
     }
 |   Factor GEQ Factor  {
@@ -392,7 +450,7 @@ Comps:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Comps \n");
         }
     }
 |   Factor  { $$.type = $1.type; }
@@ -404,7 +462,7 @@ Factor:
             $$.type = BOOL_TYPE;
             $$.value.v_bool = !$2.value.v_bool;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - Factor \n");
         }
     }
 |   AriOp { $$.type = $1.type; }
@@ -417,7 +475,7 @@ AriOp:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = REAL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - AriOp \n");
         }
     }
 |   AriOp MINUS AriOp2 {
@@ -426,7 +484,7 @@ AriOp:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = REAL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - AriOp \n");
         }
     }
 |   AriOp2 { $$.type = $1.type; }
@@ -439,7 +497,7 @@ AriOp2:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = REAL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - AriOp2 \n");
         }
     }
 |   AriOp2 DIVIDE Parenthesis {
@@ -448,7 +506,7 @@ AriOp2:
         } else if ($1.type == REAL_TYPE && $3.type == REAL_TYPE) {
             $$.type = REAL_TYPE;
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - AriOp2 \n");
         }
     }
 |   AriOp2 MOD Parenthesis {
@@ -458,7 +516,7 @@ AriOp2:
             // TODO
             printf("TODO. \n");
         } else {
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - AriOp2 \n");
         }
     }
 |   Parenthesis { $$.type = $1.type; }
@@ -474,14 +532,14 @@ UnaryExp:
         if ($2.type == INT_TYPE || $2.type == REAL_TYPE) {
             $$.type = $2.type;
         } else { 
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - UnaryExp \n");
         }
     }
 |   MINUS CastExp { 
         if ($2.type == INT_TYPE || $2.type == REAL_TYPE) {
             $$.type = $2.type;
         } else { 
-            printf("ERROR! Incompatible type. \n");
+            printf("ERROR! Incompatible type. - UnaryExp \n");
         }
     }
 |   CastExp { $$.type = $1.type; }

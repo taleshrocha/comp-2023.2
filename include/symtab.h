@@ -21,13 +21,13 @@ typedef struct Function
 {
     int return_type;
     int params[100];
-    int params_size;
+    size_t params_size;
 } Function;
 
 typedef struct Procedure
 {
     int params[100];
-    int params_size;
+    size_t params_size;
 } Procedure;
 
 /*   Entry of Symbol Table   */
