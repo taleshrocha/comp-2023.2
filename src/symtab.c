@@ -27,7 +27,7 @@ Symbol_Table * createSymbolTable(Symbol_Table * parent){
     symtab->symbols = (Symbol_Entry *)malloc(sizeof(Symbol_Entry) * SYMTAB_INITIAL_CAPACITY);
     symtab->capacity = SYMTAB_INITIAL_CAPACITY;
     symtab->size = 0;
-    
+    //push(symtab);
     return symtab;
 }
 
@@ -73,10 +73,10 @@ void increaseSymbolTableSize(Symbol_Table * symbolTable){
     symbolTable->symbols = newSymbols;
 }
 
-Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol){   
-    Symbol_Entry * searchResult = searchSymbol(symbolTable, symbol->name) ; 
+Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol){
+    Symbol_Entry * searchResult = searchSymbol(symbolTable, symbol->name);
     if(searchResult != NULL){
-        printf("\nSymbol '%s' is already present in the symbol table.", symbol->name);
+        printf("\nSymbol '%s' is already present in the symbol table.\n", symbol->name);
         return searchResult;
     }
 
@@ -89,7 +89,7 @@ Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol){
 
 void printCurrentScope(Symbol_Table * symbolTable){
     if(symbolTable->size == 0){
-        printf("No symbols in the current scope.");
+        printf("No symbols in the current scope.\n");
         return;
     }
     
@@ -103,4 +103,43 @@ void printCurrentScope(Symbol_Table * symbolTable){
             symbolTable->symbols[i].type);
     }
     printf("\n");
+}
+
+Symbol_Table *stack[100];
+size_t stack_size = 0;
+size_t stack_capacity = 100;
+
+Symbol_Table * getCurrentScope(){
+    // printf(
+    //     "scope num %ld has %ld symbols.\n", 
+    //     stack_size-1,
+    //     stack[stack_size-1]->size
+    // );
+    return stack[stack_size-1];
+}
+
+// void increaseStack(){
+//     size_t newCapacity = stack_capacity * 2;
+//     Symbol_Table **newStack = (Symbol_Table *)malloc(sizeof(Symbol_Table) * newCapacity);
+
+//     for (size_t i = 0; i < stack_capacity; i++) {
+//         newStack[i] = stack[i];
+//     }
+
+//     free(stack);
+//     stack = newStack;
+//     stack_capacity = newCapacity;
+// }
+
+Symbol_Table * pushScope(Symbol_Table * scope){
+    // if(stack_size == stack_capacity){
+    //     increaseStack();
+    // }
+
+    stack[stack_size++]=scope;
+}
+
+Symbol_Table * popScope(){
+    //TODO: free?
+    return stack[--stack_size];
 }

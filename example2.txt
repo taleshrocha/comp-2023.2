@@ -3,8 +3,10 @@ const const1 := 1;
 const const1 := 1;
 
 begin
-    var id: int;
+    var minhavar : int;
+    var minhavar2 : int;
+    var minhavar3 : int;
     const1 := 12;
-    id := 3 * true;
+    minhavar := 3 * 3;
     return
 end

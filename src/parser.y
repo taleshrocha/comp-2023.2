@@ -53,6 +53,7 @@ Symbol_Table* tabela;
 Prog : 
     {
         tabela = createSymbolTable(NULL);
+        pushScope(tabela);
     } 
     Decl CmdBlock {
         // TODO free das tabelas
@@ -90,8 +91,8 @@ Consts :
                 exit(1); //TODO: tratar melhor este caso.
         }
         newSymbol->data.v_data = var_data;
-        printf("type: %d\n", $4.type);
-        printf("value: %d\n", var_data.value.v_int);
+        // printf("type: %d\n", $4.type);
+        // printf("value: %d\n", var_data.value.v_int);
         //addConstant($2.name, $4.type, data);
         insertSymbol(tabela, newSymbol);
         printCurrentScope(tabela);
@@ -99,7 +100,38 @@ Consts :
 |   /* NOTHING */
 ;
 Vars : 
-    VAR ID COLON TypeDec SEMICOLON Vars {}
+    VAR ID COLON TypeDec SEMICOLON {
+        Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
+        newSymbol->name = $2.name;
+        newSymbol->type = $4.type;
+
+        Variable var_data;
+        var_data.is_constant = 0;
+        switch ($4.type) {
+            case INT_TYPE:
+                var_data.value.v_int = $4.value.v_int;
+                break;
+            case REAL_TYPE:
+                var_data.value.v_real = $4.value.v_real;
+                break;
+            case BOOL_TYPE:
+                var_data.value.v_bool = $4.value.v_bool;
+                break;
+            case CHAR_TYPE:
+                var_data.value.v_char = $4.value.v_char;
+                break;
+            case STRING_TYPE:
+                var_data.value.v_string = $4.value.v_string;
+                break;
+            default:
+                exit(1); //TODO: tratar melhor este caso.
+        }
+        newSymbol->data.v_data = var_data;
+
+        tabela = getCurrentScope();
+        insertSymbol(tabela, newSymbol);
+        printCurrentScope(tabela);
+    } Vars {}
 |   /* NOTHING */
 ;
 Types :
@@ -156,8 +188,13 @@ FunctionDecl:
 ;
 
 CmdBlock :
-    BEGIN_ Vars Cmds END {
-        //Create new scope   
+    BEGIN_ {
+        tabela = createSymbolTable(tabela);
+        pushScope(tabela);
+    } Vars Cmds 
+    END {
+        //printCurrentScope(getCurrentScope());
+        tabela = popScope();  //Leaving scope, returning to the last scope (which is the parent scope)
     }
 ;
 
@@ -168,14 +205,24 @@ Cmds:
 
 CmdAux:
     AcessMemAddr ATTRIB Exp {
-        if ($1.type != $3.type) {
-            printf(
-                "Error: value cannot be assigned to %s.\n",
-                $1.name
-            );
-        }
+        // if ($1.type != $3.type) {
+        //     printf("Type 1: %d\tType 2: %d\n", $1.type, $3.type);
+        //     printf(
+        //         "Error: value cannot be assigned to '%s'. Types are not equivalent.\n",
+        //         $1.name
+        //     );
+        // }
         Symbol_Entry * symbol = searchSymbol(tabela, $1.name);
-        if(symbol != NULL){
+        if(symbol == NULL){
+            printf("Error: symbol '%s' not found.\n", $1.name);
+        }
+        else{
+            if (symbol->type != $3.type) {
+                printf(
+                    "Error: value cannot be assigned to '%s'. Types are not equivalent.\n",
+                    $1.name
+                );
+            }
             switch (symbol->type){
                 case INT_TYPE:
                 case REAL_TYPE:
@@ -184,7 +231,7 @@ CmdAux:
                 case BOOL_TYPE:
                     if(symbol->data.v_data.is_constant == 1){
                         printf(
-                            "Error: The value of a constant cannot change. Const: %s\n",
+                            "Error: The value of '%s' cannot be changed. Reason: constant.\n",
                             symbol->name
                         );
                     }
