@@ -22,8 +22,6 @@ void yyerror(char* s) {
     fprintf(stderr, "current token is: \"%s\"\n", yytext);
 }
 
-Symbol_Table* tabela;
-
 %}
 
 %union {
@@ -53,8 +51,7 @@ Symbol_Table* tabela;
 Prog : 
     {
         initializeStackOfScopes();
-        tabela = createSymbolTable(NULL);
-        pushScope(tabela);
+        createSymbolTable(NULL);
     } 
     Decl CmdBlock {
         // TODO free das tabelas
@@ -99,8 +96,8 @@ Consts :
         // printf("type: %d\n", $4.type);
         // printf("value: %d\n", var_data.value.v_int);
         //addConstant($2.name, $4.type, data);
-        insertSymbol(tabela, newSymbol);
-        printCurrentScope(tabela);
+        insertSymbol(getCurrentScope(), newSymbol);
+        printCurrentScope(getCurrentScope());
     }
 |   /* NOTHING */
 ;
@@ -133,7 +130,7 @@ Vars :
         }
         newSymbol->data.v_data = var_data;
 
-        tabela = getCurrentScope();
+        Symbol_Table* tabela = getCurrentScope();
         insertSymbol(tabela, newSymbol);
         printCurrentScope(tabela);
     } Vars {}
@@ -194,12 +191,11 @@ FunctionDecl:
 
 CmdBlock :
     BEGIN_ {
-        tabela = createSymbolTable(tabela);
-        pushScope(tabela);
+        createSymbolTable(getCurrentScope());
     } Vars Cmds 
     END {
         //printCurrentScope(getCurrentScope());
-        tabela = popScope();  //Leaving scope, returning to the last scope (which is the parent scope)
+        popScope();  //Leaving scope, returning to the last scope (which is the parent scope)
     }
 ;
 
@@ -217,7 +213,7 @@ CmdAux:
         //         $1.name
         //     );
         // }
-        Symbol_Entry * symbol = searchSymbol(tabela, $1.name);
+        Symbol_Entry * symbol = searchSymbol(getCurrentScope(), $1.name);
         if(symbol == NULL){
             printf("Error: symbol '%s' not found.\n", $1.name);
         }

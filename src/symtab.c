@@ -27,8 +27,8 @@ Symbol_Table * createSymbolTable(Symbol_Table * parent){
     symtab->symbols = (Symbol_Entry *)malloc(sizeof(Symbol_Entry) * SYMTAB_INITIAL_CAPACITY);
     symtab->capacity = SYMTAB_INITIAL_CAPACITY;
     symtab->size = 0;
-    
-    //push(symtab);
+
+    pushScope(symtab);
     return symtab;
 }
 

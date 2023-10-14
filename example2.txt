@@ -6,7 +6,8 @@ begin
     var minhavar : int;
     var minhavar2 : int;
     var minhavar3 : int;
+    minhavar3 := true;
     const1 := 12;
-    minhavar := 3 * 3;
+    minhavar := 3 * true;
     return
 end
