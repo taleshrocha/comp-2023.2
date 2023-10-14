@@ -67,8 +67,11 @@ Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name);
 
 void printCurrentScope(Symbol_Table * symbolTable);
 
+void initializeStackOfScopes();
+void increaseStack();
 Symbol_Table * getCurrentScope();
 Symbol_Table * pushScope(Symbol_Table * scope);
 Symbol_Table * popScope();
+void freeStackOfScopes();
 
 #endif

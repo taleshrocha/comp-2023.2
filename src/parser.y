@@ -52,11 +52,16 @@ Symbol_Table* tabela;
 
 Prog : 
     {
+        initializeStackOfScopes();
         tabela = createSymbolTable(NULL);
         pushScope(tabela);
     } 
     Decl CmdBlock {
         // TODO free das tabelas
+        printf(
+            "\n\nFreeing stack and symbol tables.\n"
+        );
+        freeStackOfScopes();
     }
 ;
 Decl : 
