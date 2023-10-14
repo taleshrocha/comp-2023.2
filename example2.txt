@@ -4,6 +4,7 @@ const const1 := 1;
 
 begin
     var id: int;
+    const1 := 12;
     id := 3 * true;
     return
 end

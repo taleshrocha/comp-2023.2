@@ -156,7 +156,9 @@ FunctionDecl:
 ;
 
 CmdBlock :
-    BEGIN_ Vars Cmds END {}
+    BEGIN_ Vars Cmds END {
+        //Create new scope   
+    }
 ;
 
 Cmds:
@@ -167,9 +169,28 @@ Cmds:
 CmdAux:
     AcessMemAddr ATTRIB Exp {
         if ($1.type != $3.type) {
-            // TODO: ERROR
+            printf(
+                "Error: value cannot be assigned to %s.\n",
+                $1.name
+            );
         }
-        //TODO: Adicionar checagem para atribuição a constantes
+        Symbol_Entry * symbol = searchSymbol(tabela, $1.name);
+        if(symbol != NULL){
+            switch (symbol->type){
+                case INT_TYPE:
+                case REAL_TYPE:
+                case CHAR_TYPE:
+                case STRING_TYPE:
+                case BOOL_TYPE:
+                    if(symbol->data.v_data.is_constant == 1){
+                        printf(
+                            "Error: The value of a constant cannot change. Const: %s\n",
+                            symbol->name
+                        );
+                    }
+                    break;
+            }
+        }
     }
 |   CmdBlock {}
 |   CmdConditional {}
