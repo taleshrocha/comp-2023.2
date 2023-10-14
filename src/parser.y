@@ -38,12 +38,13 @@ void yyerror(char* s) {
             char v_char;
             char* v_string;
         } value;
+        char* lexemes;
     } info;
 }
 
-%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR V_REAL V_BOOL V_CHAR V_STRING DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
+%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE T_BOOL T_INT T_REAL T_CHAR ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
 
-%token <info> ID V_INT
+%token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING
 
 %type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args TypeDec
 
@@ -58,9 +59,11 @@ Prog :
     } 
     Decl CmdBlock {
         // TODO free das tabelas
+        #ifdef DEBUG
         printf(
             "\n\nFreeing stack and symbol tables.\n"
         );
+        #endif
         freeStackOfScopes();
     }
 ;
@@ -68,13 +71,14 @@ Decl :
     Consts Types SubProg Vars {}
 ;
 Consts :
-    CONST ID ATTRIB Exp SEMICOLON Consts {
+    CONST ID ATTRIB Exp SEMICOLON {
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
-        newSymbol->type = $4.type;
+        newSymbol->symbol_type = 0;
 
         Variable var_data;
         var_data.is_constant = 1;
+        var_data.type = $4.type;
         switch ($4.type) {
             case INT_TYPE:
                 var_data.value.v_int = $4.value.v_int;
@@ -96,21 +100,21 @@ Consts :
                 exit(1); //TODO: tratar melhor este caso.
         }
         newSymbol->data.v_data = var_data;
-        // printf("type: %d\n", $4.type);
-        // printf("value: %d\n", var_data.value.v_int);
-        //addConstant($2.name, $4.type, data);
         insertSymbol(getCurrentScope(), newSymbol);
-        //printCurrentScope(getCurrentScope());
-    }
+        #ifdef DEBUG
+        printCurrentScope(getCurrentScope());
+        #endif
+    } Consts
 |   /* NOTHING */
 ;
 Vars : 
     VAR ID COLON TypeDec SEMICOLON {
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
-        newSymbol->type = $4.type;
+        newSymbol->symbol_type = 0;
 
         Variable var_data;
+        var_data.type = $4.type;
         var_data.is_constant = 0;
         switch ($4.type) {
             case INT_TYPE:
@@ -133,11 +137,12 @@ Vars :
         }
         newSymbol->data.v_data = var_data;
 
-        Symbol_Table* tabela = getCurrentScope();
-        insertSymbol(tabela, newSymbol);
-        //printCurrentScope(tabela);
-    } Vars {}
-|   /* NOTHING */
+        insertSymbol(getCurrentScope(), newSymbol);
+        #ifdef DEBUG
+        printCurrentScope(getCurrentScope());
+        #endif
+    } Vars
+|   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
 Types :
     TYPE ID ATTRIB TypeDec SEMICOLON Types {}
@@ -168,21 +173,29 @@ SubProg :
 
 ProcedureDecl :
     PROCEDURE ID LPAR {args_size=0;} Parameters RPAR {
+        #ifdef DEBUG
         printf("\n\tProcessing procedure...\n\n");
+        #endif
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
 
+        #ifdef DEBUG
         printf("Procedure name: %s\n", $2.name);
+        #endif
         newSymbol->name = $2.name;
-        newSymbol->type = PROCEDURE_TYPE;
+        newSymbol->symbol_type = 1;
 
         Procedure procedure;
+        #ifdef DEBUG
         printf("\nPARAMETROS IDENTIFICADOS - PROCEDURE: %s\n", $2.name);
+        #endif
         for(int i = 0; i < args_size; i++){
+            procedure.params[i] = args_types[i];
+            #ifdef DEBUG
             printf(
                 "\tParam %d Type: %d\n", 
                 i+1, args_types[i]
             );
-            procedure.params[i] = args_types[i];
+            #endif
         }
         procedure.params_size = args_size;
         //args_size=0;// Comentado para nao ser zerado 
@@ -195,7 +208,9 @@ ProcedureDecl :
         
     } CmdBlock SEMICOLON
     {
+        #ifdef DEBUG
         printf("\n\t End of Procedure...\n");
+        #endif
     }
 ;
 
@@ -215,24 +230,32 @@ ParametersAux:
 
 FunctionDecl:
     FUNCTION ID LPAR {args_size=0;} Parameters RPAR COLON TypeDec {
+        #ifdef DEBUG
         printf("\n\tProcessing function...\n\n");
-
+        #endif
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
-
+        #ifdef DEBUG
         printf("Function name: %s\n", $2.name);
+        #endif
         newSymbol->name = $2.name;
-        newSymbol->type = FUNCTION_TYPE;
+        newSymbol->symbol_type = 2;
 
         Function function;
+        #ifdef DEBUG
         printf("Return type: %d\n", $8.type);
+        #endif
         function.return_type = $8.type;
+        #ifdef DEBUG
         printf("\nPARAMETROS IDENTIFICADOS - FUNCTION: %s\n", $2.name);
+        #endif
         for(int i = 0; i < args_size; i++){
+            function.params[i] = args_types[i];
+            #ifdef DEBUG
             printf(
                 "\tParam %d Type: %d\n", 
                 i+1, args_types[i]
             );
-            function.params[i] = args_types[i];
+            #endif
         }
 
         function.params_size = args_size;
@@ -246,19 +269,29 @@ FunctionDecl:
                         //- ainda falta inserir os parametros na tabela de simbolos da funcao
     } CmdBlock SEMICOLON
     {
+        #ifdef DEBUG
         printf("\n\t End of Function...\n");
+        #endif
     }
 ;
 
 CmdBlock :
     BEGIN_ {
+        #ifdef DEBUG
         printCurrentScope(getCurrentScope());
+        #endif
         createSymbolTable(getCurrentScope());
         if(args_size > 0 && args_size < 101){
             for(int i = 0; i < args_size; i++){
                 Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
                 newSymbol->name = args_names[i];
-                newSymbol->type = args_types[i];
+                newSymbol->symbol_type = 0;
+
+                Variable var_data;
+                var_data.type = args_types[i];
+                var_data.is_constant = 0;
+                newSymbol->data.v_data = var_data;
+
                 // criar registro na tabela
                 insertSymbol(getCurrentScope(), newSymbol);
             }
@@ -266,7 +299,9 @@ CmdBlock :
         }
     } Vars Cmds 
     END {
+        #ifdef DEBUG
         printCurrentScope(getCurrentScope());
+        #endif
         popScope();  //Leaving scope, returning to the last scope (which is the parent scope)
     }
 ;
@@ -278,25 +313,16 @@ Cmds:
 
 CmdAux:
     AcessMemAddr ATTRIB Exp {
-        // if ($1.type != $3.type) {
-        //     printf("Type 1: %d\tType 2: %d\n", $1.type, $3.type);
-        //     printf(
-        //         "Error: value cannot be assigned to '%s'. Types are not equivalent.\n",
-        //         $1.name
-        //     );
-        // }
         Symbol_Entry * symbol = searchSymbol(getCurrentScope(), $1.name);
         if(symbol == NULL){
             printf("Error: symbol '%s' not found.\n", $1.name);
-        }
-        else{
-            if (symbol->type != $3.type) {
-                printf(
-                    "Error: value cannot be assigned to '%s'. Types are not equivalent.\n",
-                    $1.name
-                );
-            }
-            switch (symbol->type){
+        } else if (symbol->symbol_type != 0) {
+            printf(
+                "Error: value cannot be assigned to '%s'. Is not a variable",
+                $1.name
+            );
+        } else {
+            switch (symbol->data.v_data.type){
                 case INT_TYPE:
                 case REAL_TYPE:
                 case CHAR_TYPE:
@@ -334,7 +360,15 @@ CmdAux:
 
 AcessMemAddr: 
     ID {
-        //TODO
+        Symbol_Table* tabela = getCurrentScope();
+        Symbol_Entry* entry = searchSymbol(tabela, $1.name);
+        switch(entry->symbol_type) {
+            case 0:
+                $$.type = entry->data.v_data.type;
+                break;
+            default:
+                printf("Not a variable or constant!");
+        }
     }
 |   AcessMemAddr DOT ID {
         //TODO  
@@ -360,6 +394,7 @@ AcessMemAddr:
 CmdConditional:
     IF Exp THEN CmdBlock CmdConditionalEnd {
         if ($2.type != BOOL_TYPE) {
+            printf("CmdConditional - exp: %s\n", $2.lexemes);
             printf("ERROR");
             // TODO
         }
@@ -378,7 +413,7 @@ CmdReturn:
 ;
 
 CmdReturnExp:
-    Exp { $$.type = $1.type; }
+    Exp { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 |   /* NOTHING */ { $$.type = -1;}
 ;
 
@@ -390,7 +425,7 @@ Exp:
             printf("ERROR! Incompatible type. - Exp \n");
         }
     }
-|   Terms { $$.type = $1.type; }
+|   Terms { $$.type = $1.type; $$.lexemes = $1.lexemes; }
 ;
 
 Terms:
@@ -401,7 +436,7 @@ Terms:
             printf("ERROR! Incompatible type. - Terms\n");
         }
     }
-|   Comps { $$.type = $1.type; }
+|   Comps { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 ;
 
 Comps: 
@@ -428,6 +463,8 @@ Comps:
         } else if ($1.type == CHAR_TYPE && $3.type == CHAR_TYPE) {
             $$.type = BOOL_TYPE;
         } else {
+            printf("lexemes: %s and %s\n", $1.lexemes, $3.lexemes);
+            printf("types: %d and %d - %d\n", $1.type, $3.type, EQ);
             printf("ERROR! Incompatible type. - Comps \n");
         }
     }
@@ -467,7 +504,7 @@ Comps:
             printf("ERROR! Incompatible type. - Comps \n");
         }
     }
-|   Factor  { $$.type = $1.type; }
+|   Factor  { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 ;
 
 Factor:
@@ -479,7 +516,7 @@ Factor:
             printf("ERROR! Incompatible type. - Factor \n");
         }
     }
-|   AriOp { $$.type = $1.type; }
+|   AriOp { $$.type = $1.type; $$.lexemes = $1.lexemes; }
 ;
 
 AriOp:
@@ -501,7 +538,7 @@ AriOp:
             printf("ERROR! Incompatible type. - AriOp \n");
         }
     }
-|   AriOp2 { $$.type = $1.type; }
+|   AriOp2 { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 ;
 
 AriOp2:
@@ -533,11 +570,11 @@ AriOp2:
             printf("ERROR! Incompatible type. - AriOp2 \n");
         }
     }
-|   Parenthesis { $$.type = $1.type; }
+|   Parenthesis { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 ;
 
 Parenthesis:
-    UnaryExp { $$.type = $1.type; }
+    UnaryExp { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 |   LPAR Exp RPAR { $$.type = $2.type; }
 ;
 
@@ -556,7 +593,7 @@ UnaryExp:
             printf("ERROR! Incompatible type. - UnaryExp \n");
         }
     }
-|   CastExp { $$.type = $1.type; }
+|   CastExp { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 ;
 
 CastExp:
@@ -632,18 +669,19 @@ CastExp:
 }
 |   SimpleExp                       {
     $$.type = $1.type;
+    $$.lexemes = $1.lexemes;
 }
 
 SimpleExp:
-    NumExp { $$.type = $1.type; }
-|   AcessMemAddr { $$.type = $1.type; }
+    NumExp { $$.type = $1.type; $$.lexemes = $1.lexemes;}
+|   AcessMemAddr { $$.type = $1.type; $$.lexemes = $1.lexemes;}
 ;
 
 NumExp:
-    V_INT    { $$.type = INT_TYPE; $$.value.v_int = $1.value.v_int; }
-|   V_REAL   { $$.type = REAL_TYPE; }
-|   V_BOOL   { $$.type = BOOL_TYPE; }
-|   V_CHAR   { $$.type = CHAR_TYPE; }
+    V_INT    { $$.type = INT_TYPE; $$.value.v_int = $1.value.v_int; $$.lexemes = $1.lexemes;}
+|   V_REAL   { $$.type = REAL_TYPE; $$.value.v_real = $1.value.v_real; $$.lexemes = $1.lexemes;}
+|   V_BOOL   { $$.type = BOOL_TYPE; $$.value.v_bool = $1.value.v_bool; $$.lexemes = $1.lexemes;}
+|   V_CHAR   { $$.type = CHAR_TYPE; $$.value.v_char = $1.value.v_char; $$.lexemes = $1.lexemes;}
 |   V_STRING { $$.type = ARRAY; /*TODO*/}
 ;
 

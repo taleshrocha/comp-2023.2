@@ -7,6 +7,7 @@
 typedef struct Variable
 {
     int is_constant;
+    int type;
     union Value {
         int v_int;
         int v_bool;
@@ -34,12 +35,12 @@ typedef struct Procedure
 typedef struct Symbol_Entry
 {
     char *  name;
-    int     type;
+    int     symbol_type;
     union 
     {
+        Variable    v_data;
         Function    f_data;
         Procedure   p_data;
-        Variable    v_data;
     } data;
 } Symbol_Entry;
 
@@ -70,7 +71,7 @@ void printCurrentScope(Symbol_Table * symbolTable);
 void initializeStackOfScopes();
 void increaseStack();
 Symbol_Table * getCurrentScope();
-Symbol_Table * pushScope(Symbol_Table * scope);
+void pushScope(Symbol_Table * scope);
 Symbol_Table * popScope();
 void freeStackOfScopes();
 

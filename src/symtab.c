@@ -6,7 +6,7 @@
 
 int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName){
     Symbol_Entry * symbol = searchSymbol(symbolTable, functionName);
-    if(symbol->type == 2){ //TODO: substituir '2' por FUNCTION_TYPE
+    if(symbol->symbol_type == 2){ //TODO: substituir '2' por FUNCTION_TYPE
         return symbol->data.f_data.return_type;
     }
     return -1;
@@ -14,7 +14,7 @@ int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName){
 
 Function * getFunctionSymbol(Symbol_Table * symbolTable, char * functionName){
     Symbol_Entry * symbol = searchSymbol(symbolTable, functionName);
-    if(symbol->type == 2){ //TODO: substituir '2' por FUNCTION_TYPE
+    if(symbol->symbol_type == 2){ //TODO: substituir '2' por FUNCTION_TYPE
         return &(symbol->data.f_data);
     }
     return NULL;
@@ -66,7 +66,7 @@ void increaseSymbolTableSize(Symbol_Table * symbolTable){
     for (size_t i = 0; i < symbolTable->size; i++){
         newSymbols[i].data = symbolTable->symbols[i].data;
         newSymbols[i].name = symbolTable->symbols[i].name;
-        newSymbols[i].type = symbolTable->symbols[i].type;
+        newSymbols[i].symbol_type = symbolTable->symbols[i].symbol_type;
     }
 
     symbolTable->capacity = newCapacity;
@@ -101,7 +101,7 @@ void printCurrentScope(Symbol_Table * symbolTable){
             "%ld. Name: %s. Type: %d\n",
             i, 
             symbolTable->symbols[i].name,
-            symbolTable->symbols[i].type);
+            symbolTable->symbols[i].symbol_type);
     }
     printf("\n");
 }
@@ -136,7 +136,7 @@ void increaseStack(){
     stack_capacity = newCapacity;
 }
 
-Symbol_Table * pushScope(Symbol_Table * scope){
+void pushScope(Symbol_Table * scope){
     if(stack_size == stack_capacity){
         increaseStack();
     }
