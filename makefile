@@ -70,4 +70,4 @@ clean:
 
 
 valgrind:
-	valgrind -s --leak-check=full --show-leak-kinds=all ./bin/parser $(file)
+	valgrind -s --max-stackframe=2096112 --leak-check=full --show-leak-kinds=all ./bin/parser $(file)

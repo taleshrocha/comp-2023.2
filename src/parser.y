@@ -31,13 +31,44 @@ void yyerror(char* s) {
             char* v_string;
         } value;
     } info;
+    struct {
+        int type;
+        char* name;
+        union {
+            struct {
+                char field_names[100][100];
+                int field_types[100];
+                int n_fields;
+            } record_data;
+            struct {
+                int inner_type;
+                int size;
+                int capacity[100];
+                int starts[100];
+                int ends[100];
+                int dimensions;
+            } array_data;
+        };
+    } type_info;
+    struct {
+        int size;
+        int capacity[100];
+        int starts[100];
+        int ends[100];
+        int dimensions;  
+    } interval;
+
 }
 
-%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE ARRAY OF RECORD END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
+%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE OF END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
 
-%token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING T_BOOL T_INT T_REAL T_CHAR
+%token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING 
+%token <type_info> T_BOOL T_INT T_REAL T_CHAR ARRAY RECORD
 
-%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args TypeDec
+%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args
+%type <type_info> TypeDec 
+%type <interval> Interval
+
 
 %start Prog 
 
@@ -64,7 +95,7 @@ Consts :
     CONST ID ATTRIB Exp SEMICOLON {
         Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
-        newSymbol->symbol_type = 0;
+        newSymbol->symbol_type = K_VARIABLE;
 
         Variable var_data;
         var_data.is_constant = 1;
@@ -100,31 +131,11 @@ Vars :
     VAR ID COLON TypeDec SEMICOLON {
         Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
-        newSymbol->symbol_type = 0;
+        newSymbol->symbol_type = K_VARIABLE;
 
         Variable var_data;
         var_data.type = $4.type;
         var_data.is_constant = 0;
-        switch ($4.type) {
-            case E_INT:
-                var_data.value.v_int = $4.value.v_int;
-                break;
-            case E_REAL:
-                var_data.value.v_real = $4.value.v_real;
-                break;
-            case E_BOOL:
-                var_data.value.v_bool = $4.value.v_bool;
-                break;
-            case E_CHAR:
-                var_data.value.v_char = $4.value.v_char;
-                break;
-            case E_ARRAY:
-                // TODO
-                var_data.value.v_string = $4.value.v_string;
-                break;
-            default:
-                //TODO: Tipo definido pelo usuario
-        }
         newSymbol->data.v_data = var_data;
 
         insertSymbol(getCurrentScope(), newSymbol);
@@ -136,21 +147,76 @@ Vars :
 |   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
 Types :
-    TYPE ID ATTRIB TypeDec SEMICOLON Types {}
+    TYPE ID ATTRIB TypeDec SEMICOLON {
+        // Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
+        // newSymbol->name = $2.name;
+        // newSymbol->symbol_type = K_TYPE;
+        // // Type t_data;
+        // // t_data.type_kind = $4.type;
+
+        // // switch (type_kind)
+
+        // insertSymbol(getCurrentScope(), newSymbol);
+        // #ifdef DEBUG
+        // printCurrentScope(getCurrentScope());
+        // #endif
+        // free($2.name);
+    } Types
 |   /* NOTHING */
 ;
+
 TypeDec :
     T_BOOL {$$.type = E_BOOL; $$.name = $1.name;}
 |   T_INT  {$$.type = E_INT; $$.name = $1.name;}
 |   T_REAL {$$.type = E_REAL; $$.name = $1.name;}
 |   T_CHAR {$$.type = E_CHAR; $$.name = $1.name;}
-|   ID     {$$.type = 0 /*TODO*/; $$.name = $1.name;}
-|   ARRAY LBRA Interval RBRA OF TypeDec  {}
-|   RECORD Fields END {}
+|   ID     {$$.type = 0 /*TODO search symbol table*/; $$.name = $1.name;}
+|   ARRAY LBRA Interval RBRA OF TypeDec  {
+        $$.type = E_ARRAY;
+        $$.name = $1.name; //TODO
+        $$.array_data.inner_type = $6.type;
+        $$.array_data.dimensions = $3.dimensions;
+        $$.array_data.size = 1;
+        for (int i = 0; i < $3.dimensions; i++) {
+            $$.array_data.capacity[i] = $3.capacity[i];
+            $$.array_data.starts[i] = $3.starts[i];
+            $$.array_data.ends[i] = $3.ends[i];
+            $$.array_data.size *= $$.array_data.capacity[i];
+        }
+        // printf("dimensions: %d\n", $$.array_data.dimensions);
+        // printf("size: %d\n", $$.array_data.size);
+        free($6.name);
+    }
+|   RECORD Fields END {
+        // $$.type = E_RECORD;
+        // $$.name = $2.name;
+        // $$.record_data.
+    }
 ;
 Interval :
-    Exp INTERVAL Exp {}
-|   Exp INTERVAL Exp COMMA Interval {}
+    Exp INTERVAL Exp {
+        if ($1.type == E_INT && $3.type == E_INT) {
+            $$.dimensions = 1;
+            $$.capacity[0] = $3.value.v_int - $1.value.v_int;
+        } else {
+            yyerror("deu ruim");
+        }
+        free($1.name);
+        free($3.name);
+    }
+|   Exp INTERVAL Exp COMMA Interval {
+        if ($1.type == E_INT && $3.type == E_INT) {
+            $$.dimensions = $5.dimensions+1;
+            for (int i = 0; i < $5.dimensions; i++) {
+                $$.capacity[i] = $5.capacity[i];
+            }
+            $$.capacity[$$.dimensions-1] = $3.value.v_int - $1.value.v_int;
+        } else {
+            yyerror("deu ruim");
+        }
+        free($1.name);
+        free($3.name);
+}
 ;
 Fields :
     ID COLON TypeDec SEMICOLON Fields {}
@@ -173,7 +239,7 @@ ProcedureDecl :
         printf("Procedure name: %s\n", $2.name);
         #endif
         newSymbol->name = $2.name;
-        newSymbol->symbol_type = 1;
+        newSymbol->symbol_type = K_PROCEDURE;
 
         Procedure procedure;
         #ifdef DEBUG
@@ -229,7 +295,7 @@ FunctionDecl:
         printf("Function name: %s\n", $2.name);
         #endif
         newSymbol->name = $2.name;
-        newSymbol->symbol_type = 2;
+        newSymbol->symbol_type = K_FUNCTION;
 
         Function function;
         #ifdef DEBUG

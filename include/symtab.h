@@ -4,6 +4,13 @@
 #include <stdio.h> 
 #include <stdlib.h>
 
+typedef enum EntryKind {
+  K_VARIABLE,
+  K_FUNCTION,
+  K_PROCEDURE,
+  K_TYPE
+} EntryKind;
+
 typedef struct Variable
 {
     int is_constant;
@@ -25,6 +32,25 @@ typedef struct Function
     size_t params_size;
 } Function;
 
+typedef struct Type
+{
+    // record
+    char field_names[100][100];
+    int field_types[100];
+    int n_fields;
+    // array
+    int inner_type;
+    int size;
+    int capacity[100];
+    int starts[100];
+    int ends[100];
+    int dimensions;  
+
+    // info
+    EntryKind type_kind;
+
+} Type;
+
 typedef struct Procedure
 {
     int params[100];
@@ -34,11 +60,12 @@ typedef struct Procedure
 /*   Entry of Symbol Table   */
 typedef struct Symbol_Entry
 {
-    char *  name;
-    int     symbol_type;
+    char *    name;
+    EntryKind symbol_type;
     union 
     {
         Variable    v_data;
+        Type        t_data;
         Function    f_data;
         Procedure   p_data;
     } data;

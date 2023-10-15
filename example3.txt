@@ -1,9 +1,4 @@
-var x : int;
 begin
-    var x : int;
-    begin
-        var x : int;
-        x := 2;
-        return
-    end
+    var x : array [0..10] of int;
+    return
 end
