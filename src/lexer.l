@@ -3,7 +3,6 @@
   #include <stdlib.h>
   #include <string.h>
   #include "parser.y.h"
-  #include "symbolTable.h"
   int column_counter;
 %}
 
@@ -25,10 +24,10 @@ identificador   {letter}({letter}|{number})*
 
 {ws}          {column_counter += strlen(yytext);}
 {newline}     {column_counter = 0;} 
-"bool"        {column_counter += strlen(yytext); return T_BOOL;}
-"int"         {column_counter += strlen(yytext); return T_INT;}
-"real"        {column_counter += strlen(yytext); return T_REAL;}
-"char"        {column_counter += strlen(yytext); return T_CHAR;}
+"bool"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_BOOL;}
+"int"         {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_INT;}
+"real"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_REAL;}
+"char"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_CHAR;}
 
 ":="        {column_counter += strlen(yytext); return ATTRIB;}
 
@@ -89,8 +88,8 @@ identificador   {letter}({letter}|{number})*
 "then"      {column_counter += strlen(yytext); return THEN;}
 
 "true"|"false"	                          {
-                                              yylval.info.value.v_bool = yytext[0] == 't' ? true : false;
-                                              yylval.info.lexemes = strdup(yytext);
+                                              yylval.info.value.v_bool = yytext[0] == 't' ? 1 : 0;
+                                              yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return V_BOOL;
                                           }
@@ -98,36 +97,34 @@ identificador   {letter}({letter}|{number})*
 
 {number}+(E[+-]?{number}+)?            {
                                               yylval.info.value.v_int = atoi(yytext);
-                                              yylval.info.lexemes = strdup(yytext);
+                                              yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return V_INT;
                                             }
 
 {number}+\.{number}+(E[+-]?{number}+)? {
-                                              // yylval.real_value = strtof(yytext, NULL);
-                                              yylval.info.lexemes = strdup(yytext);
+                                              yylval.info.value.v_real = strtof(yytext, NULL);
+                                              yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return V_REAL;
                                             }
 
 \'.\'                                       {
-                                              //printf("minha string legal: %s\n", yytext);
-                                              // yylval.char_value = yytext[1];
-                                              yylval.info.lexemes = strdup(yytext);
+                                              yylval.info.value.v_char = yytext[1];
+                                              yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return V_CHAR;
                                             }
 \".*\"                                      {
-                                              // yylval.string_value = strdup(yytext+1);
-                                              // yylval.string_value[yyleng-2] = '\0';
-                                              yylval.info.lexemes = strdup(yytext);
+                                              yylval.info.value.v_string = strdup(yytext+1);
+                                              yylval.info.value.v_string[yyleng-2] = '\0';
+                                              yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return V_STRING; // ?? como indicar uma string?
                                             }
 
 {identificador}                             {
                                             //  // yylval.id_index = addSymbol(yytext);
-                                              yylval.info.lexemes = strdup(yytext);
                                               yylval.info.name = strdup(yytext);
                                               column_counter += strlen(yytext);
                                               return ID;

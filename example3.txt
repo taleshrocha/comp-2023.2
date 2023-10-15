@@ -1,0 +1,9 @@
+var x : int;
+begin
+    var x : int;
+    begin
+        var x : int;
+        x := 2;
+        return
+    end
+end

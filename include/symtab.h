@@ -47,10 +47,13 @@ typedef struct Symbol_Entry
 /*   Symbol Table (SCOPE)   */
 typedef struct Symbol_Table
 {
-    Symbol_Entry * symbols; //simbolos definidos no escopo atual - array dinamico
-    size_t size;
-    size_t capacity;
+    Symbol_Entry ** symbols; //simbolos definidos no escopo atual - array dinamico
+    size_t symbol_size;
+    size_t symbol_capacity;
     struct Symbol_Table * parent;  //utilizar para busca de simbolo no "escopo-pai"
+    struct Symbol_Table ** children;  
+    size_t children_size;
+    size_t children_capacity;
 
 } Symbol_Table;
 
@@ -58,21 +61,20 @@ typedef struct Symbol_Table
 
 
 void increaseSymbolTableSize(Symbol_Table * symbolTable);
+void increaseSymbolTableChildren(Symbol_Table * symbolTable);
 
 Function * getFunctionSymbol(Symbol_Table * symbolTable, char * functionName);
 int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName);
 
-Symbol_Table * createSymbolTable(Symbol_Table * parent);
 Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol);
-Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name);
+Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name, int flag);
 
 void printCurrentScope(Symbol_Table * symbolTable);
 
-void initializeStackOfScopes();
-void increaseStack();
 Symbol_Table * getCurrentScope();
-void pushScope(Symbol_Table * scope);
-Symbol_Table * popScope();
-void freeStackOfScopes();
+void pushScope();
+void popScope();
+void freeScopes();
+void freeScope();
 
 #endif

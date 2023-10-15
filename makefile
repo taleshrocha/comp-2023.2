@@ -5,7 +5,7 @@ LIBS = -lfl
 LEX = lex
 YACC = yacc
 
-CFLAGS = -Wall -Wextra #-Werror 
+CFLAGS = -Wall -Wextra -Werror 
  
 BIN=./bin
 OBJS=./objs
@@ -23,25 +23,16 @@ mkfolders:
 
 # debug
 
-debug: CFLAGS += -DDEBUG -g -O0 #-fsanitize=address -fno-omit-frame-pointer
+debug: CFLAGS += -DDEBUG -g -O0 # -fsanitize=address -fno-omit-frame-pointer
 debug: all
 
 release: CFLAGS += -O3
 release: all
 
 
-# executables
+# executable
 
-# $(BIN)/lexer_test: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/lexerTest.o
-# 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
-
-# $(BIN)/nonRecursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/nonRecursiveParser.o
-# 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
-
-# $(BIN)/recursiveParser: $(OBJS)/lexer.o $(OBJS)/symbolTable.o $(OBJS)/recursiveParser.o
-# 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
-
-$(BIN)/parser: $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/symbolTable.o
+$(BIN)/parser: $(OBJS)/typedefs.o $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -49,10 +40,10 @@ $(BIN)/parser: $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/symbolT
 $(OBJS)/lexer.o: $(SRC)/lexer.l.c 
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
-$(OBJS)/parser.o: $(SRC)/parser.y.c
+$(OBJS)/parser.o: $(SRC)/parser.y.c $(SRC)/lexer.l.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
-$(OBJS)/symbolTable.o: $(SRC)/symbolTable.c
+$(OBJS)/typedefs.o: $(SRC)/typedefs.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/symtab.o: $(SRC)/symtab.c
@@ -60,12 +51,6 @@ $(OBJS)/symtab.o: $(SRC)/symtab.c
 
 $(OBJS)/lexerTest.o: $(SRC)/lexerTest.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
-
-# $(OBJS)/nonRecursiveParser.o: $(SRC)/nonRecursiveParser.c
-# 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
-
-# $(OBJS)/recursiveParser.o: $(SRC)/recursiveParser.c
-# 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources
 
@@ -82,3 +67,7 @@ clean:
 	rm -f $(SRC)/*.l.c
 	rm -f $(SRC)/*.y.c
 	rm -f $(INCLUDE)/*.y.h
+
+
+valgrind:
+	valgrind -s --leak-check=full --show-leak-kinds=all ./bin/parser $(file)

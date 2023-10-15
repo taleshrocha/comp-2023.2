@@ -89,4 +89,6 @@ typedef struct Node {
 
 Node* createNode(int identifier, Node* children);
 
+char* type_name(int type_id);
+
 #endif  // TYPEDEFS_H
