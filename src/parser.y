@@ -7,7 +7,11 @@
 int args_types[100];
 char args_names[100][100];
 int args_size;
-int type_counter = 5;
+int type_counter = 10;
+
+//	gambi para guardar o nome de um tipo
+char * temp;
+int flag = 0;
 
 extern int column_counter;
 char* message;
@@ -57,6 +61,7 @@ void yyerror(char* s) {
         int ends[100];
         int dimensions;  
     } interval;
+    
 
 }
 
@@ -147,23 +152,27 @@ Vars :
 |   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
 Types :
-    TYPE ID ATTRIB TypeDec SEMICOLON {
-        // Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
-        // newSymbol->name = $2.name;
-        // newSymbol->symbol_type = K_TYPE;
-        // // Type t_data;
-        // // t_data.type_kind = $4.type;
+    TYPE ID {temp = $2.name; flag = 1;} ATTRIB TypeDec SEMICOLON {
+        //Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
+        //newSymbol->name = $2.name;
+        //newSymbol->symbol_type = K_TYPE;
+        //Type t_data;
+        //t_data.type_kind = $4.type;
 
         // // switch (type_kind)
 
-        // insertSymbol(getCurrentScope(), newSymbol);
-        // #ifdef DEBUG
-        // printCurrentScope(getCurrentScope());
-        // #endif
-        // free($2.name);
+        //insertSymbol(getCurrentScope(), newSymbol);
+        #ifdef DEBUG
+        printCurrentScope(getCurrentScope());
+        #endif
+        free($2.name);
+        flag = 0;
+        
     } Types
 |   /* NOTHING */
 ;
+
+
 
 TypeDec :
     T_BOOL {$$.type = E_BOOL; $$.name = $1.name;}
@@ -172,32 +181,63 @@ TypeDec :
 |   T_CHAR {$$.type = E_CHAR; $$.name = $1.name;}
 |   ID     {$$.type = 0 /*TODO search symbol table*/; $$.name = $1.name;}
 |   ARRAY LBRA Interval RBRA OF TypeDec  {
+		
+		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
+        newSymbol->symbol_type = K_ARRAY;
+        Array data;
+
         $$.type = E_ARRAY;
-        $$.name = $1.name; //TODO
-        $$.array_data.inner_type = $6.type;
-        $$.array_data.dimensions = $3.dimensions;
-        $$.array_data.size = 1;
-        for (int i = 0; i < $3.dimensions; i++) {
-            $$.array_data.capacity[i] = $3.capacity[i];
-            $$.array_data.starts[i] = $3.starts[i];
-            $$.array_data.ends[i] = $3.ends[i];
-            $$.array_data.size *= $$.array_data.capacity[i];
+        if(flag == 1){
+        	newSymbol->name = temp;	
         }
+        
+        data.inner_type =	$6.type;
+        data.dimensions = 	$3.dimensions;
+        data.type_id 	= 	type_counter++;
+        data.size = 1;
+        for (int i = 0; i < $3.dimensions; i++) {
+            data.capacity[i] = $3.capacity[i];
+            data.starts[i] = $3.starts[i];
+            data.ends[i] = $3.ends[i];
+            data.size *= data.capacity[i];
+        }
+        newSymbol->data.a_data = data;
+        insertSymbol(getCurrentScope(), newSymbol);
+        
         // printf("dimensions: %d\n", $$.array_data.dimensions);
         // printf("size: %d\n", $$.array_data.size);
         free($6.name);
     }
-|   RECORD Fields END {
-        // $$.type = E_RECORD;
-        // $$.name = $2.name;
-        // $$.record_data.
+|   RECORD {args_size=0;} Fields END {
+		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
+        newSymbol->symbol_type = K_RECORD;
+        if(flag == 1){
+        	newSymbol->name = temp;	
+        }
+        Record data;
+        for(int i = 0; i < args_size; i++){
+        	data.field_types[i] = args_types[i];
+        	data.field_names[i] = args_names[i];
+        }
+        data.n_fields 	= args_size;
+        data.type_id 	= type_counter++;
+        
+        newSymbol->data.r_data = data;
+        insertSymbol(getCurrentScope(), newSymbol);
+        args_size=0;
+        
     }
 ;
 Interval :
     Exp INTERVAL Exp {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.dimensions = 1;
+            if($3.value.v_int - $1.value.v_int <= 0){
+            	yyerror("erro: valor do intervalo eh negativo.\n");
+            }
             $$.capacity[0] = $3.value.v_int - $1.value.v_int;
+            $$.starts[0] = $1.value.v_int;
+            $$.ends[0] = $3.value.v_int;
         } else {
             yyerror("deu ruim");
         }
@@ -206,11 +246,18 @@ Interval :
     }
 |   Exp INTERVAL Exp COMMA Interval {
         if ($1.type == E_INT && $3.type == E_INT) {
+            if($3.value.v_int - $1.value.v_int <= 0){
+            	yyerror("erro: valor do intervalo eh negativo.\n");
+            }
             $$.dimensions = $5.dimensions+1;
             for (int i = 0; i < $5.dimensions; i++) {
                 $$.capacity[i] = $5.capacity[i];
+            	$$.starts[i] = $5.starts[i];
+            	$$.ends[i] = $5.ends[i];
             }
             $$.capacity[$$.dimensions-1] = $3.value.v_int - $1.value.v_int;
+            $$.starts[$$.dimensions-1] = $1.value.v_int;
+            $$.ends[$$.dimensions-1] = $3.value.v_int;
         } else {
             yyerror("deu ruim");
         }
@@ -219,7 +266,11 @@ Interval :
 }
 ;
 Fields :
-    ID COLON TypeDec SEMICOLON Fields {}
+    ID COLON TypeDec {
+    	args_types[args_size] = $3.type;
+    	args_names[args_size] = $1.name;
+    	args_size++;
+    } SEMICOLON Fields {}
 |   /* NOTHING */ {}
 ;
 SubProg : 
@@ -256,7 +307,7 @@ ProcedureDecl :
         }
         procedure.params_size = args_size;
         //args_size=0;// Comentado para nao ser zerado 
-                        //- ainda falta inserir os parametros na tabela de simbolos do procedimento
+                        //- inserir os parametros na tabela de simbolos do procedimento
 
         newSymbol->data.p_data = procedure;
 
