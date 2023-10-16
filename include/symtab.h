@@ -8,7 +8,9 @@ typedef enum EntryKind {
   K_VARIABLE,
   K_FUNCTION,
   K_PROCEDURE,
-  K_TYPE
+  K_ARRAY,
+  K_RECORD.
+  
 } EntryKind;
 
 typedef struct Variable
@@ -32,24 +34,34 @@ typedef struct Function
     size_t params_size;
 } Function;
 
-typedef struct Type
-{
-    // record
+
+typedef struct Record {
+	int type_id;
     char field_names[100][100];
     int field_types[100];
     int n_fields;
-    // array
+
+}Record;
+
+//type type2 := type1;
+typedef struct SimpleType {
+    int type_id; //identificador unico do tipo (contador)
+   	int inner_type;	//tipo dos valores armazenados
+
+}SimpleType;
+
+
+
+typedef struct Array
+{
+	int type_id;
     int inner_type;
     int size;
-    int capacity[100];
-    int starts[100];
-    int ends[100];
-    int dimensions;  
-
-    // info
-    EntryKind type_kind;
-
-} Type;
+    int capacity[100]; //capacidade da dimensao i
+    int starts[100]; //começo do intervalor da dimensao i
+    int ends[100];	//final do intervalo da dimensao i
+    int dimensions;  //numero de dimensoes
+} Array;
 
 typedef struct Procedure
 {
@@ -65,9 +77,11 @@ typedef struct Symbol_Entry
     union 
     {
         Variable    v_data;
-        Type        t_data;
+        Array	    a_data;
+        Record      r_data;
         Function    f_data;
         Procedure   p_data;
+        int         s_type;
     } data;
 } Symbol_Entry;
 
