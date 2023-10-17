@@ -217,7 +217,7 @@ TypeDec :
         Record data;
         for(int i = 0; i < args_size; i++){
         	data.field_types[i] = args_types[i];
-        	data.field_names[i] = args_names[i];
+            strcpy(data.field_names[i], args_names[i]);
         }
         data.n_fields 	= args_size;
         data.type_id 	= type_counter++;
@@ -268,7 +268,7 @@ Interval :
 Fields :
     ID COLON TypeDec {
     	args_types[args_size] = $3.type;
-    	args_names[args_size] = $1.name;
+        strcpy(args_names[args_size], $1.name);
     	args_size++;
     } SEMICOLON Fields {}
 |   /* NOTHING */ {}

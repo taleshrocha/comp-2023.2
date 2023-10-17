@@ -9,7 +9,7 @@ typedef enum EntryKind {
   K_FUNCTION,
   K_PROCEDURE,
   K_ARRAY,
-  K_RECORD.
+  K_RECORD
   
 } EntryKind;
 

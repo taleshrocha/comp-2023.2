@@ -168,7 +168,7 @@ void freeScope(Symbol_Table * scope) {
     }
     free(scope->children);
     for (size_t i = 0; i < scope->symbol_size; i++){
-        free(scope->symbols[i]->name);
+        free(scope->symbols[i]->name); //TODO: Problema aqui - free(): invalid pointer
         free(scope->symbols[i]);
     }
     free(scope->symbols);
