@@ -1,4 +1,4 @@
 begin
-    var x : array [0..10] of int;
+    var x : array [0..10, 32..10] of int;
     return
 end

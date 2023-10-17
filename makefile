@@ -23,8 +23,11 @@ mkfolders:
 
 # debug
 
-debug: CFLAGS += -DDEBUG -g -O0 # -fsanitize=address -fno-omit-frame-pointer
+debug: CFLAGS += -DDEBUG -g -O0
 debug: all
+
+sanitize: CFLAGS += -DDEBUG -g -O0 -fsanitize=address -fno-omit-frame-pointer
+sanitize: all
 
 release: CFLAGS += -O3
 release: all
@@ -32,7 +35,7 @@ release: all
 
 # executable
 
-$(BIN)/parser: $(OBJS)/typedefs.o $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o
+$(BIN)/parser: $(OBJS)/typedefs.o $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/exception.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -50,6 +53,9 @@ $(OBJS)/symtab.o: $(SRC)/symtab.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/lexerTest.o: $(SRC)/lexerTest.c
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
+$(OBJS)/exception.o: $(SRC)/exception.c 
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources
@@ -70,4 +76,4 @@ clean:
 
 
 valgrind:
-	valgrind -s --max-stackframe=2096112 --leak-check=full --show-leak-kinds=all ./bin/parser $(file)
+	valgrind -s --leak-check=full --show-leak-kinds=all ./bin/parser $(file)

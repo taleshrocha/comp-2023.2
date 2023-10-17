@@ -30,15 +30,15 @@ typedef struct Variable
 typedef struct Function
 {
     int return_type;
-    int params[100];
+    int params[16];
     size_t params_size;
 } Function;
 
 
 typedef struct Record {
 	int type_id;
-    char field_names[100][100];
-    int field_types[100];
+    char field_names[16][32];
+    int field_types[16];
     int n_fields;
 
 }Record;
@@ -57,15 +57,15 @@ typedef struct Array
 	int type_id;
     int inner_type;
     int size;
-    int capacity[100]; //capacidade da dimensao i
-    int starts[100]; //começo do intervalor da dimensao i
-    int ends[100];	//final do intervalo da dimensao i
+    int capacity[16]; //capacidade da dimensao i
+    int starts[16]; //começo do intervalor da dimensao i
+    int ends[16];	//final do intervalo da dimensao i
     int dimensions;  //numero de dimensoes
 } Array;
 
 typedef struct Procedure
 {
-    int params[100];
+    int params[16];
     size_t params_size;
 } Procedure;
 

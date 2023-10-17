@@ -3,9 +3,10 @@
 #include <lexer.l.h>
 #include <typedefs.h>
 #include <symtab.h>
+#include "exception.h"
 
-int args_types[100];
-char args_names[100][100];
+int args_types[16];
+char args_names[16][32];
 int args_size;
 int type_counter = 10;
 
@@ -17,7 +18,8 @@ extern int column_counter;
 char* message;
 
 void yyerror(char* s) {
-    fprintf(stderr, "%s at line %d - column %d\n", s , yylineno, column_counter);
+    printMessage(ERROR, "%s at line %d - column %d\n", s , yylineno, column_counter);
+    // fprintf(stderr, "%s at line %d - column %d\n", s , yylineno, column_counter);
     // fprintf(stderr, "current token is: \"%s\"\n", yytext);
 }
 
@@ -40,25 +42,25 @@ void yyerror(char* s) {
         char* name;
         union {
             struct {
-                char field_names[100][100];
-                int field_types[100];
+                char field_names[16][32];
+                int field_types[16];
                 int n_fields;
             } record_data;
             struct {
                 int inner_type;
                 int size;
-                int capacity[100];
-                int starts[100];
-                int ends[100];
+                int capacity[16];
+                int starts[16];
+                int ends[16];
                 int dimensions;
             } array_data;
         };
     } type_info;
     struct {
         int size;
-        int capacity[100];
-        int starts[100];
-        int ends[100];
+        int capacity[16];
+        int starts[16];
+        int ends[16];
         int dimensions;  
     } interval;
     
@@ -162,10 +164,12 @@ Types :
         // // switch (type_kind)
 
         //insertSymbol(getCurrentScope(), newSymbol);
+
         #ifdef DEBUG
         printCurrentScope(getCurrentScope());
         #endif
-        free($2.name);
+
+        // free($2.name);
         flag = 0;
         
     } Types
@@ -185,15 +189,16 @@ TypeDec :
 		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->symbol_type = K_ARRAY;
         Array data;
-
-        $$.type = E_ARRAY;
-        if(flag == 1){
-        	newSymbol->name = temp;	
-        }
-        
         data.inner_type =	$6.type;
         data.dimensions = 	$3.dimensions;
         data.type_id 	= 	type_counter++;
+        $$.type = E_ARRAY;
+        if(flag == 1){
+        	newSymbol->name = temp;	
+        } else {
+            newSymbol->name = (char*) malloc(sizeof(char) * 32);
+            sprintf(newSymbol->name, "ARRAY %d", data.type_id);
+        }
         data.size = 1;
         for (int i = 0; i < $3.dimensions; i++) {
             data.capacity[i] = $3.capacity[i];
