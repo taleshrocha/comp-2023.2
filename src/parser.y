@@ -502,13 +502,17 @@ AcessMemAddr:
     }
 
 |   AcessMemAddr LBRA Exp RBRA {
-        if ($3.type == E_INT) {
-            $$.type = $3.type;
+        Symbol_Entry* entry = searchArrayType($1.type);
+        $$.type = entry->data.a_data.inner_type;
+        if(entry == NULL){
+            printf("Error: symbol '%s' not an array, type is %d.\n", $1.name, $1.type);
         } else {
-            printf("ERROR - AcessMemAddr\n");
+            if ($3.type != E_INT) {
+                printf("ERROR - Expression not result in integer value\n");
+            }
         }
-        // garantir q AcessMemAddr é um array
-        // acessar o tipo do conteudo array e atribuir esse tipo para AcessMemAddr
+        $$.name = $1.name; // todo: concatenar $1.name e $3.name
+        free($3.name); // todo remover esse free?
     }
 |   AcessMemAddr LPAR Args RPAR {
     // TODO: comparar args com os parametros da tabela de simbolo do função AcessMemAddr 
