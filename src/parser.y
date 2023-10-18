@@ -17,8 +17,11 @@ int flag = 0;
 extern int column_counter;
 char* message;
 
-void yyerror(char* s) {
-    printMessage(ERROR, "%s at line %d - column %d\n", s , yylineno, column_counter);
+void yyerror(char* s, ...) {
+    va_list vars;
+    va_start(vars, s);
+    printMessage(ERROR, "%s at line %d - column %d\n", s , yylineno, column_counter, vars);
+    va_end(vars);
     // fprintf(stderr, "%s at line %d - column %d\n", s , yylineno, column_counter);
     // fprintf(stderr, "current token is: \"%s\"\n", yytext);
 }
@@ -29,6 +32,7 @@ void yyerror(char* s) {
     struct {
         int type;
         char* name;
+        int is_constant;
         union {
             int v_int;
             int v_bool;
@@ -183,7 +187,10 @@ TypeDec :
 |   T_INT  {$$.type = E_INT; $$.name = $1.name;}
 |   T_REAL {$$.type = E_REAL; $$.name = $1.name;}
 |   T_CHAR {$$.type = E_CHAR; $$.name = $1.name;}
-|   ID     {$$.type = 0 /*TODO search symbol table*/; $$.name = $1.name;}
+|   ID     {
+        $$.name = $1.name;
+        $$.type = searchType($$.name);
+    }
 |   ARRAY LBRA Interval RBRA OF TypeDec  {
 		
 		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
@@ -429,23 +436,10 @@ Cmds:
 
 CmdAux:
     AcessMemAddr ATTRIB Exp {
-        Symbol_Entry * symbol = searchSymbol(getCurrentScope(), $1.name, true);
-        if(symbol == NULL){
-            printf("Error: symbol '%s' not found.\n", $1.name);
-        } else if (symbol->symbol_type != 0) {
-            printf(
-                "Error: value cannot be assigned to '%s'. Is not a variable",
-                $1.name
-            );
-        } else if(symbol->data.v_data.is_constant == 1){
-            printf(
-                "Error: The value of '%s' cannot be changed. Reason: is a constant.\n",
-                symbol->name
-            );
-        } else if(symbol->data.v_data.type != $3.type){
+        if($1.type != $3.type){
             printf(
                 "Error: Type of '%s' is different from the type of the value assigned.\n",
-                symbol->name
+                $1.name
             );
         } else {
             // TODO
@@ -483,6 +477,7 @@ AcessMemAddr:
             switch(entry->symbol_type) {
                 case 0:
                     $$.type = entry->data.v_data.type;
+                    $$.is_constant = entry->data.v_data.is_constant;
                     break;
                 default:
                     printf("Not a variable or constant!");
@@ -491,7 +486,19 @@ AcessMemAddr:
         $$.name = $1.name;
     }
 |   AcessMemAddr DOT ID {
-        //TODO  
+        Symbol_Entry* entry = searchRecordType($1.type);
+        if(entry == NULL){
+            printf("Error: symbol '%s' not a record, type is %d.\n", $1.name, $1.type);
+        } else {
+            for(int i = 0; i < entry->data.r_data.n_fields; i++){
+                if(strcmp(entry->data.r_data.field_names[i], $3.name) == 0){
+                    $$.type = entry->data.r_data.field_types[i];
+                    $$.is_constant = $1.is_constant;
+                }
+            }
+        }
+        $$.name = $1.name; // todo: concatenar $1.name e $3.name
+        free($3.name); // todo remover esse free?
     }
 
 |   AcessMemAddr LBRA Exp RBRA {

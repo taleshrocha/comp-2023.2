@@ -89,6 +89,56 @@ Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name, int flag){
     return NULL;
 }
 
+int searchType(char * name) {
+    Symbol_Table* scope = getCurrentScope();
+    while(scope->parent != NULL){
+        scope = scope->parent;
+    }
+    for (size_t i = 0; i < scope->symbol_size; i++){
+        Symbol_Entry* symbol = scope->symbols[i];
+        if(strcmp(name, symbol->name) == 0) {
+            if(symbol->symbol_type == K_RECORD){
+                return symbol->data.r_data.type_id;
+            } else if(symbol->symbol_type == K_ARRAY){
+                return symbol->data.a_data.type_id;
+            }
+        }
+    }
+    return -1;
+}
+
+Symbol_Entry* searchRecordType(int type_id) {
+    Symbol_Table* scope = getCurrentScope();
+    while(scope->parent != NULL){
+        scope = scope->parent;
+    }
+    for (size_t i = 0; i < scope->symbol_size; i++){
+        Symbol_Entry* symbol = scope->symbols[i];
+        if(symbol->symbol_type == K_RECORD){
+            if(symbol->data.r_data.type_id == type_id){
+                return symbol;
+            }
+        }
+    }
+    return NULL;
+}
+
+Symbol_Entry* searchArrayType(int type_id) {
+    Symbol_Table* scope = getCurrentScope();
+    while(scope->parent != NULL){
+        scope = scope->parent;
+    }
+    for (size_t i = 0; i < scope->symbol_size; i++){
+        Symbol_Entry* symbol = scope->symbols[i];
+        if(symbol->symbol_type == K_ARRAY){
+            if(symbol->data.a_data.type_id == type_id){
+                return symbol;
+            }
+        }
+    }
+    return NULL;
+}
+
 /*  Increase capacity of symbols list   */
 void increaseSymbolTableSize(Symbol_Table * symbolTable){
 

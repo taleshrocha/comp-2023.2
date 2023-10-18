@@ -109,7 +109,9 @@ int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName);
 
 Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol);
 Symbol_Entry * searchSymbol(Symbol_Table * symbolTable, char * name, int flag);
-
+int searchType(char * name);
+Symbol_Entry * searchRecordType(int type_id);
+Symbol_Entry * searchArrayType(int type_id);
 void printCurrentScope(Symbol_Table * symbolTable);
 
 Symbol_Table * getCurrentScope();

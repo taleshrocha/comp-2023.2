@@ -2,5 +2,7 @@ type tipo1 := record x : real; y : real; end;
 type tipo2 := array[0..10] of int;
 
 begin
+    var var1 : tipo1;
+    var1.x := 3.0;
     return
 end
