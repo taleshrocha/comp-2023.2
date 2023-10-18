@@ -216,9 +216,6 @@ TypeDec :
 |   RECORD {args_size=0;} Fields END {
 		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->symbol_type = K_RECORD;
-        if(flag == 1){
-        	newSymbol->name = temp;	
-        }
         Record data;
         for(int i = 0; i < args_size; i++){
         	data.field_types[i] = args_types[i];
@@ -226,11 +223,15 @@ TypeDec :
         }
         data.n_fields 	= args_size;
         data.type_id 	= type_counter++;
-        
+        if(flag == 1){
+        	newSymbol->name = temp;	
+        } else {
+            newSymbol->name = (char*) malloc(sizeof(char) * 32);
+            sprintf(newSymbol->name, "RECORD %d", data.type_id);
+        }
         newSymbol->data.r_data = data;
         insertSymbol(getCurrentScope(), newSymbol);
         args_size=0;
-        
     }
 ;
 Interval :
@@ -274,6 +275,8 @@ Fields :
     ID COLON TypeDec {
     	args_types[args_size] = $3.type;
         strcpy(args_names[args_size], $1.name);
+        free($1.name);
+        free($3.name);
     	args_size++;
     } SEMICOLON Fields {}
 |   /* NOTHING */ {}

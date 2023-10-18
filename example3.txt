@@ -1,4 +1,6 @@
+type tipo1 := record x : real; y : real; end;
+type tipo2 := array[0..10] of int;
+
 begin
-    var x : array [0..10, 32..10] of int;
     return
 end

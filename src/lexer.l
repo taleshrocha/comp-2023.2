@@ -76,8 +76,8 @@ identificador   {letter}({letter}|{number})*
 "return"    {column_counter += strlen(yytext); return RETURN;}
 "break"     {column_counter += strlen(yytext); return BREAK;}
 "continue"  {column_counter += strlen(yytext); return CONTINUE;}
-"record"    {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return RECORD;}
-"array"     {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return ARRAY;}
+"record"    {column_counter += strlen(yytext); yylval.info.name = "record"; return RECORD;}
+"array"     {column_counter += strlen(yytext); yylval.info.name = "array"; return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
