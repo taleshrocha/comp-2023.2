@@ -6,8 +6,7 @@
 
 typedef enum EntryKind {
   K_VARIABLE,
-  K_FUNCTION,
-  K_PROCEDURE,
+  K_SUBPROGRAM,
   K_ARRAY,
   K_RECORD
   
@@ -27,13 +26,12 @@ typedef struct Variable
     
 } Variable;
 
-typedef struct Function
+typedef struct SubProgram
 {
     int return_type;
     int params[16];
     size_t params_size;
-} Function;
-
+} SubProgram;
 
 typedef struct Record {
 	int type_id;
@@ -63,24 +61,20 @@ typedef struct Array
     int dimensions;  //numero de dimensoes
 } Array;
 
-typedef struct Procedure
-{
-    int params[16];
-    size_t params_size;
-} Procedure;
+
 
 /*   Entry of Symbol Table   */
 typedef struct Symbol_Entry
 {
     char *    name;
     EntryKind symbol_type;
+    int reference;
     union 
     {
         Variable    v_data;
         Array	    a_data;
         Record      r_data;
-        Function    f_data;
-        Procedure   p_data;
+        SubProgram  sp_data;
         int         s_type;
     } data;
 } Symbol_Entry;
@@ -104,7 +98,7 @@ typedef struct Symbol_Table
 void increaseSymbolTableSize(Symbol_Table * symbolTable);
 void increaseSymbolTableChildren(Symbol_Table * symbolTable);
 
-Function * getFunctionSymbol(Symbol_Table * symbolTable, char * functionName);
+Symbol_Entry * getSubProgram(char * functionName);
 int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName);
 
 Symbol_Entry * insertSymbol(Symbol_Table * symbolTable, Symbol_Entry * symbol);

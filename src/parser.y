@@ -7,7 +7,7 @@
 
 int args_types[16];
 char args_names[16][32];
-int args_size;
+size_t args_size;
 int type_counter = 10;
 
 //	gambi para guardar o nome de um tipo
@@ -100,7 +100,7 @@ Prog :
     }
 ;
 Decl : 
-    Consts Types SubProg Vars {}
+    Consts Types Vars SubProg {}
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
@@ -199,7 +199,7 @@ TypeDec :
         data.inner_type =	$6.type;
         data.dimensions = 	$3.dimensions;
         data.type_id 	= 	type_counter++;
-        $$.type = E_ARRAY;
+        $$.type = data.type_id;
         if(flag == 1){
         	newSymbol->name = temp;	
         } else {
@@ -224,7 +224,7 @@ TypeDec :
 		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->symbol_type = K_RECORD;
         Record data;
-        for(int i = 0; i < args_size; i++){
+        for(size_t i = 0; i < args_size; i++){
         	data.field_types[i] = args_types[i];
             strcpy(data.field_names[i], args_names[i]);
         }
@@ -305,26 +305,29 @@ ProcedureDecl :
         printf("Procedure name: %s\n", $2.name);
         #endif
         newSymbol->name = $2.name;
-        newSymbol->symbol_type = K_PROCEDURE;
+        newSymbol->symbol_type = K_SUBPROGRAM;
 
-        Procedure procedure;
+        SubProgram procedure;
         #ifdef DEBUG
         printf("\nPARAMETROS IDENTIFICADOS - PROCEDURE: %s\n", $2.name);
         #endif
-        for(int i = 0; i < args_size; i++){
+        for(size_t i = 0; i < args_size; i++){
             procedure.params[i] = args_types[i];
             #ifdef DEBUG
             printf(
-                "\tParam %d Type: %d\n", 
+                "\tParam %ld Type: %d\n", 
                 i+1, args_types[i]
             );
             #endif
         }
         procedure.params_size = args_size;
+        procedure.return_type = -1;
+        printf("params_size: %ld\n", procedure.params_size);
+        printf("params_size: %ld\n", args_size);
         //args_size=0;// Comentado para nao ser zerado 
                         //- inserir os parametros na tabela de simbolos do procedimento
 
-        newSymbol->data.p_data = procedure;
+        newSymbol->data.sp_data = procedure;
 
         // criar registro na tabela
         insertSymbol(getCurrentScope(), newSymbol);
@@ -338,11 +341,13 @@ ProcedureDecl :
 ;
 
 Parameters:
-    ID COLON TypeDec ParametersAux { 
+    ID COLON TypeDec { 
         strcpy(args_names[args_size], $1.name);
         args_types[args_size++] = $3.type; 
-    }
-|   REF ID COLON TypeDec ParametersAux { args_types[args_size++] = $4.type; }
+        free($1.name);
+        free($3.name);
+    } ParametersAux
+|   REF ID COLON TypeDec { args_types[args_size++] = $4.type; } 
 |   /* NOTHING */ {}
 ;
 
@@ -361,9 +366,9 @@ FunctionDecl:
         printf("Function name: %s\n", $2.name);
         #endif
         newSymbol->name = $2.name;
-        newSymbol->symbol_type = K_FUNCTION;
+        newSymbol->symbol_type = K_SUBPROGRAM;
 
-        Function function;
+        SubProgram function;
         #ifdef DEBUG
         printf("Return type: %d\n", $8.type);
         #endif
@@ -371,18 +376,18 @@ FunctionDecl:
         #ifdef DEBUG
         printf("\nPARAMETROS IDENTIFICADOS - FUNCTION: %s\n", $2.name);
         #endif
-        for(int i = 0; i < args_size; i++){
+        for(size_t i = 0; i < args_size; i++){
             function.params[i] = args_types[i];
             #ifdef DEBUG
             printf(
-                "\tParam %d Type: %d\n", 
+                "\tParam %ld Type: %d\n", 
                 i+1, args_types[i]
             );
             #endif
         }
 
         function.params_size = args_size;
-        newSymbol->data.f_data = function;
+        newSymbol->data.sp_data = function;
 
         // criar registro na tabela
         insertSymbol(getCurrentScope(), newSymbol);
@@ -405,9 +410,9 @@ CmdBlock :
         #endif
         pushScope();
         if(args_size > 0 && args_size < 101){
-            for(int i = 0; i < args_size; i++){
+            for(size_t i = 0; i < args_size; i++){
                 Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
-                newSymbol->name = args_names[i];
+                newSymbol->name = strdup(args_names[i]);
                 newSymbol->symbol_type = 0;
 
                 Variable var_data;
@@ -435,7 +440,8 @@ Cmds:
 ;
 
 CmdAux:
-    AcessMemAddr ATTRIB Exp {
+    AcessMemAddr
+|   AcessMemAddr ATTRIB Exp {
         if($1.type != $3.type){
             printf(
                 "Error: Type of '%s' is different from the type of the value assigned.\n",
@@ -514,12 +520,37 @@ AcessMemAddr:
         $$.name = $1.name; // todo: concatenar $1.name e $3.name
         free($3.name); // todo remover esse free?
     }
-|   AcessMemAddr LPAR Args RPAR {
-    // TODO: comparar args com os parametros da tabela de simbolo do função AcessMemAddr 
-    // desalocar a memoria de args após o uso
-    // atribuir o tipo retornado pela função ao AcessMemAddr
-    // {args_size=0;}
+|   ID LPAR {args_size=0;} Args RPAR {
+    Symbol_Entry* entry = getSubProgram($1.name);
+    if (entry->data.sp_data.return_type != -1) {
+        $$.type = entry->data.sp_data.return_type;
     }
+    printf("encontrei essa função %s\n", entry->name);
+    printf("parameters %ld %ld\n", entry->data.sp_data.params_size, args_size);
+    if (entry->data.sp_data.params_size == args_size) {
+        for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
+            if (args_types[i] != entry->data.sp_data.params[i]) {
+                printf("ERROR - Type of parameter %s is %s but was expected to be %s.\n", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params[i]));
+            }
+        }
+    } else {
+        printf("ERROR - Wrong number of parameters. %ld parameters expected, %ld given\n", entry->data.sp_data.params_size, args_size);
+    }
+    // TODO: comparar args com os parametros da tabela de simbolo do função AcessMemAddr 
+    args_size=0;
+}
+;
+
+Args : 
+    Exp {
+        args_types[args_size++] = $1.type; 
+        free($1.name);
+    } ArgsAux
+|   /* NOTHING */ {}
+;
+
+ArgsAux : COMMA Args {}
+|   /* NOTHING */ {}
 ;
 
 CmdConditional:
@@ -680,6 +711,8 @@ AriOp2:
         } else {
             yyerror("ERROR! Incompatible type for '*' operation");
         }
+        // $$.name = strcat() // TODO
+
     }
 |   AriOp2 DIVIDE Parenthesis {
         if ($1.type == E_INT && $3.type == E_INT) {
@@ -813,15 +846,6 @@ NumExp:
 |   V_BOOL   { $$.type = E_BOOL; $$.value.v_bool = $1.value.v_bool; $$.name = $1.name;}
 |   V_CHAR   { $$.type = E_CHAR; $$.value.v_char = $1.value.v_char; $$.name = $1.name;}
 |   V_STRING { $$.type = ARRAY; /*TODO*/}
-;
-
-Args : 
-    Exp ArgsAux {}
-|   /* NOTHING */ {}
-;
-
-ArgsAux : COMMA Args {}
-|   /* NOTHING */ {}
 ;
 
 %%

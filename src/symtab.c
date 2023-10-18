@@ -13,17 +13,24 @@ Symbol_Table * getCurrentScope(){
 
 int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName){
     Symbol_Entry * symbol = searchSymbol(symbolTable, functionName, 0);
-    if(symbol->symbol_type == 2){ //TODO: substituir '2' por FUNCTION_TYPE
-        return symbol->data.f_data.return_type;
+    if(symbol->symbol_type == K_SUBPROGRAM){ //TODO: substituir '2' por FUNCTION_TYPE
+        return symbol->data.sp_data.return_type;
     }
     return -1;
 }
 
-Function * getFunctionSymbol(Symbol_Table * symbolTable, char * functionName){
-    Symbol_Entry * symbol = searchSymbol(symbolTable, functionName, 0);
-    if(symbol->symbol_type == 2){ //TODO: substituir '2' por FUNCTION_TYPE
-        return &(symbol->data.f_data);
+Symbol_Entry * getSubProgram(char * subprogname) {
+    Symbol_Table* scope = getCurrentScope();
+    while(scope->parent != NULL){
+        scope = scope->parent;
     }
+    for (size_t i = 0; i < scope->symbol_size; i++){
+        Symbol_Entry* symbol = scope->symbols[i];
+        if(symbol->symbol_type == K_SUBPROGRAM && strcmp(subprogname, symbol->name) == 0){
+            return symbol;
+        }
+    }
+    
     return NULL;
 }
 
