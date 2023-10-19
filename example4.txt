@@ -2,5 +2,5 @@
 
 begin
     var varteste : int;
-    print("Olá pessoal")
+    print("Tentando fazer uma baguncinha")
 end

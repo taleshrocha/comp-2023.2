@@ -60,5 +60,6 @@
 #define RETURN 56
 #define REF 57
 #define PRINT 58
+#define QUOTE 59
 
 #endif  // TERMINAL_DEFINES_H
