@@ -2,5 +2,5 @@
 
 begin
     var varteste : int;
-    return
+    print("Olá pessoal")
 end

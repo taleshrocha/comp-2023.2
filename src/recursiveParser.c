@@ -526,6 +526,7 @@ void Cmds(){
 		case CONTINUE: 	CmdAux(); Cmds_(); break;
 		case IF: 		CmdAux(); Cmds_(); break;
 		case RETURN: 	CmdAux(); Cmds_(); break;
+		case PRINT: 	CmdAux(); Cmds_(); break;
 		default: 		printf("Syntax error. Grammar rule: Cmds. Lookahead: %s. Line: %d.\n", terminal_mapping[lookahead-1], yylineno); 
 	}
 }
@@ -549,6 +550,7 @@ void CmdAux(){
 		case IF:		CmdConditional();	break;
 		case RETURN:	CmdReturn();		break;
 		case BREAK: 	eat(BREAK); 		break;
+		case PRINT: 	eat(PRINT);			break;
 		default: 		printf("Syntax error. Grammar rule: CmdAux. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }

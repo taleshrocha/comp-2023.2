@@ -139,7 +139,7 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
-char terminal_mapping[57][16] = {
+char terminal_mapping[58][16] = {
     "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
     "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
     "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",
@@ -149,7 +149,7 @@ char terminal_mapping[57][16] = {
     "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
     "VAR",      "BEGIN_",   "FOR",      "TO",        "STEP",      "LOOP",
     "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
-    "ELSE",     "RETURN", "REF"};
+    "ELSE",     "RETURN",   "REF",      "PRINT"};
 
 char non_terminal_mapping[44][32] = {"Prog",
                                      "Decl",
