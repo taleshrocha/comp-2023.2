@@ -79,6 +79,7 @@ identificador   {letter}({letter}|{number})*
 "record"    {column_counter += strlen(yytext); yylval.info.name = "record"; return RECORD;}
 "array"     {column_counter += strlen(yytext); yylval.info.name = "array"; return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
+"print"     {column_counter += strlen(yytext); return PRINT;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
 "exit"      {column_counter += strlen(yytext); return EXIT;}
