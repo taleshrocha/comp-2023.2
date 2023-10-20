@@ -76,7 +76,7 @@ void yyerror(char* s, ...) {
 %token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING 
 %token <type_info> T_BOOL T_INT T_REAL T_CHAR ARRAY RECORD
 
-%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args
+%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args CmdPrint
 %type <type_info> TypeDec 
 %type <interval> Interval
 
@@ -581,10 +581,11 @@ CmdReturnExp:
 ;
 
 CmdPrint:
-    PRINT LPAR V_STRING RPAR {
-        printf("%s\n", $3.value.v_string);
-    }
-;
+    PRINT LPAR V_STRING RPAR SEMICOLON { printf("%s\n", $3.value.v_string); }
+    | {}
+    ;
+
+
 
 /* 
 

@@ -1,6 +1,5 @@
-
-
 begin
-    var varteste : int;
-    print("Tentando fazer uma baguncinha")
+    print("Testando");
+    var x : int;
+    return
 end
