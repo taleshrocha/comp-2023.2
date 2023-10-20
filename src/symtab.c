@@ -13,7 +13,7 @@ Symbol_Table * getCurrentScope(){
 
 int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName){
     Symbol_Entry * symbol = searchSymbol(symbolTable, functionName, 0);
-    if(symbol->symbol_type == K_SUBPROGRAM){ //TODO: substituir '2' por FUNCTION_TYPE
+    if(symbol->symbol_type == K_SUBPROGRAM){
         return symbol->data.sp_data.return_type;
     }
     return -1;

@@ -29,7 +29,9 @@ typedef struct Variable
 typedef struct SubProgram
 {
     int return_type;
-    int params[16];
+    char params_names[16][32];
+    int params_types[16];
+    short ref_flags[16];
     size_t params_size;
 } SubProgram;
 

@@ -7,6 +7,7 @@
 
 int args_types[16];
 char args_names[16][32];
+short ref_flags[16];
 size_t args_size;
 int type_counter = 10;
 
@@ -312,7 +313,9 @@ ProcedureDecl :
         printf("\nPARAMETROS IDENTIFICADOS - PROCEDURE: %s\n", $2.name);
         #endif
         for(size_t i = 0; i < args_size; i++){
-            procedure.params[i] = args_types[i];
+            procedure.params_types[i] = args_types[i];
+            strcpy(procedure.params_names[i], args_names[i]);
+            procedure.ref_flags[i] = ref_flags[i];
             #ifdef DEBUG
             printf(
                 "\tParam %ld Type: %d\n", 
@@ -343,11 +346,18 @@ ProcedureDecl :
 Parameters:
     ID COLON TypeDec { 
         strcpy(args_names[args_size], $1.name);
+        ref_flags[args_size] = 0; 
         args_types[args_size++] = $3.type; 
         free($1.name);
         free($3.name);
     } ParametersAux
-|   REF ID COLON TypeDec { args_types[args_size++] = $4.type; } 
+|   REF ID COLON TypeDec {
+        strcpy(args_names[args_size], $2.name);
+        ref_flags[args_size] = 1; 
+        args_types[args_size++] = $4.type; 
+        free($2.name);
+        free($4.name);
+    } ParametersAux
 |   /* NOTHING */ {}
 ;
 
@@ -377,7 +387,9 @@ FunctionDecl:
         printf("\nPARAMETROS IDENTIFICADOS - FUNCTION: %s\n", $2.name);
         #endif
         for(size_t i = 0; i < args_size; i++){
-            function.params[i] = args_types[i];
+            function.params_types[i] = args_types[i];
+            strcpy(function.params_names[i], args_names[i]);
+            function.ref_flags[i] = ref_flags[i];
             #ifdef DEBUG
             printf(
                 "\tParam %ld Type: %d\n", 
