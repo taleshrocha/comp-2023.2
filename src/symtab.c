@@ -247,6 +247,8 @@ char* type_name(int type_id) {
             return "real";
         case E_CHAR:
             return "char";
+        case E_STRING:
+            return "string";
         case E_BOOL:    
             return "bool";
         case E_ARRAY:   

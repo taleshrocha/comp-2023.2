@@ -615,10 +615,10 @@ CmdReturn:
             if(functionSymbol != NULL){
                 if(functionSymbol->data.sp_data.return_type != $2.type){
                     yyerror(
-                        "\nTipo de retorno nao compativel com o tipo de retorno da funcao '%s'.\n Esperado tipo %d, mas encontrado tipo %d.\n",
+                        "\nTipo de retorno nao compativel com o tipo de retorno da funcao '%s'.\n Esperado tipo %s, mas encontrado tipo %s.\n",
                         functionSymbol->name,
-                        functionSymbol->data.sp_data.return_type, 
-                        $2.type
+                        type_name(functionSymbol->data.sp_data.return_type), 
+                        type_name($2.type)
                     );
                 }
             }
