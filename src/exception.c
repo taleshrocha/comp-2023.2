@@ -1,8 +1,8 @@
 #include "exception.h"
 
-void printMessage(enum MessageType messageType, const char *message, ...) {
-    va_list vars;
-    va_start(vars, message);
+void printMessage(enum MessageType messageType, const char *message, va_list vars) {
+    // va_list vars;
+    // va_start(vars, message);
     // Esses printf irão apenas definir a cor da mensagem
     switch (messageType) {
         case SUCCESS:
@@ -22,7 +22,7 @@ void printMessage(enum MessageType messageType, const char *message, ...) {
     vfprintf(stderr, message, vars);
     fprintf(stderr, ANSI_COLOR_RESET);
     
-    va_end(vars);
+    // va_end(vars);
 }
 /*
 (Lembrar de adicionar o enum)

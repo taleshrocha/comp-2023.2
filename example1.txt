@@ -44,8 +44,8 @@ end;
 procedure main ()
 begin
   globalVar3[2] := 3;
-  globalVar2.prop1 := false;
-  procedure1(false, globalVar2);
+  globalVar5.b := false;
+  procedure1(false, globalVar5.a);
   
   begin
     var localVar : int;
@@ -56,7 +56,7 @@ begin
       end 
     else
       begin
-        for i.campo := 0 to 10 step 1
+        for globalVar5.a := 0 to 10 step 1
         begin
           globalVar2 := globalVar2 + 1
         end
@@ -65,10 +65,10 @@ begin
 
   loop 
     var test1 : int;
-    teste1 := 10;
-    if teste1 == 10 then 
+    test1 := 10;
+    if test1 == 10 then 
     begin
-      teste1 := 0
+      test1 := 0
     end
     else
     begin
@@ -87,6 +87,7 @@ begin
   globalVar7 := 'a';
   
   globalVar8 := "four";
+  globalVar8 := "a";
 
   return
   

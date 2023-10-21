@@ -13,7 +13,11 @@ end;
 
 function function1 (par1 : bool, par2 : bool) : bool
 begin
-  return par1 == par2
+  if 3.0 > 1.0 then
+  begin
+    return false
+  end;
+  return par1 != par2
 end;
 
 begin

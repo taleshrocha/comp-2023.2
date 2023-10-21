@@ -11,6 +11,8 @@ short ref_flags[16];
 size_t args_size;
 int type_counter = 10;
 
+int current_return_type = 0;
+
 //	gambi para guardar o nome de um tipo
 char * temp;
 int flag = 0;
@@ -21,10 +23,9 @@ char* message;
 void yyerror(char* s, ...) {
     va_list vars;
     va_start(vars, s);
-    printMessage(ERROR, "%s at line %d - column %d\n", s , yylineno, column_counter, vars);
+    sprintf(message, "%s at line %d - column %d\n", s, yylineno, column_counter);
+    printMessage(ERROR, message, vars);
     va_end(vars);
-    // fprintf(stderr, "%s at line %d - column %d\n", s , yylineno, column_counter);
-    // fprintf(stderr, "current token is: \"%s\"\n", yytext);
 }
 
 %}
@@ -147,6 +148,7 @@ Vars :
 
         Variable var_data;
         var_data.type = $4.type;
+        printf("Type: %s\n", type_name(var_data.type));
         var_data.is_constant = 0;
         newSymbol->data.v_data = var_data;
 
@@ -201,11 +203,13 @@ TypeDec :
         data.dimensions = 	$3.dimensions;
         data.type_id 	= 	type_counter++;
         $$.type = data.type_id;
+        printf("typedecl: %s\n", type_name($$.type));
         if(flag == 1){
         	newSymbol->name = temp;	
         } else {
             newSymbol->name = (char*) malloc(sizeof(char) * 32);
             sprintf(newSymbol->name, "ARRAY %d", data.type_id);
+            $$.name = strdup(newSymbol->name);
         }
         data.size = 1;
         for (int i = 0; i < $3.dimensions; i++) {
@@ -231,11 +235,13 @@ TypeDec :
         }
         data.n_fields 	= args_size;
         data.type_id 	= type_counter++;
+        $$.type = data.type_id;
         if(flag == 1){
         	newSymbol->name = temp;	
         } else {
             newSymbol->name = (char*) malloc(sizeof(char) * 32);
             sprintf(newSymbol->name, "RECORD %d", data.type_id);
+            $$.name = strdup(newSymbol->name);
         }
         newSymbol->data.r_data = data;
         insertSymbol(getCurrentScope(), newSymbol);
@@ -325,8 +331,8 @@ ProcedureDecl :
         }
         procedure.params_size = args_size;
         procedure.return_type = -1;
-        printf("params_size: %ld\n", procedure.params_size);
-        printf("params_size: %ld\n", args_size);
+        // printf("params_size: %ld\n", procedure.params_size);
+        // printf("params_size: %ld\n", args_size);
         //args_size=0;// Comentado para nao ser zerado 
                         //- inserir os parametros na tabela de simbolos do procedimento
 
@@ -407,8 +413,10 @@ FunctionDecl:
         // apagar os dados de parametros após salvar a função na tabela de simbolos
         //args_size=0; // Comentado para nao ser zerado 
                         //- ainda falta inserir os parametros na tabela de simbolos da funcao
+        current_return_type = function.return_type;
     } CmdBlock SEMICOLON
     {
+        current_return_type = 0;
         #ifdef DEBUG
         printf("\n\t End of Function...\n");
         #endif
@@ -454,13 +462,17 @@ Cmds:
 CmdAux:
     AcessMemAddr
 |   AcessMemAddr ATTRIB Exp {
+        if ($1.type > 9) {
+            yyerror("Type of '%s' ('%s') cannot be assigned directly.\n", $1.name, type_name($1.type));
+        }
+        if ($3.type > 9) {
+            yyerror("Type of '%s' ('%s') cannot be assigned to a variable.\n", $3.name, type_name($3.type));
+        }
         if($1.type != $3.type){
-            printf(
-                "Error: Type of '%s' is different from the type of the value assigned.\n",
-                $1.name
+            yyerror(
+                "Type of '%s' ('%s') is different from the type of the value assigned ('%s').\n",
+                $1.name, type_name($1.type), type_name($3.type)
             );
-        } else {
-            // TODO
         }
         free($1.name);
         free($3.name);
@@ -470,10 +482,14 @@ CmdAux:
 |   CONTINUE {}
 |   BREAK {}
 |   FOR AcessMemAddr ATTRIB Exp TO Exp STEP Exp CmdBlock {
-        if ($2.type == $4.type && $6.type == $8.type && $2.type == $6.type) {
-            // TODO
-        } else {
-            printf("ERROR");
+        if ($2.type != $4.type) {
+            yyerror("Type of '%s' is different from the type of the value assigned for the initial value: %s.\n", $2.name, $4.name);
+        }
+        if ($2.type != $6.type) {
+            yyerror("Type of '%s' is different from the type of the value assigned for the final value: %s.\n", $2.name, $4.name);
+        }
+        if ($2.type != $8.type) {
+            yyerror("Type of '%s' is different from the type of the value assigned for the step value: %s.\n", $2.name, $4.name);
         }
     }
 |   LOOP Vars Cmds END {}
@@ -490,7 +506,7 @@ AcessMemAddr:
         Symbol_Table* tabela = getCurrentScope();
         Symbol_Entry* entry = searchSymbol(tabela, $1.name, true);
         if(entry == NULL){
-            printf("Error: symbol '%s' not found.\n", $1.name);
+            yyerror("Symbol '%s' not found.\n", $1.name);
         } else {
             switch(entry->symbol_type) {
                 case 0:
@@ -498,7 +514,7 @@ AcessMemAddr:
                     $$.is_constant = entry->data.v_data.is_constant;
                     break;
                 default:
-                    printf("Not a variable or constant!");
+                    yyerror("Identifier %s is not a variable or constant!", $1.name);
             }
         }
         $$.name = $1.name;
@@ -506,7 +522,7 @@ AcessMemAddr:
 |   AcessMemAddr DOT ID {
         Symbol_Entry* entry = searchRecordType($1.type);
         if(entry == NULL){
-            printf("Error: symbol '%s' not a record, type is %d.\n", $1.name, $1.type);
+            yyerror("Symbol '%s' not a record, its type is %d.\n", $1.name, $1.type);
         } else {
             for(int i = 0; i < entry->data.r_data.n_fields; i++){
                 if(strcmp(entry->data.r_data.field_names[i], $3.name) == 0){
@@ -523,10 +539,10 @@ AcessMemAddr:
         Symbol_Entry* entry = searchArrayType($1.type);
         $$.type = entry->data.a_data.inner_type;
         if(entry == NULL){
-            printf("Error: symbol '%s' not an array, type is %d.\n", $1.name, $1.type);
+            yyerror("Symbol '%s' not an array, its type is %d.\n", $1.name, $1.type);
         } else {
             if ($3.type != E_INT) {
-                printf("ERROR - Expression not result in integer value\n");
+                yyerror("Expression used to access position of array is not an integer, is of type %s\n", type_name($3.type));
             }
         }
         $$.name = $1.name; // todo: concatenar $1.name e $3.name
@@ -537,18 +553,17 @@ AcessMemAddr:
     if (entry->data.sp_data.return_type != -1) {
         $$.type = entry->data.sp_data.return_type;
     }
-    printf("encontrei essa função %s\n", entry->name);
-    printf("parameters %ld %ld\n", entry->data.sp_data.params_size, args_size);
+    // printf("encontrei essa função %s\n", entry->name);
+    // printf("parameters %ld %ld\n", entry->data.sp_data.params_size, args_size);
     if (entry->data.sp_data.params_size == args_size) {
         for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
-            if (args_types[i] != entry->data.sp_data.params[i]) {
-                printf("ERROR - Type of parameter %s is %s but was expected to be %s.\n", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params[i]));
+            if (args_types[i] != entry->data.sp_data.params_types[i]) {
+                yyerror("Type of parameter %s is %s but was expected to be %s.\n", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
             }
         }
     } else {
-        printf("ERROR - Wrong number of parameters. %ld parameters expected, %ld given\n", entry->data.sp_data.params_size, args_size);
+        yyerror("Wrong number of parameters. %ld parameters expected, %ld given\n", entry->data.sp_data.params_size, args_size);
     }
-    // TODO: comparar args com os parametros da tabela de simbolo do função AcessMemAddr 
     args_size=0;
 }
 ;
@@ -566,13 +581,11 @@ ArgsAux : COMMA Args {}
 ;
 
 CmdConditional:
-    IF Exp THEN CmdBlock CmdConditionalEnd {
+    IF Exp {
         if ($2.type != E_BOOL) {
-            printf("CmdConditional - exp: %s\n", $2.name);
-            printf("ERROR");
-            // TODO
+            yyerror("Result type of expression in IF statement should be boolean, but was os type %s\n", type_name($2.type));
         }
-    }
+    } THEN CmdBlock CmdConditionalEnd
 ;
 
 CmdConditionalEnd:
@@ -582,13 +595,15 @@ CmdConditionalEnd:
 
 CmdReturn:
     RETURN CmdReturnExp {
-        // TODO busca na tabela para tipo compativel 
+        if (current_return_type != 0 && current_return_type != $2.type) {
+            yyerror("Error: Return type is %s but was expected to be %s.\n", type_name($2.type), type_name(current_return_type));
+        }
     }
 ;
 
 CmdReturnExp:
     Exp { $$.type = $1.type; $$.name = $1.name;}
-|   /* NOTHING */ { $$.type = -1;}
+|   /* NOTHING */ { $$.type = 0;}
 ;
 
 Exp:
@@ -596,7 +611,7 @@ Exp:
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type. - Exp \n");
+            yyerror("Incompatible type. - Exp \n");
         }
     }
 |   Terms { $$.type = $1.type; $$.name = $1.name; }
@@ -607,7 +622,7 @@ Terms:
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type. - Terms\n");
+            yyerror("Incompatible type. - Terms\n");
         }
     }
 |   Comps { $$.type = $1.type; $$.name = $1.name;}
@@ -624,7 +639,7 @@ Comps:
         } else if ($1.type == E_CHAR && $3.type == E_CHAR) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type for '!=' operation");
+            yyerror("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   Factor EQ Factor  {
@@ -637,8 +652,7 @@ Comps:
         } else if ($1.type == E_CHAR && $3.type == E_CHAR) {
             $$.type = E_BOOL;
         } else {
-            sprintf(message, "ERROR! Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
-            yyerror(message);
+            yyerror("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   Factor LESS Factor {
@@ -647,7 +661,7 @@ Comps:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type for '<' operation");
+            yyerror("Incompatible type for '<' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   Factor GREATER Factor  {
@@ -656,7 +670,7 @@ Comps:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type for '>' operation");
+            yyerror("Incompatible type for '>' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   Factor LEQ Factor {
@@ -665,7 +679,7 @@ Comps:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type for '<=' operation");
+            yyerror("Incompatible type for '<=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   Factor GEQ Factor  {
@@ -674,7 +688,7 @@ Comps:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
         } else {
-            yyerror("ERROR! Incompatible type for '>=' operation");
+            yyerror("Incompatible type for '>=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   Factor  { $$.type = $1.type; $$.name = $1.name;}
@@ -686,7 +700,7 @@ Factor:
             $$.type = E_BOOL;
             $$.value.v_bool = !$2.value.v_bool;
         } else {
-            yyerror("ERROR! Incompatible type for '!' operation");
+            yyerror("Incompatible type for '!' operation between %s (%s)", $2.name, type_name($2.type));
         }
     }
 |   AriOp { $$.type = $1.type; $$.name = $1.name; }
@@ -699,7 +713,7 @@ AriOp:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
         } else {
-            yyerror("ERROR! Incompatible type for '+' operation");
+            yyerror("Incompatible type for '+' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   AriOp MINUS AriOp2 {
@@ -708,7 +722,7 @@ AriOp:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
         } else {
-            yyerror("ERROR! Incompatible type for '-' operation");
+            yyerror("Incompatible type for '-' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   AriOp2 { $$.type = $1.type; $$.name = $1.name;}
@@ -721,7 +735,7 @@ AriOp2:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
         } else {
-            yyerror("ERROR! Incompatible type for '*' operation");
+            yyerror("Incompatible type for '*' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         // $$.name = strcat() // TODO
 
@@ -732,7 +746,7 @@ AriOp2:
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
         } else {
-            yyerror("ERROR! Incompatible type for '/' operation");
+            yyerror("Incompatible type for '/' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
 |   AriOp2 MOD Parenthesis {
@@ -740,9 +754,9 @@ AriOp2:
             $$.type = E_INT;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             // TODO
-            yyerror("ERROR! Incompatible type. - AriOp2 \n");
+            yyerror("Incompatible type. - AriOp2 \n");
         } else {
-            yyerror("ERROR! Incompatible type. - AriOp2 \n");
+            yyerror("Incompatible type. - AriOp2 \n");
         }
     }
 |   Parenthesis { $$.type = $1.type; $$.name = $1.name;}
@@ -758,14 +772,14 @@ UnaryExp:
         if ($2.type == E_INT || $2.type == E_REAL) {
             $$.type = $2.type;
         } else { 
-            yyerror("ERROR! Incompatible type. - UnaryExp \n");
+            yyerror("Incompatible type. - UnaryExp \n");
         }
     }
 |   MINUS CastExp { 
         if ($2.type == E_INT || $2.type == E_REAL) {
             $$.type = $2.type;
         } else { 
-            yyerror("ERROR! Incompatible type. - UnaryExp \n");
+            yyerror("Incompatible type. - UnaryExp \n");
         }
     }
 |   CastExp { $$.type = $1.type; $$.name = $1.name;}
