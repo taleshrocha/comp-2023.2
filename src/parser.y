@@ -74,7 +74,7 @@ void yyerror(char* s, ...) {
 %token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE OF END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF
 
 %token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING 
-%token <type_info> T_BOOL T_INT T_REAL T_CHAR ARRAY RECORD
+%token <type_info> T_BOOL T_INT T_REAL T_CHAR T_STRING ARRAY RECORD
 
 %type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args
 %type <type_info> TypeDec 
@@ -165,7 +165,7 @@ Types :
             newSymbol->symbol_type = K_SIMPLETYPE;
             SimpleType data;
             data.inner_type = $4.type;
-            newSymbol->name = strdup(temp);
+            newSymbol->name = strdup($2.name);
             newSymbol->data.s_data = data;
             data.type_id 	= 	type_counter++;
         	insertSymbol(getCurrentScope(), newSymbol);
@@ -195,6 +195,11 @@ TypeDec :
     }
 |   T_REAL {
         $$.type = E_REAL;
+        $$.name = $1.name;
+        $$.to_rename = 0;
+    }
+|   T_STRING {
+        $$.type = E_STRING;
         $$.name = $1.name;
         $$.to_rename = 0;
     }
@@ -658,7 +663,10 @@ Comps:
             $$.type = E_BOOL;
         } else if ($1.type == E_CHAR && $3.type == E_CHAR) {
             $$.type = E_BOOL;
-        } else {
+        }else if($1.type == E_STRING && $3.type == E_STRING){
+            $$.type = E_BOOL;
+        }
+        else {
             yyerror("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
@@ -671,7 +679,10 @@ Comps:
             $$.type = E_BOOL;
         } else if ($1.type == E_CHAR && $3.type == E_CHAR) {
             $$.type = E_BOOL;
-        } else {
+        }else if($1.type == E_STRING && $3.type == E_STRING){
+            $$.type = E_BOOL;
+        }
+        else {
             yyerror("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
     }
@@ -891,32 +902,7 @@ NumExp:
 |   V_REAL   { $$.type = E_REAL; $$.value.v_real = $1.value.v_real; $$.name = $1.name;}
 |   V_BOOL   { $$.type = E_BOOL; $$.value.v_bool = $1.value.v_bool; $$.name = $1.name;}
 |   V_CHAR   { $$.type = E_CHAR; $$.value.v_char = $1.value.v_char; $$.name = $1.name;}
-|   V_STRING {
-        $$.value.v_string = $1.value.v_string;
-        $$.name = $1.name;
-        Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
-        newSymbol->symbol_type = K_ARRAY;
-        Array data;
-        data.inner_type =	E_CHAR;
-        data.dimensions = 	1;
-        data.type_id 	= 	type_counter++; // TODO: checar se tipo o tipo já existe
-        $$.type = data.type_id;
-        newSymbol->name = (char*) malloc(sizeof(char) * 32);
-        sprintf(newSymbol->name, "ARRAY %d", data.type_id);
-        
-        data.size = strlen($1.value.v_string);
-        data.capacity[0] = data.size;
-        data.starts[0] = 0;
-        data.ends[0] = data.size;
-        newSymbol->data.a_data = data;
-
-        Symbol_Table* scope = getCurrentScope();
-        while(scope->parent != NULL){
-            scope = scope->parent;
-        }
-
-        insertSymbol(scope, newSymbol);
-}
+|   V_STRING { $$.type = E_STRING; $$.value.v_string = $1.value.v_string; $$.name = $1.name;}
 ;
 
 %%

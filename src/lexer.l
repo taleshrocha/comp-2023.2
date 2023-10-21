@@ -37,6 +37,7 @@ identificador   {letter}({letter}|{number})*
 "int"         {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_INT;}
 "real"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_REAL;}
 "char"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_CHAR;}
+"string"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_STRING;}
 
 ":="        {column_counter += strlen(yytext); return ATTRIB;}
 

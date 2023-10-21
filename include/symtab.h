@@ -10,6 +10,7 @@ typedef enum E_TYPE {
   E_REAL,
   E_CHAR,
   E_BOOL,
+  E_STRING,
   E_ARRAY,
   E_RECORD,
   E_FUNCTION,
