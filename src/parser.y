@@ -16,6 +16,8 @@ int current_return_type = 0;
 char * temp;
 int flag = 0;
 
+char functionName[256];
+
 extern int column_counter;
 char message[256];
 
@@ -406,7 +408,7 @@ FunctionDecl:
 
         // criar registro na tabela
         insertSymbol(getCurrentScope(), newSymbol);
-
+        strcpy(functionName, $2.name);
         // apagar os dados de parametros após salvar a função na tabela de simbolos
         //args_size=0; // Comentado para nao ser zerado 
                         //- ainda falta inserir os parametros na tabela de simbolos da funcao
@@ -417,6 +419,7 @@ FunctionDecl:
         #ifdef DEBUG
         printf("\n\t End of Function...\n");
         #endif
+        strcpy(functionName, "");
     }
 ;
 
@@ -594,6 +597,21 @@ CmdReturn:
     RETURN CmdReturnExp {
         if (current_return_type != 0 && current_return_type != $2.type) {
             yyerror("Error: Return type is %s but was expected to be %s.\n", type_name($2.type), type_name(current_return_type));
+        }
+
+        if(strcmp(functionName, "") != 0){
+            
+            Symbol_Entry * functionSymbol = searchSymbol(getCurrentScope(), functionName, 1);
+            if(functionSymbol != NULL){
+                if(functionSymbol->data.sp_data.return_type != $2.type){
+                    yyerror(
+                        "\nTipo de retorno nao compativel com o tipo de retorno da funcao '%s'.\n Esperado tipo %d, mas encontrado tipo %d.\n",
+                        functionSymbol->name,
+                        functionSymbol->data.sp_data.return_type, 
+                        $2.type
+                    );
+                }
+            }
         }
     }
 ;
