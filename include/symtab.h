@@ -20,7 +20,8 @@ typedef enum EntryKind {
   K_VARIABLE,
   K_SUBPROGRAM,
   K_ARRAY,
-  K_RECORD
+  K_RECORD,
+  K_SIMPLETYPE
   
 } EntryKind;
 
@@ -89,7 +90,7 @@ typedef struct Symbol_Entry
         Array	    a_data;
         Record      r_data;
         SubProgram  sp_data;
-        int         s_type;
+        SimpleType  s_data;
     } data;
 } Symbol_Entry;
 

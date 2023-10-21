@@ -108,10 +108,12 @@ int searchType(char * name) {
                 return symbol->data.r_data.type_id;
             } else if(symbol->symbol_type == K_ARRAY){
                 return symbol->data.a_data.type_id;
+            } else if(symbol->symbol_type == K_SIMPLETYPE){
+                return symbol->data.s_data.inner_type;
             }
         }
     }
-    return -1;
+    return 0;
 }
 
 Symbol_Entry* searchRecordType(int type_id) {

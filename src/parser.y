@@ -12,10 +12,6 @@ int type_counter = 10;
 
 int current_return_type = 0;
 
-//	gambi para guardar o nome de um tipo
-char * temp;
-int flag = 0;
-
 char functionName[256];
 
 extern int column_counter;
@@ -47,6 +43,7 @@ void yyerror(char* s, ...) {
     struct {
         int type;
         char* name;
+        short to_rename;
         union {
             struct {
                 char field_names[16][32];
@@ -161,38 +158,55 @@ Vars :
 |   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
 Types :
-    TYPE ID {temp = $2.name; flag = 1;} ATTRIB TypeDec SEMICOLON {
-        //Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
-        //newSymbol->name = $2.name;
-        //newSymbol->symbol_type = K_TYPE;
-        //Type t_data;
-        //t_data.type_kind = $4.type;
+    TYPE ID ATTRIB TypeDec SEMICOLON {
 
-        // // switch (type_kind)
-
-        //insertSymbol(getCurrentScope(), newSymbol);
+        if ($4.to_rename == 0){ 
+            Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
+            newSymbol->symbol_type = K_SIMPLETYPE;
+            SimpleType data;
+            data.inner_type = $4.type;
+            newSymbol->name = strdup(temp);
+            newSymbol->data.s_data = data;
+            data.type_id 	= 	type_counter++;
+        	insertSymbol(getCurrentScope(), newSymbol);
+        } else {
+            Symbol_Entry* entry = searchSymbol(getCurrentScope(), $4.name, 1);
+            free(entry->name);
+            entry->name = $2.name;
+        }
 
         #ifdef DEBUG
         printCurrentScope(getCurrentScope());
         #endif
-
-        // free($2.name);
-        flag = 0;
-        
     } Types
 |   /* NOTHING */
 ;
 
-
-
 TypeDec :
-    T_BOOL {$$.type = E_BOOL; $$.name = $1.name;}
-|   T_INT  {$$.type = E_INT; $$.name = $1.name;}
-|   T_REAL {$$.type = E_REAL; $$.name = $1.name;}
-|   T_CHAR {$$.type = E_CHAR; $$.name = $1.name;}
+    T_BOOL {
+        $$.type = E_BOOL;
+        $$.name = $1.name;
+        $$.to_rename = 0;
+    }
+|   T_INT  {
+        $$.type = E_INT;
+        $$.name = $1.name;
+        $$.to_rename = 0;
+    }
+|   T_REAL {
+        $$.type = E_REAL;
+        $$.name = $1.name;
+        $$.to_rename = 0;
+    }
+|   T_CHAR {
+        $$.type = E_CHAR;
+        $$.name = $1.name;
+        $$.to_rename = 0;
+    }
 |   ID     {
         $$.name = $1.name;
         $$.type = searchType($$.name);
+        $$.to_rename = 0;
     }
 |   ARRAY LBRA Interval RBRA OF TypeDec  {
 		
@@ -203,13 +217,10 @@ TypeDec :
         data.dimensions = 	$3.dimensions;
         data.type_id 	= 	type_counter++;
         $$.type = data.type_id;
-        if(flag == 1){
-        	newSymbol->name = temp;	
-        } else {
-            newSymbol->name = (char*) malloc(sizeof(char) * 32);
-            sprintf(newSymbol->name, "ARRAY %d", data.type_id);
-            $$.name = strdup(newSymbol->name);
-        }
+        newSymbol->name = (char*) malloc(sizeof(char) * 32);
+        sprintf(newSymbol->name, "ARRAY %d", data.type_id);
+        $$.name = strdup(newSymbol->name);
+        $$.to_rename = 1;
         data.size = 1;
         for (int i = 0; i < $3.dimensions; i++) {
             data.capacity[i] = $3.capacity[i];
@@ -219,9 +230,6 @@ TypeDec :
         }
         newSymbol->data.a_data = data;
         insertSymbol(getCurrentScope(), newSymbol);
-        
-        // printf("dimensions: %d\n", $$.array_data.dimensions);
-        // printf("size: %d\n", $$.array_data.size);
         free($6.name);
     }
 |   RECORD {args_size=0;} Fields END {
@@ -235,13 +243,10 @@ TypeDec :
         data.n_fields 	= args_size;
         data.type_id 	= type_counter++;
         $$.type = data.type_id;
-        if(flag == 1){
-        	newSymbol->name = temp;	
-        } else {
-            newSymbol->name = (char*) malloc(sizeof(char) * 32);
-            sprintf(newSymbol->name, "RECORD %d", data.type_id);
-            $$.name = strdup(newSymbol->name);
-        }
+        newSymbol->name = (char*) malloc(sizeof(char) * 32);
+        sprintf(newSymbol->name, "RECORD %d", data.type_id);
+        $$.name = strdup(newSymbol->name);
+        $$.to_rename = 1;
         newSymbol->data.r_data = data;
         insertSymbol(getCurrentScope(), newSymbol);
         args_size=0;
@@ -896,12 +901,9 @@ NumExp:
         data.dimensions = 	1;
         data.type_id 	= 	type_counter++; // TODO: checar se tipo o tipo já existe
         $$.type = data.type_id;
-        if(flag == 1){
-            newSymbol->name = temp;	
-        } else {
-            newSymbol->name = (char*) malloc(sizeof(char) * 32);
-            sprintf(newSymbol->name, "ARRAY %d", data.type_id);
-        }
+        newSymbol->name = (char*) malloc(sizeof(char) * 32);
+        sprintf(newSymbol->name, "ARRAY %d", data.type_id);
+        
         data.size = strlen($1.value.v_string);
         data.capacity[0] = data.size;
         data.starts[0] = 0;

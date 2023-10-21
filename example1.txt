@@ -5,12 +5,15 @@ const const2 := 2;
 {TYPES}
 type type1 := bool;
 type type2 := int;
+type type3 := array[0..99] of bool;
+type type4 := type1;
+type type5 := type4;
 
 {VARIABLES}
 
 var globalVar1 : bool;
 var globalVar2 : int;
-var globalVar3 : array[0..99] of int;
+var globalVar3 : type3;
 var globalVar4 : type1;
 var globalVar5 : record 
   a : int;
@@ -18,7 +21,7 @@ var globalVar5 : record
 end;
 var globalVar6 : real;
 var globalVar7 : char;
-var globalVar8 : array[0..4] of char;
+var globalVar8 : type3;
 
 
 {FUNCTIONS AND PROCEDURES}
@@ -28,12 +31,11 @@ procedure procedure1 (par1 : bool, par2 : int)
 begin 
   var var1 : bool;
   var var2 : int;
-
+  globalVar1 := true;
   if var1 == true then 
-    begin
-      var1 := false
-    end
-
+  begin
+    var1 := false
+  end
 end;
 
 function function1 (par1 : bool, par2 : bool) : bool
@@ -86,10 +88,7 @@ begin
   
   globalVar7 := 'a';
   
-  globalVar8[0] := 'f';
-  globalVar8[1] := 'o';
-  globalVar8[2] := 'u';
-  globalVar8[3] := 'r';
+  globalVar8 := globalVar3;
 
   return
   
