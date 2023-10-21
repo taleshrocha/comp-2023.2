@@ -834,6 +834,9 @@ CastExp:
             $$.type = E_INT;
             $$.value.v_int = $4.value.v_char;
         }
+        if ($4.type == E_STRING) {
+            yyerror("string para int pode não!\n");
+        }
     }
 |   LPAR T_REAL RPAR SimpleExp      {
         if ($4.type == E_INT) {
@@ -852,6 +855,9 @@ CastExp:
             $$.type = E_REAL;
             $$.value.v_real = $4.value.v_char;
         }
+        if ($4.type == E_STRING) {
+            yyerror("string para real pode não!\n");
+        }
 }
 |   LPAR T_BOOL RPAR SimpleExp      {
         if ($4.type == E_INT) {
@@ -869,12 +875,13 @@ CastExp:
         if ($4.type == E_CHAR) {
             yyerror("char para bool pode não!\n");
         }
+        if ($4.type == E_STRING) {
+            yyerror("string para bool pode não!\n");
+        }
 }
 |   LPAR T_CHAR RPAR SimpleExp      {
     if ($4.type == E_INT) {
-        $$.type = E_CHAR;
-        // TODO If
-        $$.value.v_char = $4.value.v_int;
+        yyerror("int para char pode não!\n");
     }
     if ($4.type == E_REAL) {
         yyerror("real para char pode não!\n");
@@ -885,6 +892,26 @@ CastExp:
     if ($4.type == E_CHAR) {
         $$.type = E_CHAR;
         $$.value.v_char = $4.value.v_char;
+    }
+    if ($4.type == E_STRING) {
+        yyerror("string para char pode não!\n");
+    }
+}
+|   LPAR T_STRING RPAR SimpleExp      {
+    if ($4.type == E_INT) {
+        $$.type = E_STRING;
+    }
+    if ($4.type == E_REAL) {
+        $$.type = E_STRING;
+    }
+    if ($4.type == E_BOOL) {
+        $$.type = E_STRING;
+    }
+    if ($4.type == E_CHAR) {
+        $$.type = E_STRING;
+    }
+    if ($4.type == E_STRING) {
+        $$.type = E_STRING;
     }
 }
 |   SimpleExp                       {
