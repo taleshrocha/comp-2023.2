@@ -4,6 +4,18 @@
 #include <stdio.h> 
 #include <stdlib.h>
 
+typedef enum E_TYPE {
+  E_UNDEFINED,
+  E_INT,
+  E_REAL,
+  E_CHAR,
+  E_BOOL,
+  E_ARRAY,
+  E_RECORD,
+  E_FUNCTION,
+  E_PROCEDURE
+} E_TYPE;
+
 typedef enum EntryKind {
   K_VARIABLE,
   K_SUBPROGRAM,
@@ -115,5 +127,7 @@ void pushScope();
 void popScope();
 void freeScopes();
 void freeScope();
+
+char* type_name(int type_id);
 
 #endif

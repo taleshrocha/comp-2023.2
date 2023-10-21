@@ -35,7 +35,7 @@ release: all
 
 # executable
 
-$(BIN)/parser: $(OBJS)/typedefs.o $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/exception.o
+$(BIN)/parser: $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/exception.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -44,9 +44,6 @@ $(OBJS)/lexer.o: $(SRC)/lexer.l.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/parser.o: $(SRC)/parser.y.c $(SRC)/lexer.l.c
-	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
-
-$(OBJS)/typedefs.o: $(SRC)/typedefs.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/symtab.o: $(SRC)/symtab.c

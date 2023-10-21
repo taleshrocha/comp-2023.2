@@ -1,7 +1,6 @@
 %{
 #include <stdio.h>
 #include <lexer.l.h>
-#include <typedefs.h>
 #include <symtab.h>
 #include "exception.h"
 
@@ -18,7 +17,7 @@ char * temp;
 int flag = 0;
 
 extern int column_counter;
-char* message;
+char message[256];
 
 void yyerror(char* s, ...) {
     va_list vars;
@@ -148,7 +147,6 @@ Vars :
 
         Variable var_data;
         var_data.type = $4.type;
-        printf("Type: %s\n", type_name(var_data.type));
         var_data.is_constant = 0;
         newSymbol->data.v_data = var_data;
 
@@ -203,7 +201,6 @@ TypeDec :
         data.dimensions = 	$3.dimensions;
         data.type_id 	= 	type_counter++;
         $$.type = data.type_id;
-        printf("typedecl: %s\n", type_name($$.type));
         if(flag == 1){
         	newSymbol->name = temp;	
         } else {
@@ -504,7 +501,7 @@ CmdAux:
 AcessMemAddr: 
     ID {
         Symbol_Table* tabela = getCurrentScope();
-        Symbol_Entry* entry = searchSymbol(tabela, $1.name, true);
+        Symbol_Entry* entry = searchSymbol(tabela, $1.name, 1);
         if(entry == NULL){
             yyerror("Symbol '%s' not found.\n", $1.name);
         } else {
@@ -871,7 +868,35 @@ NumExp:
 |   V_REAL   { $$.type = E_REAL; $$.value.v_real = $1.value.v_real; $$.name = $1.name;}
 |   V_BOOL   { $$.type = E_BOOL; $$.value.v_bool = $1.value.v_bool; $$.name = $1.name;}
 |   V_CHAR   { $$.type = E_CHAR; $$.value.v_char = $1.value.v_char; $$.name = $1.name;}
-|   V_STRING { $$.type = ARRAY; /*TODO*/}
+|   V_STRING {
+        $$.value.v_string = $1.value.v_string;
+        $$.name = $1.name;
+        Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
+        newSymbol->symbol_type = K_ARRAY;
+        Array data;
+        data.inner_type =	E_CHAR;
+        data.dimensions = 	1;
+        data.type_id 	= 	type_counter++; // TODO: checar se tipo o tipo já existe
+        $$.type = data.type_id;
+        if(flag == 1){
+            newSymbol->name = temp;	
+        } else {
+            newSymbol->name = (char*) malloc(sizeof(char) * 32);
+            sprintf(newSymbol->name, "ARRAY %d", data.type_id);
+        }
+        data.size = strlen($1.value.v_string);
+        data.capacity[0] = data.size;
+        data.starts[0] = 0;
+        data.ends[0] = data.size;
+        newSymbol->data.a_data = data;
+
+        Symbol_Table* scope = getCurrentScope();
+        while(scope->parent != NULL){
+            scope = scope->parent;
+        }
+
+        insertSymbol(scope, newSymbol);
+}
 ;
 
 %%
@@ -881,9 +906,7 @@ int main(int argc, char const *argv[])
     if (argc == 2) {
         yyin=fopen(argv[1],"r");
     }
-    message = malloc(sizeof(char) * 256);
     int result = yyparse();
-    free(message);
     if (result == 0) {
         printf("parsing was successful\n");
     } else if (result == 1) {

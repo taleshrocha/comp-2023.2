@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 // #include "terminalDefines.h"
-#include "typedefs.h"
 #include "symbolTable.h"
 #include "lexer.h"
 

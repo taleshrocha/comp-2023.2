@@ -1,9 +1,18 @@
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
-  #include "parser.y.h"
-  int column_counter;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "parser.y.h"
+#include "exception.h"
+int column_counter;
+void error_message(char* s, ...) {
+  char message[256];
+  va_list vars;
+  va_start(vars, s);
+  sprintf(message, "%s at line %d - column %d\n", s, yylineno, column_counter);
+  printMessage(ERROR, message, vars);
+  va_end(vars);
+}
 %}
 
 %option noinput nounput
@@ -132,7 +141,7 @@ identificador   {letter}({letter}|{number})*
 
 .                                           {
                                               column_counter += strlen(yytext);
-                                              printf("ERROR! %s \n", yytext);
+                                              error_message("Token ' %s ' not recognized!\n", yytext);
                                             }
 
 %%

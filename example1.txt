@@ -86,8 +86,10 @@ begin
   
   globalVar7 := 'a';
   
-  globalVar8 := "four";
-  globalVar8 := "a";
+  globalVar8[0] := 'f';
+  globalVar8[1] := 'o';
+  globalVar8[2] := 'u';
+  globalVar8[3] := 'r';
 
   return
   

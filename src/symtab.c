@@ -233,3 +233,37 @@ void freeScope(Symbol_Table * scope) {
     printf("freescope!\n");
     #endif
 }
+
+
+char* type_name(int type_id) {
+    switch (type_id) {
+        case E_UNDEFINED:
+            return "undefined";
+        case E_INT:
+            return "int";
+        case E_REAL:
+            return "real";
+        case E_CHAR:
+            return "char";
+        case E_BOOL:    
+            return "bool";
+        case E_ARRAY:   
+            return "array";
+        case E_RECORD:  
+            return "record";
+        case E_FUNCTION:
+            return "function";
+        case E_PROCEDURE:
+            return "procedure";
+        default:
+            Symbol_Entry* type = searchRecordType(type_id);
+            if (type != NULL){
+                return type->name;
+            }
+            type = searchArrayType(type_id);
+            if (type != NULL){
+                return type->name;
+            }
+            return "Type not found!";
+    }
+}

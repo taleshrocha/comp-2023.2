@@ -3,7 +3,6 @@
   #include <stdlib.h>
   #include <string.h>
   #include "parser.y.h"
-  #include "typedefs.h"
   #include "symbolTable.h"
   #include "lexer.h"
   int column_counter;
