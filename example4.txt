@@ -1,5 +1,7 @@
 begin
-    print("Testando");
     var x : int;
+    
+    print("Testando");
+    print("sd");
     return
 end

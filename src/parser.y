@@ -581,9 +581,15 @@ CmdReturnExp:
 ;
 
 CmdPrint:
-    PRINT LPAR V_STRING RPAR SEMICOLON { printf("%s\n", $3.value.v_string); }
-    | {}
-    ;
+    PRINT LPAR Exp RPAR {
+        if ($3.type != E_STRING) {
+            printf("ERROR - Expression not result in string value\n");
+        } else {
+            printf("%s\n", $3.value.v_string);
+        }
+    }
+| {}
+;
 
 
 
