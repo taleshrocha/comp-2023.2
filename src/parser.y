@@ -71,12 +71,12 @@ void yyerror(char* s, ...) {
 
 }
 
-%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE OF END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF PRINT QUOTE
+%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE OF END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF PRINT READ QUOTE
 
 %token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING 
 %token <type_info> T_BOOL T_INT T_REAL T_CHAR ARRAY RECORD
 
-%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args CmdPrint
+%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args CmdPrint CmdRead
 %type <type_info> TypeDec 
 %type <interval> Interval
 
@@ -472,6 +472,7 @@ CmdAux:
     }
 |   CmdReturn {}
 |   CmdPrint {}
+|   CmdRead {}
 ;
 
 AcessMemAddr: 
@@ -582,6 +583,11 @@ CmdReturnExp:
 
 CmdPrint:
     PRINT LPAR V_STRING RPAR SEMICOLON { printf("%s\n", $3.value.v_string); }
+    | {}
+    ;
+
+CmdRead:
+    READ LPAR V_STRING RPAR SEMICOLON { printf("%s\n", $3.value.v_string); }
     | {}
     ;
 

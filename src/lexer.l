@@ -81,6 +81,7 @@ identificador   {letter}({letter}|{number})*
 "array"     {column_counter += strlen(yytext); yylval.info.name = "array"; return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
 "print"     {column_counter += strlen(yytext); return PRINT;}
+"read"      {column_counter += strlen(yytext); return READ;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
 "exit"      {column_counter += strlen(yytext); return EXIT;}
@@ -140,7 +141,7 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
-char terminal_mapping[59][16] = {
+char terminal_mapping[60][16] = {
     "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
     "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
     "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",
@@ -150,7 +151,7 @@ char terminal_mapping[59][16] = {
     "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
     "VAR",      "BEGIN_",   "FOR",      "TO",        "STEP",      "LOOP",
     "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
-    "ELSE",     "RETURN",   "REF",      "PRINT",     "QUOTE"};
+    "ELSE",     "RETURN",   "REF",      "PRINT",     "READ",      "QUOTE"};
 
 char non_terminal_mapping[44][32] = {"Prog",
                                      "Decl",

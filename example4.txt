@@ -1,5 +1,5 @@
 begin
-    print("Testando");
     var x : int;
+    print("Testando");;
     return
 end
