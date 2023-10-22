@@ -69,6 +69,7 @@ identificador   {letter}({letter}|{number})*
 ","         {column_counter += strlen(yytext); return COMMA;}
 ":"         {column_counter += strlen(yytext); return COLON;}
 ";"         {column_counter += strlen(yytext); return SEMICOLON;}
+"\""        {column_counter += strlen(yytext); return QUOTE;}
 
 "const"     {column_counter += strlen(yytext); return CONST;}
 "var"	      {column_counter += strlen(yytext); return VAR;}
@@ -89,6 +90,7 @@ identificador   {letter}({letter}|{number})*
 "record"    {column_counter += strlen(yytext); yylval.info.name = "record"; return RECORD;}
 "array"     {column_counter += strlen(yytext); yylval.info.name = "array"; return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
+"print"     {column_counter += strlen(yytext); return PRINT;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
 "exit"      {column_counter += strlen(yytext); return EXIT;}
@@ -148,7 +150,7 @@ identificador   {letter}({letter}|{number})*
 %%
 
 
-char terminal_mapping[57][16] = {
+char terminal_mapping[59][16] = {
     "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
     "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
     "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",
@@ -158,7 +160,7 @@ char terminal_mapping[57][16] = {
     "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
     "VAR",      "BEGIN_",   "FOR",      "TO",        "STEP",      "LOOP",
     "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
-    "ELSE",     "RETURN", "REF"};
+    "ELSE",     "RETURN",   "REF",      "PRINT",     "QUOTE"};
 
 char non_terminal_mapping[44][32] = {"Prog",
                                      "Decl",
