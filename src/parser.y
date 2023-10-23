@@ -235,7 +235,11 @@ TypeDec :
             data.size *= data.capacity[i];
         }
         newSymbol->data.a_data = data;
-        insertSymbol(getCurrentScope(), newSymbol);
+        Symbol_Table* scope = getCurrentScope();
+        while(scope->parent != NULL){
+            scope = scope->parent;
+        }
+        insertSymbol(scope, newSymbol);
         free($6.name);
     }
 |   RECORD {args_size=0;} Fields END {
@@ -254,7 +258,11 @@ TypeDec :
         $$.name = strdup(newSymbol->name);
         $$.to_rename = 1;
         newSymbol->data.r_data = data;
-        insertSymbol(getCurrentScope(), newSymbol);
+        Symbol_Table* scope = getCurrentScope();
+        while(scope->parent != NULL){
+            scope = scope->parent;
+        }
+        insertSymbol(scope, newSymbol);
         args_size=0;
     }
 ;
@@ -569,10 +577,10 @@ AcessMemAddr:
 
 |   AcessMemAddr LBRA Exp RBRA {
         Symbol_Entry* entry = searchArrayType($1.type);
-        $$.type = entry->data.a_data.inner_type;
         if(entry == NULL){
-            yyerror("Symbol '%s' not an array, its type is %d.", $1.name, $1.type);
+            yyerror("Symbol '%s' not an array, its type is %s.", $1.name, type_name($1.type));
         } else {
+            $$.type = entry->data.a_data.inner_type;
             if ($3.type != E_INT) {
                 yyerror("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
             }
@@ -658,7 +666,7 @@ CmdPrint:
         if ($3.type != E_STRING) {
             yyerror("First argument of print must be of type string");
         } else {
-            // printf("%s\n", $3.value.v_string);
+            printf("%s\n", $3.value.v_string);
         }
         args_types[args_size] = $3.type;
         strcpy(args_names[args_size], $3.name);
