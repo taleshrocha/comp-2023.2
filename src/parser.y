@@ -476,14 +476,17 @@ CmdAux:
 |   CONTINUE {}
 |   BREAK {}
 |   FOR AcessMemAddr ATTRIB Exp TO Exp STEP Exp CmdBlock {
-        if ($2.type != $4.type) {
-            yyerror("Type of '%s' is different from the type of the value assigned for the initial value: %s.", $2.name, $4.name);
+        if ($2.type != E_INT) {
+            yyerror("Type of '%s' must be int.", $2.name);
         }
-        if ($2.type != $6.type) {
-            yyerror("Type of '%s' is different from the type of the value assigned for the final value: %s.", $2.name, $4.name);
+        if ($4.type != E_INT) {
+            yyerror("Type of '%s' must be int.", $4.name);
         }
-        if ($2.type != $8.type) {
-            yyerror("Type of '%s' is different from the type of the value assigned for the step value: %s.", $2.name, $4.name);
+        if ($6.type != E_INT) {
+            yyerror("Type of '%s' must be int.", $6.name);
+        }
+        if ($8.type != E_INT) {
+            yyerror("Type of '%s' must be int.", $8.name);
         }
     }
 |   LOOP Vars Cmds END {}
@@ -560,8 +563,8 @@ AcessMemAddr:
                 yyerror("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
             }
         }
-        $$.name = $1.name; // todo: concatenar $1.name e $3.name
-        free($3.name); // todo remover esse free?
+        $$.name = $1.name; // TODO: concatenar $1.name e $3.name
+        free($3.name); // TODO remover esse free?
     }
 |   ID LPAR {args_size=0;} Args RPAR {
     Symbol_Entry* entry = getSubProgram($1.name);

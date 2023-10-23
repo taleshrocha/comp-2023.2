@@ -1,10 +1,13 @@
 type tipo1 := record x : real; y : real; end;
-type tipo2 := array[0..10, 10..20] of int;
+type tipo2 := array[0..10] of array[0..10] of tipo1;
+type minhastring := array[0..10] of char;
 
 begin
     var var1 : tipo1;
     var var2 : tipo2;
-    var1.x := 3.0;
-    var2[4][3] := 3;
+    var var3 : minhastring;
+    var var4 : string;
+    var2[0][0].x := var1.x;
+    var4 := "teste";
     return
 end

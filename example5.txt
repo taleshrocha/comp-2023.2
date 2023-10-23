@@ -1,0 +1,10 @@
+begin
+    var i : int;
+    var j : int;
+    
+    for i := 0 + j to 1 step -1 begin
+        print("%d", i)
+    end;
+
+    return
+end
