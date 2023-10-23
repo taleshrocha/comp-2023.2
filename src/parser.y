@@ -105,7 +105,7 @@ Decl :
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
         if (!$4.is_constant) {
-            ("Expression %s must be constant", $4.name);
+            yyerror("Expression %s must be constant", $4.name);
         }
         Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
@@ -645,7 +645,7 @@ CmdReturn:
             if(functionSymbol != NULL){
                 if(functionSymbol->data.sp_data.return_type != $2.type){
                     yyerror(
-                        "\nType of the return value is not compatible with the '%s' function's return type.\n Type %s was expected, but type %s was found.",
+                        "Type of the return value is not compatible with the '%s' function's return type.\nType %s was expected, but type %s was found.",
                         functionSymbol->name,
                         type_name(functionSymbol->data.sp_data.return_type), 
                         type_name($2.type)
@@ -666,7 +666,7 @@ CmdPrint:
         if ($3.type != E_STRING) {
             yyerror("First argument of print must be of type string");
         } else {
-            printf("%s\n", $3.value.v_string);
+            // printf("%s\n", $3.value.v_string);
         }
         args_types[args_size] = $3.type;
         strcpy(args_names[args_size], $3.name);
