@@ -26,7 +26,9 @@ Symbol_Entry * getSubProgram(char * subprogname) {
     }
     for (size_t i = 0; i < scope->symbol_size; i++){
         Symbol_Entry* symbol = scope->symbols[i];
-        if(symbol->symbol_type == K_SUBPROGRAM && strcmp(subprogname, symbol->name) == 0){
+        if (symbol == NULL) {
+            printf("subprogram %s not found!", subprogname);
+        } else if(symbol->symbol_type == K_SUBPROGRAM && strcmp(subprogname, symbol->name) == 0){
             return symbol;
         }
     }

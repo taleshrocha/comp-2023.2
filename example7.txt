@@ -1,0 +1,31 @@
+type ponto := record x: real; y: real; end;
+
+function sqrt(n : real) : real begin
+    var i : int;
+    var z : real;
+    z := 1.0;
+    for i := 1 to 10 step 1 begin
+        z := z - (z*z - n) / (2.0*z)
+    end;
+    return z
+end;
+
+function distance(p1: ponto, p2: ponto) : real begin
+    var x : real;
+    var y : real;
+    x := (p2.x - p1.x) * (p2.x - p1.x);
+    y := (p2.y - p1.y) * (p2.y - p1.y);
+    return sqrt(x + y)
+end;
+
+begin
+    var p1 : ponto;
+    var p2 : ponto;
+    var dist: real; 
+
+    dist := asd(p1, p2);
+
+    print("%r", dist);
+
+    print("end of program")
+end

@@ -568,19 +568,21 @@ AcessMemAddr:
     }
 |   ID LPAR {args_size=0;} Args RPAR {
     Symbol_Entry* entry = getSubProgram($1.name);
-    if (entry->data.sp_data.return_type != -1) {
-        $$.type = entry->data.sp_data.return_type;
-    }
-    // printf("encontrei essa função %s\n", entry->name);
-    // printf("parameters %ld %ld\n", entry->data.sp_data.params_size, args_size);
-    if (entry->data.sp_data.params_size == args_size) {
-        for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
-            if (args_types[i] != entry->data.sp_data.params_types[i]) {
-                yyerror("Type of parameter %s is %s but was expected to be %s.", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
-            }
-        }
+    if (entry == NULL) {
+        yyerror("Symbol '%s' not found.", $1.name);
     } else {
-        yyerror("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
+        if (entry->data.sp_data.return_type != -1) {
+            $$.type = entry->data.sp_data.return_type;
+        }
+        if (entry->data.sp_data.params_size == args_size) {
+            for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
+                if (args_types[i] != entry->data.sp_data.params_types[i]) {
+                    yyerror("Type of parameter %s is %s but was expected to be %s.", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
+                }
+            }
+        } else {
+            yyerror("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
+        }
     }
     args_size=0;
 }

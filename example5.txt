@@ -3,13 +3,14 @@ begin
     var j : int;
     
     for i := 0 + j to 1 step -1 begin
+        var k : int;
         print("%d", i)
     end;
 
     loop 
         var j : int;
-        print("%d", i);
-        exit when true
+        exit when true;
+        print("%d", i)
     end;
 
     return
