@@ -105,7 +105,7 @@ Decl :
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
         if (!$4.is_constant) {
-            yyerror("Expression %s must be constant", $4.name);
+            ("Expression %s must be constant", $4.name);
         }
         Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
@@ -271,13 +271,13 @@ Interval :
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.dimensions = 1;
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("intervalo não podem ser negativos.");
+            	yyerror("intervals cannot be neagative.");
             }
             $$.capacity[0] = $3.value.v_int - $1.value.v_int;
             $$.starts[0] = $1.value.v_int;
             $$.ends[0] = $3.value.v_int;
         } else {
-            yyerror("intervalo só pode ser definido com valores inteiros.");
+            yyerror("intervals can only be defined with integer values.");
         }
         free($1.name);
         free($3.name);
@@ -285,7 +285,7 @@ Interval :
 |   Exp INTERVAL Exp COMMA Interval {
         if ($1.type == E_INT && $3.type == E_INT) {
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("intervalo não podem ser negativos.");
+            	yyerror("intervals cannot be neagative.");
             }
             $$.dimensions = $5.dimensions+1;
             for (int i = 0; i < $5.dimensions; i++) {
@@ -297,7 +297,7 @@ Interval :
             $$.starts[$$.dimensions-1] = $1.value.v_int;
             $$.ends[$$.dimensions-1] = $3.value.v_int;
         } else {
-            yyerror("intervalo só pode ser definido com valores inteiros.");
+            yyerror("intervals can only be defined with integer values.");
         }
         free($1.name);
         free($3.name);
@@ -334,7 +334,7 @@ ProcedureDecl :
 
         SubProgram procedure;
         #ifdef DEBUG
-        printf("\nPARAMETROS IDENTIFICADOS - PROCEDURE: %s\n", $2.name);
+        printf("\nIDENTIFIED PARAMETERS - PROCEDURE: %s\n", $2.name);
         #endif
         for(size_t i = 0; i < args_size; i++){
             procedure.params_types[i] = args_types[i];
@@ -408,7 +408,7 @@ FunctionDecl:
         #endif
         function.return_type = $8.type;
         #ifdef DEBUG
-        printf("\nPARAMETROS IDENTIFICADOS - FUNCTION: %s\n", $2.name);
+        printf("\nIDENTIFIED PARAMETERS - FUNCTION: %s\n", $2.name);
         #endif
         for(size_t i = 0; i < args_size; i++){
             function.params_types[i] = args_types[i];
@@ -645,7 +645,7 @@ CmdReturn:
             if(functionSymbol != NULL){
                 if(functionSymbol->data.sp_data.return_type != $2.type){
                     yyerror(
-                        "\nTipo de retorno nao compativel com o tipo de retorno da funcao '%s'.\n Esperado tipo %s, mas encontrado tipo %s.",
+                        "\nType of the return value is not compatible with the '%s' function's return type.\n Type %s was expected, but type %s was found.",
                         functionSymbol->name,
                         type_name(functionSymbol->data.sp_data.return_type), 
                         type_name($2.type)
@@ -998,7 +998,7 @@ CastExp:
             $$.value.v_int = $4.value.v_char;
         }
         if ($4.type == E_STRING) {
-            yyerror("string para int pode não!\n");
+            yyerror("string cannot be converted to int!\n");
         }
         $$.is_constant = $4.is_constant;
     }
@@ -1020,7 +1020,7 @@ CastExp:
             $$.value.v_real = $4.value.v_char;
         }
         if ($4.type == E_STRING) {
-            yyerror("string para real pode não!\n");
+            yyerror("string cannot be converted to real!\n");
         }
         $$.is_constant = $4.is_constant;
 }
@@ -1038,29 +1038,29 @@ CastExp:
             $$.value.v_bool = $4.value.v_bool;
         }
         if ($4.type == E_CHAR) {
-            yyerror("char para bool pode não!");
+            yyerror("char cannot be converted to bool!");
         }
         if ($4.type == E_STRING) {
-            yyerror("string para bool pode não!");
+            yyerror("string cannot be converted to bool!");
         }
         $$.is_constant = $4.is_constant;
 }
 |   LPAR T_CHAR RPAR Parenthesis      {
     if ($4.type == E_INT) {
-        yyerror("int para char pode não!");
+        yyerror("int cannot be converted to char!");
     }
     if ($4.type == E_REAL) {
-        yyerror("real para char pode não!");
+        yyerror("real cannot be converted to char!");
     }
     if ($4.type == E_BOOL) {
-        yyerror("bool para char pode não!");
+        yyerror("bool cannot be converted to char!");
     }
     if ($4.type == E_CHAR) {
         $$.type = E_CHAR;
         $$.value.v_char = $4.value.v_char;
     }
     if ($4.type == E_STRING) {
-        yyerror("string para char pode não!");
+        yyerror("string cannot be converted to char!");
     }
     $$.is_constant = $4.is_constant;
 }
