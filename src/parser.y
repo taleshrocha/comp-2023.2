@@ -489,7 +489,7 @@ CmdAux:
             yyerror("Type of '%s' must be int.", $8.name);
         }
     }
-|   LOOP Vars Cmds END {}
+|   LOOP {pushScope();} Vars Cmds END {popScope();}
 |   EXIT WHEN Exp { 
         if ($3.type != E_BOOL) {
             yyerror("Type of '%s' must be boolean.", $3.name);

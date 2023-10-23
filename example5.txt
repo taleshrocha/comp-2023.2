@@ -6,5 +6,11 @@ begin
         print("%d", i)
     end;
 
+    loop 
+        var j : int;
+        print("%d", i);
+        exit when true
+    end;
+
     return
 end
