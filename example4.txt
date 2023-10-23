@@ -4,7 +4,6 @@ begin
     var x : int;
     print(string1);
     print("Testando");
-    print(string2);
-    read(string2);
+    print(3, 3, "6");
     return
 end

@@ -263,13 +263,13 @@ Interval :
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.dimensions = 1;
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("erro: valor do intervalo eh negativo.\n");
+            	yyerror("intervalo não podem ser negativos.");
             }
             $$.capacity[0] = $3.value.v_int - $1.value.v_int;
             $$.starts[0] = $1.value.v_int;
             $$.ends[0] = $3.value.v_int;
         } else {
-            yyerror("deu ruim");
+            yyerror("intervalo só pode ser definido com valores inteiros.");
         }
         free($1.name);
         free($3.name);
@@ -277,7 +277,7 @@ Interval :
 |   Exp INTERVAL Exp COMMA Interval {
         if ($1.type == E_INT && $3.type == E_INT) {
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("erro: valor do intervalo eh negativo.\n");
+            	yyerror("intervalo não podem ser negativos.");
             }
             $$.dimensions = $5.dimensions+1;
             for (int i = 0; i < $5.dimensions; i++) {
@@ -289,7 +289,7 @@ Interval :
             $$.starts[$$.dimensions-1] = $1.value.v_int;
             $$.ends[$$.dimensions-1] = $3.value.v_int;
         } else {
-            yyerror("deu ruim");
+            yyerror("intervalo só pode ser definido com valores inteiros.");
         }
         free($1.name);
         free($3.name);
@@ -474,14 +474,14 @@ CmdAux:
     AcessMemAddr
 |   AcessMemAddr ATTRIB Exp {
         if ($1.type > 9) {
-            yyerror("Type of '%s' ('%s') cannot be assigned directly.\n", $1.name, type_name($1.type));
+            yyerror("Type of '%s' ('%s') cannot be assigned directly.", $1.name, type_name($1.type));
         }
         if ($3.type > 9) {
-            yyerror("Type of '%s' ('%s') cannot be assigned to a variable.\n", $3.name, type_name($3.type));
+            yyerror("Type of '%s' ('%s') cannot be assigned to a variable.", $3.name, type_name($3.type));
         }
         if($1.type != $3.type){
             yyerror(
-                "Type of '%s' ('%s') is different from the type of the value assigned ('%s').\n",
+                "Type of '%s' ('%s') is different from the type of the value assigned ('%s').",
                 $1.name, type_name($1.type), type_name($3.type)
             );
         }
@@ -494,13 +494,13 @@ CmdAux:
 |   BREAK {}
 |   FOR AcessMemAddr ATTRIB Exp TO Exp STEP Exp CmdBlock {
         if ($2.type != $4.type) {
-            yyerror("Type of '%s' is different from the type of the value assigned for the initial value: %s.\n", $2.name, $4.name);
+            yyerror("Type of '%s' is different from the type of the value assigned for the initial value: %s.", $2.name, $4.name);
         }
         if ($2.type != $6.type) {
-            yyerror("Type of '%s' is different from the type of the value assigned for the final value: %s.\n", $2.name, $4.name);
+            yyerror("Type of '%s' is different from the type of the value assigned for the final value: %s.", $2.name, $4.name);
         }
         if ($2.type != $8.type) {
-            yyerror("Type of '%s' is different from the type of the value assigned for the step value: %s.\n", $2.name, $4.name);
+            yyerror("Type of '%s' is different from the type of the value assigned for the step value: %s.", $2.name, $4.name);
         }
     }
 |   LOOP Vars Cmds END {}
@@ -519,7 +519,7 @@ AcessMemAddr:
         Symbol_Table* tabela = getCurrentScope();
         Symbol_Entry* entry = searchSymbol(tabela, $1.name, 1);
         if(entry == NULL){
-            yyerror("Symbol '%s' not found.\n", $1.name);
+            yyerror("Symbol '%s' not found.", $1.name);
         } else {
             switch(entry->symbol_type) {
                 case 0:
@@ -554,7 +554,7 @@ AcessMemAddr:
 |   AcessMemAddr DOT ID {
         Symbol_Entry* entry = searchRecordType($1.type);
         if(entry == NULL){
-            yyerror("Symbol '%s' not a record, its type is %d.\n", $1.name, $1.type);
+            yyerror("Symbol '%s' not a record, its type is %d.", $1.name, $1.type);
         } else {
             for(int i = 0; i < entry->data.r_data.n_fields; i++){
                 if(strcmp(entry->data.r_data.field_names[i], $3.name) == 0){
@@ -571,10 +571,10 @@ AcessMemAddr:
         Symbol_Entry* entry = searchArrayType($1.type);
         $$.type = entry->data.a_data.inner_type;
         if(entry == NULL){
-            yyerror("Symbol '%s' not an array, its type is %d.\n", $1.name, $1.type);
+            yyerror("Symbol '%s' not an array, its type is %d.", $1.name, $1.type);
         } else {
             if ($3.type != E_INT) {
-                yyerror("Expression used to access position of array is not an integer, is of type %s\n", type_name($3.type));
+                yyerror("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
             }
         }
         $$.name = $1.name; // todo: concatenar $1.name e $3.name
@@ -590,11 +590,11 @@ AcessMemAddr:
     if (entry->data.sp_data.params_size == args_size) {
         for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
             if (args_types[i] != entry->data.sp_data.params_types[i]) {
-                yyerror("Type of parameter %s is %s but was expected to be %s.\n", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
+                yyerror("Type of parameter %s is %s but was expected to be %s.", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
             }
         }
     } else {
-        yyerror("Wrong number of parameters. %ld parameters expected, %ld given\n", entry->data.sp_data.params_size, args_size);
+        yyerror("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
     }
     args_size=0;
 }
@@ -615,7 +615,7 @@ ArgsAux : COMMA Args {}
 CmdConditional:
     IF Exp {
         if ($2.type != E_BOOL) {
-            yyerror("Result type of expression in IF statement should be boolean, but was os type %s\n", type_name($2.type));
+            yyerror("Result type of expression in IF statement should be boolean, but was os type %s", type_name($2.type));
         }
     } THEN CmdBlock CmdConditionalEnd
 ;
@@ -628,7 +628,7 @@ CmdConditionalEnd:
 CmdReturn:
     RETURN CmdReturnExp {
         if (current_return_type != 0 && current_return_type != $2.type) {
-            yyerror("Error: Return type is %s but was expected to be %s.\n", type_name($2.type), type_name(current_return_type));
+            yyerror("Error: Return type is %s but was expected to be %s.", type_name($2.type), type_name(current_return_type));
         }
 
         if(strcmp(functionName, "") != 0){
@@ -637,7 +637,7 @@ CmdReturn:
             if(functionSymbol != NULL){
                 if(functionSymbol->data.sp_data.return_type != $2.type){
                     yyerror(
-                        "\nTipo de retorno nao compativel com o tipo de retorno da funcao '%s'.\n Esperado tipo %s, mas encontrado tipo %s.\n",
+                        "\nTipo de retorno nao compativel com o tipo de retorno da funcao '%s'.\n Esperado tipo %s, mas encontrado tipo %s.",
                         functionSymbol->name,
                         type_name(functionSymbol->data.sp_data.return_type), 
                         type_name($2.type)
@@ -654,19 +654,33 @@ CmdReturnExp:
 ;
 
 CmdPrint:
-    PRINT LPAR Exp RPAR {
+    PRINT LPAR Exp {
         if ($3.type != E_STRING) {
-            printf("ERROR - Expression not result in string value\n");
+            yyerror("First argument of print must be of type string");
         } else {
-            printf("%s\n", $3.value.v_string);
+            // printf("%s\n", $3.value.v_string);
         }
+        args_types[args_size] = $3.type;
+        strcpy(args_names[args_size], $3.name);
+        args_size++;
+    } PrintArgs RPAR {
+        args_size = 0;
     }
+;
+
+PrintArgs:
+    COMMA Exp {
+        args_types[args_size] = $2.type;
+        strcpy(args_names[args_size], $2.name);
+        args_size++;
+}   PrintArgs
+|   /* NOTHING */ {}
 ;
 
 CmdRead:
     READ LPAR AcessMemAddr RPAR {
         if ($3.type != E_STRING) {
-            yyerror("%s must be of type String, but is of type %s\n", $3.name, type_name($3.type));
+            yyerror("%s must be of type String, but is of type %s", $3.name, type_name($3.type));
         }
         if ($3.is_constant) {
             yyerror("\"%s\" cannot be a constant", $3.name);
@@ -674,29 +688,13 @@ CmdRead:
     }
 ;
 
-
-
-/* 
-
-PrintArgs:
-    PrintArgs COMMA PrintArg
-;
-
-PrintArg:
-    V_STRING {
-        $$ = create_print_arg(STRING, $1.value.v_string);
-    }
-    | 
-    ;
-*/
-
 Exp:
     Exp OR Terms {
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_bool || $3.value.v_bool;
         } else {
-            yyerror("Incompatible type. - Exp \n");
+            yyerror("Incompatible type. - Exp");
         }
         $$.is_constant = $1.is_constant && $3.is_constant;
     }
@@ -714,7 +712,7 @@ Terms:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_bool && $3.value.v_bool;
         } else {
-            yyerror("Incompatible type. - Terms\n");
+            yyerror("Incompatible type. - Terms");
         }
         $$.is_constant = $1.is_constant && $3.is_constant;
     }
@@ -875,7 +873,6 @@ AriOp:
         $$.name = $1.name;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
-        
 }
 ;
 
@@ -1033,29 +1030,29 @@ CastExp:
             $$.value.v_bool = $4.value.v_bool;
         }
         if ($4.type == E_CHAR) {
-            yyerror("char para bool pode não!\n");
+            yyerror("char para bool pode não!");
         }
         if ($4.type == E_STRING) {
-            yyerror("string para bool pode não!\n");
+            yyerror("string para bool pode não!");
         }
         $$.is_constant = $4.is_constant;
 }
 |   LPAR T_CHAR RPAR Parenthesis      {
     if ($4.type == E_INT) {
-        yyerror("int para char pode não!\n");
+        yyerror("int para char pode não!");
     }
     if ($4.type == E_REAL) {
-        yyerror("real para char pode não!\n");
+        yyerror("real para char pode não!");
     }
     if ($4.type == E_BOOL) {
-        yyerror("bool para char pode não!\n");
+        yyerror("bool para char pode não!");
     }
     if ($4.type == E_CHAR) {
         $$.type = E_CHAR;
         $$.value.v_char = $4.value.v_char;
     }
     if ($4.type == E_STRING) {
-        yyerror("string para char pode não!\n");
+        yyerror("string para char pode não!");
     }
     $$.is_constant = $4.is_constant;
 }
