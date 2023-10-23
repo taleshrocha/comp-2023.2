@@ -69,7 +69,6 @@ identificador   {letter}({letter}|{number})*
 ","         {column_counter += strlen(yytext); return COMMA;}
 ":"         {column_counter += strlen(yytext); return COLON;}
 ";"         {column_counter += strlen(yytext); return SEMICOLON;}
-"\""        {column_counter += strlen(yytext); return QUOTE;}
 
 "const"     {column_counter += strlen(yytext); return CONST;}
 "var"	      {column_counter += strlen(yytext); return VAR;}
@@ -91,6 +90,7 @@ identificador   {letter}({letter}|{number})*
 "array"     {column_counter += strlen(yytext); yylval.info.name = "array"; return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
 "print"     {column_counter += strlen(yytext); return PRINT;}
+"read"     {column_counter += strlen(yytext); return READ;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
 "exit"      {column_counter += strlen(yytext); return EXIT;}

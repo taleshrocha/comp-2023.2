@@ -71,7 +71,7 @@ void yyerror(char* s, ...) {
 
 }
 
-%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE OF END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF PRINT QUOTE
+%token CONST ATTRIB SEMICOLON OR AND NEQ EQ LESS GREATER LEQ GEQ NOT PLUS MINUS MULTIPLY DIVIDE MOD LPAR RPAR DOT LBRA RBRA TYPE OF END INTERVAL COMMA COLON PROCEDURE FUNCTION VAR BEGIN_ FOR TO STEP LOOP EXIT WHEN CONTINUE BREAK IF THEN ELSE RETURN REF PRINT READ
 
 %token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING 
 %token <type_info> T_BOOL T_INT T_REAL T_CHAR T_STRING ARRAY RECORD
@@ -511,6 +511,7 @@ CmdAux:
     }
 |   CmdReturn {}
 |   CmdPrint {}
+|   CmdRead {}
 ;
 
 AcessMemAddr: 
@@ -660,7 +661,17 @@ CmdPrint:
             printf("%s\n", $3.value.v_string);
         }
     }
-| {}
+;
+
+CmdRead:
+    READ LPAR AcessMemAddr RPAR {
+        if ($3.type != E_STRING) {
+            yyerror("%s must be of type String, but is of type %s\n", $3.name, type_name($3.type));
+        }
+        if ($3.is_constant) {
+            yyerror("\"%s\" cannot be a constant", $3.name);
+        }
+    }
 ;
 
 
