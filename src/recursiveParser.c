@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "recursiveParser.h"
-#include "terminalDefines.h"
+// #include "terminalDefines.h"
 #include "symbolTable.h"
 #include "lexer.h"
+#include "parser.y.h"
 
 
 int getNextToken(){
@@ -44,7 +45,7 @@ void Prog(){
         case PROCEDURE: Decl(); CmdBlock(); break;
         case FUNCTION: 	Decl(); CmdBlock(); break;
         case VAR: 	Decl(); CmdBlock(); break;
-        case _BEGIN: 	Decl(); CmdBlock(); break;	
+        case BEGIN_: 	Decl(); CmdBlock(); break;	
         default:        printf("Syntax error. Grammar Rule: Prog. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
     }
 }
@@ -57,7 +58,7 @@ void Decl(){
         case PROCEDURE: Consts(); Types(); SubProg(); Vars(); break;
         case FUNCTION: 	Consts(); Types(); SubProg(); Vars(); break;
         case VAR: 	Consts(); Types(); SubProg(); Vars(); break;
-        case _BEGIN: 	Consts(); Types(); SubProg(); Vars(); break;
+        case BEGIN_: 	Consts(); Types(); SubProg(); Vars(); break;
         default:        printf("Syntax error. Grammar Rule: Decl. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
     }
 }
@@ -71,7 +72,7 @@ void Consts(){
 		case PROCEDURE: break; //lambda - search on FOLLOW. removing Consts from stack...
 		case FUNCTION: 	break; //lambda - search on FOLLOW. removing Consts from stack...
 		case VAR: 		break; //lambda - search on FOLLOW. removing Consts from stack...
-		case _BEGIN: 	break; //lambda - search on FOLLOW. removing Consts from stack...
+		case BEGIN_: 	break; //lambda - search on FOLLOW. removing Consts from stack...
 		default: 		printf("Syntax error. Grammar Rule: Consts. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
@@ -102,7 +103,7 @@ void Exp_(){
 		case END:		break; //lambda - search on FOLLOW
 		case INTERVAL:	break; //lambda - search on FOLLOW
 		case COMMA:		break; //lambda - search on FOLLOW
-		case _BEGIN:	break; //lambda - search on FOLLOW
+		case BEGIN_:	break; //lambda - search on FOLLOW
 		case TO:		break; //lambda - search on FOLLOW
 		case STEP:		break; //lambda - search on FOLLOW
 		case THEN:		break; //lambda - search on FOLLOW
@@ -137,7 +138,7 @@ void Terms_(){
 		case END: 		break;
 		case INTERVAL:	break;
 		case COMMA:		break;
-		case _BEGIN:	break;
+		case BEGIN_:	break;
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
@@ -177,7 +178,7 @@ void Comps_(){
 		case INTERVAL:	break;
 		case END:		break;
 		case COMMA:		break;
-		case _BEGIN: 	break;
+		case BEGIN_: 	break;
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
@@ -236,7 +237,7 @@ void AriOp_(){
 		case END:		break;
 		case INTERVAL: 	break;
 		case COMMA:		break;
-		case _BEGIN:	break;
+		case BEGIN_:	break;
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
@@ -282,7 +283,7 @@ void AriOp2_(){
 		case END:		break;
 		case INTERVAL: 	break;
 		case COMMA:		break;
-		case _BEGIN:	break;
+		case BEGIN_:	break;
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
@@ -374,7 +375,7 @@ void AcessMemAddr_(){
 		case END:		break;
 		case INTERVAL:	break;
 		case COMMA:		break;
-		case _BEGIN:	break;
+		case BEGIN_:	break;
 		case TO:		break;
 		case STEP:		break;
 		case THEN:		break;
@@ -390,7 +391,7 @@ void Types(){
 		case PROCEDURE: break;
 		case FUNCTION: 	break;
 		case VAR: 		break;
-		case _BEGIN: 	break;
+		case BEGIN_: 	break;
 		default: 		printf("Syntax error. Grammar Rule: Types. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 
@@ -448,7 +449,7 @@ void SubProg(){
 		case PROCEDURE: 	ProcedureDecl();	SubProg(); 	break;
 		case FUNCTION: 		FunctionDecl(); 	SubProg(); 	break;
 		case VAR: 			break;
-		case _BEGIN: 		break;
+		case BEGIN_: 		break;
 		default: 			printf("Syntax error. Grammar Rule: SubProg. Lookahead: %s. Line: %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
@@ -496,7 +497,7 @@ void Vars(){
 	switch (lookahead){
 		case ID: 		break;
 		case VAR: 		eat(VAR); eat(ID); eat(COLON); TypeDec(); eat(SEMICOLON); Vars(); break; 
-		case _BEGIN: 	break;
+		case BEGIN_: 	break;
 		case FOR:		break;
 		case LOOP:		break;
 		case EXIT:		break;
@@ -510,7 +511,7 @@ void Vars(){
 void CmdBlock(){
   printf("Entrei - CmdBlock()\n");
 	switch (lookahead){
-		case _BEGIN: 	eat(_BEGIN); Vars(); Cmds(); eat(END); break; 
+		case BEGIN_: 	eat(BEGIN_); Vars(); Cmds(); eat(END); break; 
 		default: 		printf("Syntax error. Grammar rule: CmdBlock. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }
@@ -518,13 +519,14 @@ void CmdBlock(){
 void Cmds(){
 	switch (lookahead){
 		case ID: 		CmdAux(); Cmds_(); break;
-		case _BEGIN: 	CmdAux(); Cmds_(); break;
+		case BEGIN_: 	CmdAux(); Cmds_(); break;
 		case FOR: 		CmdAux(); Cmds_(); break;
 		case LOOP: 		CmdAux(); Cmds_(); break;
 		case EXIT: 		CmdAux(); Cmds_(); break;
 		case CONTINUE: 	CmdAux(); Cmds_(); break;
 		case IF: 		CmdAux(); Cmds_(); break;
 		case RETURN: 	CmdAux(); Cmds_(); break;
+		case PRINT: 	CmdAux(); Cmds_(); break;
 		default: 		printf("Syntax error. Grammar rule: Cmds. Lookahead: %s. Line: %d.\n", terminal_mapping[lookahead-1], yylineno); 
 	}
 }
@@ -540,7 +542,7 @@ void Cmds_(){
 void CmdAux(){
 	switch (lookahead){
 		case ID: 		AcessMemAddr(); 	CmdAux_(); 	break;
-		case _BEGIN: 	CmdBlock(); 		break;
+		case BEGIN_: 	CmdBlock(); 		break;
 		case FOR: 		eat(FOR); 			eat(ID); 	eat(ATTRIB); 	Exp(); 		eat(TO); Exp(); eat(STEP); Exp(); CmdBlock(); break;
 		case LOOP: 		eat(LOOP); 			Vars(); 	Cmds(); 		eat(END); 	break; 
 		case EXIT: 		eat(EXIT); 			eat(WHEN); 	Exp(); 			break; 
@@ -548,6 +550,7 @@ void CmdAux(){
 		case IF:		CmdConditional();	break;
 		case RETURN:	CmdReturn();		break;
 		case BREAK: 	eat(BREAK); 		break;
+		case PRINT: 	eat(PRINT);			break;
 		default: 		printf("Syntax error. Grammar rule: CmdAux. Lookahead: %s. Line : %d\n", terminal_mapping[lookahead-1], yylineno);
 	}
 }

@@ -38,7 +38,7 @@ int matrix[45][56][10] = {
     /*29 ParametersAux*/     {{0}, {ID, COLON, TypeDec, ParametersAux_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*30 ParametersAux_*/    {{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {COMMA, ParametersAux,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*31 Vars*/              {{0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {VAR, ID, COLON, TypeDec, SEMICOLON, Vars,-1}, {-1}, {-1}, {0}, {0}, {-1}, {-1}, {0}, {-1}, {-1}, {-1}, {0}, {0}, {-1}},
-    /*32 CmdBlock*/          {{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {_BEGIN, Vars, Cmds, END,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
+    /*32 CmdBlock*/          {{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {BEGIN_, Vars, Cmds, END,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*33 Cmds*/              {{0}, {CmdAux, Cmds_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {CmdAux, Cmds_,-1}, {CmdAux, Cmds_,-1}, {0}, {0}, {CmdAux, Cmds_,-1}, {CmdAux, Cmds_,-1}, {0}, {CmdAux, Cmds_,-1}, {CmdAux, Cmds_,-1}, {CmdAux, Cmds_,-1}, {0}, {0}, {CmdAux, Cmds_, -1}},
     /*34 Cmds_*/             {{0}, {0}, {0}, {SEMICOLON, Cmds,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
     /*35 CmdAux*/            {{0}, {AcessMemAddr, CmdAux_,-1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {CmdBlock,-1}, {FOR, ID, ATTRIB, Exp, TO, Exp, STEP, Exp, CmdBlock,-1}, {0}, {0}, {LOOP, Vars, Cmds, END,-1}, {EXIT, WHEN, Exp,-1}, {0}, {CONTINUE,-1}, {BREAK,-1}, {CmdConditional,-1}, {0}, {0}, {CmdReturn, -1}},
@@ -56,7 +56,7 @@ int *stack;
 
 void initialize_stack() {
   stack = (int*)malloc(sizeof(int) * capacity);
-  push(EndOfInput);
+  push(YYEOF);
   push(Prog);
 }
 
@@ -64,7 +64,7 @@ void print_stack() {
   for(int i = 0; i < curr_size; i++) {
       char* s;
       if (stack[i] == 0) {
-        s = "EndOfInput";
+        s = "YYEOF";
       } else if (stack[i] < 100) {
           s = terminal_mapping[stack[i]-1];
       } else {
@@ -123,7 +123,7 @@ int main() {
   printf("starting!...\n");
   initialize_stack();
   int current_terminal = yylex(); 
-  while (peek() != EndOfInput) {
+  while (peek() != YYEOF) {
     #ifdef DEBUG
     printf("%d-%s ::: ", current_terminal, terminal_mapping[current_terminal-1]);
     print_stack();
@@ -131,15 +131,15 @@ int main() {
     if (peek() == current_terminal) {
       current_terminal = yylex(); 
       pop();
-    } else if (peek() < 100) {
-        printf("symbol: %d-%s is terminal\n", peek(), terminal_mapping[peek()-1]);
+    } else if (peek() < Prog) {
+        printf("symbol: %d-%s is terminal\n", peek(), terminal_mapping[peek()-CONST]);
         error();
         destroySymbolTable();
         yylex_destroy();
         return -1;
-    } else if (get_symbols(peek()-100, current_terminal-1)[0] == 0) {
-        printf("symbol: %d-%s is not terminal\n", peek(), non_terminal_mapping[peek()-100]);
-        printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
+    } else if (get_symbols(peek()-Prog, current_terminal-CONST)[0] == 0) {
+        printf("symbol: %d-%s is not terminal\n", peek(), non_terminal_mapping[peek()-Prog]);
+        printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-CONST]);
         printf("Invalid terminal!\n");
         error();
         destroySymbolTable();
@@ -150,11 +150,11 @@ int main() {
         // printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
         int v = peek();
         pop();
-        insert_symbols(get_symbols(v-100, current_terminal-1));
+        insert_symbols(get_symbols(v-Prog, current_terminal-CONST));
     }
   }
-  if (current_terminal != EndOfInput) {
-    printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-1]);
+  if (current_terminal != YYEOF) {
+    printf("current token is %d-%s\n", current_terminal, terminal_mapping[current_terminal-CONST]);
     printf("error\n");
   }
   printf("end of input! Finalizing!\n");

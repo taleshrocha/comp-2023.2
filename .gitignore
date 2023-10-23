@@ -60,6 +60,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Lex
-*.yy*
+# Lex & Yacc
+*.l.h
+*.y.h
 *.l.c
+*.y.c

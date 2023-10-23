@@ -1,4 +1,38 @@
+
+const const1 := 1;
+
+type tipo1 := record x : int; y : real; end;
+
+procedure procedure1 (par1 : tipo1, par2 : int) 
+begin 
+  var var1 : bool;
+  var var2 : int;
+  return
+end;
+
+
+function function1 (par1 : bool, par2 : bool) : bool
 begin
-    id :=  3 != false || -3 <= 2;
+  if 3.0 > 1.0 then
+  begin
+    return false
+  end;
+  return par1 != par2
+end;
+
+begin
+    var var1 : tipo1;
+    var minhavar : int;
+    var minhavar4 : bool;
+    var minhavar2 : int;
+    var minhavar3 : int;
+    minhavar3 := 3;
+    var1.x := 12;
+    minhavar := 3 * 4;
+    if function1(true, true) then
+    begin
+      return
+    end;
+    procedure1(var1, minhavar3);
     return
 end

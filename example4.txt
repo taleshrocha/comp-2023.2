@@ -1,0 +1,9 @@
+const string1 := "Constante";
+const string2 := "Teste";
+begin
+    var x : int;
+    print(string1);
+    print("Testando");
+    print(3, 3, "6");
+    return
+end

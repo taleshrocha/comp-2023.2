@@ -1,0 +1,88 @@
+Gramática da Linguagem:
+
+
+Prog := Decl CmdBlock
+
+Decl := Consts Types SubProg Vars 
+
+Consts ::= const Id := Exp ; Consts
+Consts ::= ''
+
+Vars ::= var Id : TypeDec ; Vars
+Vars ::= ''
+
+Types := type Id := TypeDec ; Types
+Types := ''
+
+TypeDec := bool | int | real | char | Id
+           array [ Interval ] of TypeDec | record Fields end
+
+Interval := Exp .. Exp | Exp .. Exp , Interval
+
+Fields := Id : TypeDec ; Fields
+Fields := ''
+
+SubProg ::= ProcedureDecl SubProg | FunctionDecl SubProg
+SubProg ::= ''
+
+ProcedureDecl ::= procedure Id ( Parameters ) CmdBlock ;
+FunctionDecl ::= function Id ( Parameters ) : TypeDec CmdBlock ;
+
+Parameters := ''
+Parameters := Id : TypeDec ParametersAux
+ParametersAux := , Parameters
+ParametersAux := ''
+
+CmdBlock ::= begin Vars Cmds end
+
+Cmds := CmdAux | CmdAux ';' Cmds
+
+CmdAux ::= AcessMemAddr CmdAux_
+CmdAux_ ::= := Exp
+CmdAux_ ::= ''
+CmdAux ::= CmdBlock | CmdConditional | continue | break
+        |  for Id := Exp to Exp step Exp CmdBlock
+        |  loop Vars Cmds end | exit when Exp | CmdReturn
+
+CmdConditional ::= if Exp then CmdBlock CmdConditionalEnd
+CmdConditionalEnd ::= else CmdBlock
+CmdConditionalEnd ::= ''
+
+CmdReturn ::= return CmdReturnExp
+CmdReturnExp ::= Exp
+CmdReturnExp ::= ''
+
+Exp :=  Exp || Terms | Terms
+
+Terms := Terms && Comps | Comps
+
+Comps := Factor != Factor | Factor == Factor 
+       | Factor < Factor  | Factor > Factor 
+       | Factor <= Factor | Factor >= Factor 
+       | Factor 
+
+Factor := ! AriOp | AriOp
+
+AriOp := AriOp   +   AriOp2
+       | AriOp   -   AriOp2
+       | AriOp2
+
+AriOp2 := AriOp2 * Parenthesis
+        | AriOp2 / Parenthesis
+        | AriOp2 % Parenthesis
+        | Parenthesis
+
+Parenthesis := UnaryExp | ( Exp ) 
+
+UnaryExp := + SimpleExp | - SimpleExp | SimpleExp
+
+SimpleExp := NumExp | AcessMemAddr
+
+NumExp := V_INT | V_REAL | V_BOOL | V_CHAR | V_STRING
+
+AcessMemAddr := Id | AcessMemAddr . Id | AcessMemAddr [ Exp ] | AcessMemAddr ( Args )
+
+Args := ''
+Args := Exp ArgsAux
+ArgsAux := , Args
+ArgsAux := ''

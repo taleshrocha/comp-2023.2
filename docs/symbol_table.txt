@@ -1,0 +1,24 @@
+Estratégia 1) Tabela de símbolos composta por tabelas de escopo, responsáveis por armazenar os símbolos declarados em cada escopo do código-fonte.
+A busca por identificador é realizada de baixo para cima (esta é a razão do ponteiro para o nó pai).
+
+
+Symbol_Scope * symbol_table;
+
+Symbol_Scope {
+	Symbol_Entry * symbols;
+	Symbol_Scope * parent;
+	Symbol_Scope * inner_scopes; //Escopos descendentes diretos
+}
+
+//Entrada na tabela de escopo
+Symbol_Entry {
+	char * name;
+	ENUM_TYPE type;
+	union {
+		ArrayData array;
+		RecordData record;
+		FunctionData function; //Definir tipo de retorno, lista de parametros, etc.
+		ProcedureData procedure;
+		VariableData variable;
+	}
+}

@@ -1,21 +1,13 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "parser.y.h"
-#include "exception.h"
-int column_counter;
-void error_message(char* s, ...) {
-  char message[256];
-  va_list vars;
-  va_start(vars, s);
-  sprintf(message, "%s at line %d - column %d\n", s, yylineno, column_counter);
-  printMessage(ERROR, message, vars);
-  va_end(vars);
-}
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include "parser.y.h"
+  #include "symbolTable.h"
+  #include "lexer.h"
+  int column_counter;
 %}
 
-%option noinput nounput
 %option noyywrap
 %option yylineno
 
@@ -33,11 +25,10 @@ identificador   {letter}({letter}|{number})*
 
 {ws}          {column_counter += strlen(yytext);}
 {newline}     {column_counter = 0;} 
-"bool"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_BOOL;}
-"int"         {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_INT;}
-"real"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_REAL;}
-"char"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_CHAR;}
-"string"        {column_counter += strlen(yytext); yylval.info.name = strdup(yytext); return T_STRING;}
+"bool"        {column_counter += strlen(yytext); return T_BOOL;}
+"int"         {column_counter += strlen(yytext); return T_INT;}
+"real"        {column_counter += strlen(yytext); return T_REAL;}
+"char"        {column_counter += strlen(yytext); return T_CHAR;}
 
 ":="        {column_counter += strlen(yytext); return ATTRIB;}
 
@@ -72,7 +63,6 @@ identificador   {letter}({letter}|{number})*
 
 "const"     {column_counter += strlen(yytext); return CONST;}
 "var"	      {column_counter += strlen(yytext); return VAR;}
-"ref"       {column_counter += strlen(yytext); return REF;}
 "if"        {column_counter += strlen(yytext); return IF;}
 "else"      {column_counter += strlen(yytext); return ELSE;}
 "loop"      {column_counter += strlen(yytext); return LOOP;}
@@ -86,11 +76,9 @@ identificador   {letter}({letter}|{number})*
 "return"    {column_counter += strlen(yytext); return RETURN;}
 "break"     {column_counter += strlen(yytext); return BREAK;}
 "continue"  {column_counter += strlen(yytext); return CONTINUE;}
-"record"    {column_counter += strlen(yytext); yylval.info.name = "record"; return RECORD;}
-"array"     {column_counter += strlen(yytext); yylval.info.name = "array"; return ARRAY;}
+"record"    {column_counter += strlen(yytext); return RECORD;}
+"array"     {column_counter += strlen(yytext); return ARRAY;}
 "of"        {column_counter += strlen(yytext); return OF;}
-"print"     {column_counter += strlen(yytext); return PRINT;}
-"read"     {column_counter += strlen(yytext); return READ;}
 
 "type"      {column_counter += strlen(yytext); return TYPE;}
 "exit"      {column_counter += strlen(yytext); return EXIT;}
@@ -100,57 +88,52 @@ identificador   {letter}({letter}|{number})*
 "then"      {column_counter += strlen(yytext); return THEN;}
 
 "true"|"false"	                          {
-                                              yylval.info.value.v_bool = yytext[0] == 't' ? 1 : 0;
-                                              yylval.info.name = strdup(yytext);
+                                              yylval.bool_value = yytext[0] == 't' ? true : false;
                                               column_counter += strlen(yytext);
                                               return V_BOOL;
                                           }
 
 
 {number}+(E[+-]?{number}+)?            {
-                                              yylval.info.value.v_int = atoi(yytext);
-                                              yylval.info.name = strdup(yytext);
+                                              yylval.int_value = atoi(yytext);
                                               column_counter += strlen(yytext);
                                               return V_INT;
                                             }
 
 {number}+\.{number}+(E[+-]?{number}+)? {
-                                              yylval.info.value.v_real = strtof(yytext, NULL);
-                                              yylval.info.name = strdup(yytext);
+                                              yylval.real_value = strtof(yytext, NULL);
                                               column_counter += strlen(yytext);
                                               return V_REAL;
                                             }
 
 \'.\'                                       {
-                                              yylval.info.value.v_char = yytext[1];
-                                              yylval.info.name = strdup(yytext);
+                                              //printf("minha string legal: %s\n", yytext);
+                                              yylval.char_value = yytext[1];
                                               column_counter += strlen(yytext);
                                               return V_CHAR;
                                             }
 \".*\"                                      {
-                                              yylval.info.value.v_string = strdup(yytext+1);
-                                              yylval.info.value.v_string[yyleng-2] = '\0';
-                                              yylval.info.name = strdup(yytext);
+                                              yylval.string_value = strdup(yytext+1);
+                                              yylval.string_value[yyleng-2] = '\0';
                                               column_counter += strlen(yytext);
                                               return V_STRING; // ?? como indicar uma string?
                                             }
 
 {identificador}                             {
-                                            //  // yylval.id_index = addSymbol(yytext);
-                                              yylval.info.name = strdup(yytext);
+                                             // yylval.id_index = addSymbol(yytext);
                                               column_counter += strlen(yytext);
                                               return ID;
                                             }
 
 .                                           {
                                               column_counter += strlen(yytext);
-                                              error_message("Token ' %s ' not recognized!\n", yytext);
+                                              printf("ERROR! %s \n", yytext);
                                             }
 
 %%
 
 
-char terminal_mapping[59][16] = {
+char terminal_mapping[56][16] = {
     "CONST",    "ID",       "ATTRIB",   "SEMICOLON", "OR",        "AND",
     "NEQ",      "EQ",       "LESS",     "GREATER",   "LEQ",       "GEQ",
     "NOT",      "PLUS",     "MINUS",    "MULTIPLY",  "DIVIDE",    "MOD",
@@ -160,7 +143,7 @@ char terminal_mapping[59][16] = {
     "END",      "INTERVAL", "COMMA",    "COLON",     "PROCEDURE", "FUNCTION",
     "VAR",      "BEGIN_",   "FOR",      "TO",        "STEP",      "LOOP",
     "EXIT",     "WHEN",     "CONTINUE", "BREAK",     "IF",        "THEN",
-    "ELSE",     "RETURN",   "REF",      "PRINT",     "READ", };
+    "ELSE",     "RETURN"};
 
 char non_terminal_mapping[44][32] = {"Prog",
                                      "Decl",
