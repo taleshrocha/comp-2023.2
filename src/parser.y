@@ -271,7 +271,7 @@ Interval :
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.dimensions = 1;
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("intervals cannot be neagative.");
+            	yyerror("intervals cannot be negative.");
             }
             $$.capacity[0] = $3.value.v_int - $1.value.v_int;
             $$.starts[0] = $1.value.v_int;
@@ -285,7 +285,7 @@ Interval :
 |   Exp INTERVAL Exp COMMA Interval {
         if ($1.type == E_INT && $3.type == E_INT) {
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("intervals cannot be neagative.");
+            	yyerror("intervals cannot be negative.");
             }
             $$.dimensions = $5.dimensions+1;
             for (int i = 0; i < $5.dimensions; i++) {
@@ -348,15 +348,10 @@ ProcedureDecl :
             #endif
         }
         procedure.params_size = args_size;
-        procedure.return_type = -1;
-        // printf("params_size: %ld\n", procedure.params_size);
-        // printf("params_size: %ld\n", args_size);
-        //args_size=0;// Comentado para nao ser zerado 
-                        //- inserir os parametros na tabela de simbolos do procedimento
+        procedure.return_type = 0;
 
         newSymbol->data.sp_data = procedure;
 
-        // criar registro na tabela
         insertSymbol(getCurrentScope(), newSymbol);
         
     } CmdBlock SEMICOLON
@@ -514,7 +509,7 @@ CmdAux:
 |   LOOP Vars Cmds END {}
 |   EXIT WHEN Exp { 
         if ($3.type != E_BOOL) {
-            // TODO: error
+            yyerror("Type of '%s' must be boolean.", $3.name);
         }
     }
 |   CmdReturn {}
@@ -702,7 +697,7 @@ Exp:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_bool || $3.value.v_bool;
         } else {
-            yyerror("Incompatible type. - Exp");
+            yyerror("OR operation must be between bool values, but was between %s and %s", type_name($1.type), type_name($3.type));
         }
         $$.is_constant = $1.is_constant && $3.is_constant;
     }
@@ -720,7 +715,7 @@ Terms:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_bool && $3.value.v_bool;
         } else {
-            yyerror("Incompatible type. - Terms");
+            yyerror("AND operation must be between bool values, but was between %s and %s", type_name($1.type), type_name($3.type));
         }
         $$.is_constant = $1.is_constant && $3.is_constant;
     }

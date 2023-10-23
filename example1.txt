@@ -5,7 +5,7 @@ const const2 := 2;
 {TYPES}
 type type1 := bool;
 type type2 := int;
-type type3 := array[0..99] of bool;
+type type3 := array[0..99] of int;
 type type4 := type1;
 type type5 := type4;
 
@@ -88,8 +88,6 @@ begin
   
   globalVar7 := 'a';
   
-  globalVar8 := globalVar3;
-
   return
   
 end;
