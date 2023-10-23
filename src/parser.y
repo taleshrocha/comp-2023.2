@@ -326,7 +326,7 @@ ProcedureDecl :
 
         SubProgram procedure;
         #ifdef DEBUG
-        printf("\nPARAMETROS IDENTIFICADOS - PROCEDURE: %s\n", $2.name);
+        printf("\nIDENTIFIED PARAMETERS - PROCEDURE: %s\n", $2.name);
         #endif
         for(size_t i = 0; i < args_size; i++){
             procedure.params_types[i] = args_types[i];
@@ -400,7 +400,7 @@ FunctionDecl:
         #endif
         function.return_type = $8.type;
         #ifdef DEBUG
-        printf("\nPARAMETROS IDENTIFICADOS - FUNCTION: %s\n", $2.name);
+        printf("\nIDENTIFIED PARAMETERS - FUNCTION: %s\n", $2.name);
         #endif
         for(size_t i = 0; i < args_size; i++){
             function.params_types[i] = args_types[i];
