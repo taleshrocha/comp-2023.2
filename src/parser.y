@@ -76,7 +76,7 @@ void yyerror(char* s, ...) {
 %token <info> ID V_INT V_REAL V_BOOL V_CHAR V_STRING 
 %token <type_info> T_BOOL T_INT T_REAL T_CHAR T_STRING ARRAY RECORD
 
-%type <info> NumExp SimpleExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CastExp CmdReturnExp AcessMemAddr Args CmdPrint
+%type <info> NumExp SimpleExp CastExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CmdReturnExp AcessMemAddr Args CmdPrint
 %type <type_info> TypeDec 
 %type <interval> Interval
 
@@ -104,6 +104,9 @@ Decl :
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
+        if (!$4.is_constant) {
+            yyerror("Expression %s must be constant", $4.name);
+        }
         Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
         newSymbol->symbol_type = K_VARIABLE;
@@ -124,8 +127,7 @@ Consts :
             case E_CHAR:
                 var_data.value.v_char = $4.value.v_char;
                 break;
-            case E_ARRAY:
-                // TODO
+            case E_STRING:
                 var_data.value.v_string = $4.value.v_string;
                 break;
         }
@@ -134,7 +136,6 @@ Consts :
         #ifdef DEBUG
         printCurrentScope(getCurrentScope());
         #endif
-        free($4.name);
     } Consts
 |   /* NOTHING */
 ;
@@ -523,6 +524,25 @@ AcessMemAddr:
                 case 0:
                     $$.type = entry->data.v_data.type;
                     $$.is_constant = entry->data.v_data.is_constant;
+                    if ($$.is_constant) {
+                        switch ($$.type) {
+                            case E_INT:
+                                $$.value.v_int = entry->data.v_data.value.v_int;
+                                break;
+                            case E_REAL:
+                                $$.value.v_real = entry->data.v_data.value.v_real;
+                                break;
+                            case E_BOOL:
+                                $$.value.v_bool = entry->data.v_data.value.v_bool;
+                                break;
+                            case E_CHAR:
+                                $$.value.v_char = entry->data.v_data.value.v_char;
+                                break;
+                            case E_STRING:
+                                $$.value.v_string = entry->data.v_data.value.v_string;
+                                break;
+                        }
+                    }
                     break;
                 default:
                     yyerror("Identifier %s is not a variable or constant!", $1.name);
@@ -663,94 +683,136 @@ Exp:
     Exp OR Terms {
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_bool || $3.value.v_bool;
         } else {
             yyerror("Incompatible type. - Exp \n");
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
-|   Terms { $$.type = $1.type; $$.name = $1.name; }
+|   Terms {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+}
 ;
 
 Terms:
     Terms AND Comps {
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_bool && $3.value.v_bool;
         } else {
             yyerror("Incompatible type. - Terms\n");
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
-|   Comps { $$.type = $1.type; $$.name = $1.name;}
+|   Comps {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+    }
 ;
 
 Comps: 
     Factor NEQ Factor {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_int != $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_real != $3.value.v_real;
         } else if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_bool != $3.value.v_bool;
         } else if ($1.type == E_CHAR && $3.type == E_CHAR) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_char != $3.value.v_char;
         }else if($1.type == E_STRING && $3.type == E_STRING){
             $$.type = E_BOOL;
-        }
-        else {
+            $$.value.v_bool = strcmp($1.value.v_string, $3.value.v_string) != 0;
+        } else {
             yyerror("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   Factor EQ Factor  {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_int == $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_real == $3.value.v_real;
         } else if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_bool == $3.value.v_bool;
         } else if ($1.type == E_CHAR && $3.type == E_CHAR) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_char == $3.value.v_char;
         }else if($1.type == E_STRING && $3.type == E_STRING){
             $$.type = E_BOOL;
-        }
-        else {
+            $$.value.v_bool = strcmp($1.value.v_string, $3.value.v_string) == 0;
+        } else {
             yyerror("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   Factor LESS Factor {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_int < $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_real < $3.value.v_real;
         } else {
             yyerror("Incompatible type for '<' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   Factor GREATER Factor  {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_int > $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_real > $3.value.v_real;
         } else {
             yyerror("Incompatible type for '>' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   Factor LEQ Factor {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_int <= $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_real <= $3.value.v_real;
         } else {
             yyerror("Incompatible type for '<=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   Factor GEQ Factor  {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_int >= $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_BOOL;
+            $$.value.v_bool = $1.value.v_real >= $3.value.v_real;
         } else {
             yyerror("Incompatible type for '>=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
-|   Factor  { $$.type = $1.type; $$.name = $1.name;}
+|   Factor  {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
 ;
 
 Factor:
@@ -761,91 +823,148 @@ Factor:
         } else {
             yyerror("Incompatible type for '!' operation between %s (%s)", $2.name, type_name($2.type));
         }
+        $$.is_constant = $2.is_constant;
     }
-|   AriOp { $$.type = $1.type; $$.name = $1.name; }
+|   AriOp {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
 ;
 
 AriOp:
     AriOp PLUS AriOp2 {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_INT;
+            $$.value.v_int = $1.value.v_int + $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
+            $$.value.v_real = $1.value.v_real + $3.value.v_real;
         } else {
             yyerror("Incompatible type for '+' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   AriOp MINUS AriOp2 {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_INT;
+            $$.value.v_int = $1.value.v_int - $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
+            $$.value.v_real = $1.value.v_real - $3.value.v_real;
         } else {
             yyerror("Incompatible type for '-' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
-|   AriOp2 { $$.type = $1.type; $$.name = $1.name;}
+|   AriOp2 {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
 ;
 
 AriOp2:
     AriOp2 MULTIPLY Parenthesis {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_INT;
+            $$.value.v_int = $1.value.v_int * $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
+            $$.value.v_real = $1.value.v_real * $3.value.v_real;
         } else {
             yyerror("Incompatible type for '*' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         // $$.name = strcat() // TODO
-
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   AriOp2 DIVIDE Parenthesis {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_INT;
+            $$.value.v_int = $1.value.v_int / $3.value.v_int;
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
+            $$.value.v_real = $1.value.v_real / $3.value.v_real;
         } else {
             yyerror("Incompatible type for '/' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
 |   AriOp2 MOD Parenthesis {
         if ($1.type == E_INT && $3.type == E_INT) {
             $$.type = E_INT;
-        } else if ($1.type == E_REAL && $3.type == E_REAL) {
-            // TODO
-            yyerror("Incompatible type. - AriOp2 \n");
+            $$.value.v_int = $1.value.v_int % $3.value.v_int;
         } else {
             yyerror("Incompatible type. - AriOp2 \n");
         }
+        $$.is_constant = $1.is_constant && $3.is_constant;
     }
-|   Parenthesis { $$.type = $1.type; $$.name = $1.name;}
+|   Parenthesis {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
 ;
 
 Parenthesis:
-    UnaryExp { $$.type = $1.type; $$.name = $1.name;}
-|   LPAR Exp RPAR { $$.type = $2.type; }
+    UnaryExp {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
+|   LPAR Exp RPAR {
+        $$.type = $2.type;
+        $$.name = $2.name;
+        $$.is_constant = $2.is_constant;
+        $$.value = $2.value;
+}
 ;
 
 UnaryExp:
     PLUS CastExp { 
-        if ($2.type == E_INT || $2.type == E_REAL) {
-            $$.type = $2.type;
+        if ($2.type == E_INT) {
+            $$.type = E_INT;
+            $$.value.v_int = + $2.value.v_int;
+        } else if ($2.type == E_REAL) {
+            $$.type = E_REAL;
+            $$.value.v_real = + $2.value.v_real;
         } else { 
             yyerror("Incompatible type. - UnaryExp \n");
         }
+        $$.is_constant = $2.is_constant;
     }
 |   MINUS CastExp { 
-        if ($2.type == E_INT || $2.type == E_REAL) {
-            $$.type = $2.type;
+        if ($2.type == E_INT) {
+            $$.type = E_INT;
+            $$.value.v_int = - $2.value.v_int;
+        } else if ($2.type == E_REAL) {
+            $$.type = E_REAL;
+            $$.value.v_real = - $2.value.v_real;
         } else { 
             yyerror("Incompatible type. - UnaryExp \n");
         }
+        $$.is_constant = $2.is_constant;
+        
     }
-|   CastExp { $$.type = $1.type; $$.name = $1.name;}
+|   CastExp {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
 ;
 
 CastExp:
-    LPAR T_INT RPAR SimpleExp       {
+    LPAR T_INT RPAR Parenthesis       {
         if ($4.type == E_INT) {
             $$.type = E_INT;
             $$.value.v_int = $4.value.v_int;
@@ -865,8 +984,9 @@ CastExp:
         if ($4.type == E_STRING) {
             yyerror("string para int pode não!\n");
         }
+        $$.is_constant = $4.is_constant;
     }
-|   LPAR T_REAL RPAR SimpleExp      {
+|   LPAR T_REAL RPAR Parenthesis      {
         if ($4.type == E_INT) {
             $$.type = E_REAL;
             $$.value.v_real = $4.value.v_int;
@@ -886,8 +1006,9 @@ CastExp:
         if ($4.type == E_STRING) {
             yyerror("string para real pode não!\n");
         }
+        $$.is_constant = $4.is_constant;
 }
-|   LPAR T_BOOL RPAR SimpleExp      {
+|   LPAR T_BOOL RPAR Parenthesis      {
         if ($4.type == E_INT) {
             $$.type = E_BOOL;
             $$.value.v_bool = $4.value.v_int > 0;
@@ -906,8 +1027,9 @@ CastExp:
         if ($4.type == E_STRING) {
             yyerror("string para bool pode não!\n");
         }
+        $$.is_constant = $4.is_constant;
 }
-|   LPAR T_CHAR RPAR SimpleExp      {
+|   LPAR T_CHAR RPAR Parenthesis      {
     if ($4.type == E_INT) {
         yyerror("int para char pode não!\n");
     }
@@ -924,8 +1046,9 @@ CastExp:
     if ($4.type == E_STRING) {
         yyerror("string para char pode não!\n");
     }
+    $$.is_constant = $4.is_constant;
 }
-|   LPAR T_STRING RPAR SimpleExp      {
+|   LPAR T_STRING RPAR Parenthesis      {
     if ($4.type == E_INT) {
         $$.type = E_STRING;
     }
@@ -941,23 +1064,64 @@ CastExp:
     if ($4.type == E_STRING) {
         $$.type = E_STRING;
     }
+    $$.is_constant = $4.is_constant;
 }
 |   SimpleExp                       {
     $$.type = $1.type;
     $$.name = $1.name;
+    $$.is_constant = $1.is_constant;
+    $$.value = $1.value;
+    
 }
 
 SimpleExp:
-    NumExp { $$.type = $1.type; $$.name = $1.name;}
-|   AcessMemAddr { $$.type = $1.type; $$.name = $1.name;}
+    NumExp {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+        
+}
+|   AcessMemAddr {
+        $$.type = $1.type;
+        $$.name = $1.name;
+        $$.is_constant = $1.is_constant;
+        $$.value = $1.value;
+}
 ;
 
 NumExp:
-    V_INT    { $$.type = E_INT; $$.value.v_int = $1.value.v_int; $$.name = $1.name;}
-|   V_REAL   { $$.type = E_REAL; $$.value.v_real = $1.value.v_real; $$.name = $1.name;}
-|   V_BOOL   { $$.type = E_BOOL; $$.value.v_bool = $1.value.v_bool; $$.name = $1.name;}
-|   V_CHAR   { $$.type = E_CHAR; $$.value.v_char = $1.value.v_char; $$.name = $1.name;}
-|   V_STRING { $$.type = E_STRING; $$.value.v_string = $1.value.v_string; $$.name = $1.name;}
+    V_INT    {
+        $$.type = E_INT;
+        $$.value.v_int = $1.value.v_int;
+        $$.name = $1.name;
+        $$.is_constant = 1;
+        
+}
+|   V_REAL   {
+        $$.type = E_REAL;
+        $$.value.v_real = $1.value.v_real;
+        $$.name = $1.name;
+        $$.is_constant = 1;
+}
+|   V_BOOL   {
+        $$.type = E_BOOL;
+        $$.value.v_bool = $1.value.v_bool;
+        $$.name = $1.name;
+        $$.is_constant = 1;
+}
+|   V_CHAR   {
+        $$.type = E_CHAR;
+        $$.value.v_char = $1.value.v_char;
+        $$.name = $1.name;
+        $$.is_constant = 1;
+}
+|   V_STRING {
+        $$.type = E_STRING;
+        $$.value.v_string = $1.value.v_string;
+        $$.name = $1.name;
+        $$.is_constant = 1;
+}
 ;
 
 %%
