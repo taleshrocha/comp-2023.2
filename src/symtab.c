@@ -32,7 +32,6 @@ Symbol_Entry * getSubProgram(char * subprogname) {
             return symbol;
         }
     }
-    
     return NULL;
 }
 

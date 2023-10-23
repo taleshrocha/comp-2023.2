@@ -1,16 +1,17 @@
 const PI := 3.1415;
 
 function circle_area(r: real) : real begin
-    return PI * s * r
+    return PI * r * r
 end;
 
 begin
     var r : real;
     var area: real; 
 
-    r := 10.0;
-    area := circle_area(r);
-
+    begin
+        r := 10.0;
+        area := circle_area(r)
+    end;
     print("%r", area);
 
     print("end of program")
