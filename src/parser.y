@@ -282,26 +282,6 @@ Interval :
         free($1.name);
         free($3.name);
     }
-|   Exp INTERVAL Exp COMMA Interval {
-        if ($1.type == E_INT && $3.type == E_INT) {
-            if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("intervals cannot be negative.");
-            }
-            $$.dimensions = $5.dimensions+1;
-            for (int i = 0; i < $5.dimensions; i++) {
-                $$.capacity[i] = $5.capacity[i];
-            	$$.starts[i] = $5.starts[i];
-            	$$.ends[i] = $5.ends[i];
-            }
-            $$.capacity[$$.dimensions-1] = $3.value.v_int - $1.value.v_int;
-            $$.starts[$$.dimensions-1] = $1.value.v_int;
-            $$.ends[$$.dimensions-1] = $3.value.v_int;
-        } else {
-            yyerror("intervals can only be defined with integer values.");
-        }
-        free($1.name);
-        free($3.name);
-}
 ;
 Fields :
     ID COLON TypeDec {

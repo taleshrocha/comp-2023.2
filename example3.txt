@@ -1,10 +1,10 @@
 type tipo1 := record x : real; y : real; end;
-type tipo2 := array[0..10, 20..30] of int;
+type tipo2 := array[0..10, 10..20] of int;
 
 begin
     var var1 : tipo1;
     var var2 : tipo2;
     var1.x := 3.0;
-    var2[4] := 3;
+    var2[4][3] := 3;
     return
 end
