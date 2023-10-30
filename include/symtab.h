@@ -132,4 +132,5 @@ void freeScope();
 
 char* type_name(int type_id);
 
+char* get_c_type(int type_id);
 #endif

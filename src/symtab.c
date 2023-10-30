@@ -195,11 +195,11 @@ void printCurrentScope(Symbol_Table * symbolTable){
     for (size_t i = 0; i < symbolTable->symbol_size; i++)
     {
         printf(
-            "%ld. Name: %s. Type: %d. Value: %s\n ",
+            "%ld. Name: %s. Type: %d\n ",
             i, 
             symbolTable->symbols[i]->name,
-            symbolTable->symbols[i]->symbol_type,
-            symbolTable->symbols[i]->data.v_data.value.v_string);
+            symbolTable->symbols[i]->symbol_type
+        );
     }
     printf("\n");
 }
@@ -272,4 +272,21 @@ char* type_name(int type_id) {
             }
             return "Type not found!";
     }
+}
+
+char* get_c_type(int type_id) {
+    switch (type_id) {
+        case E_INT:
+            return "int";
+        case E_REAL:
+            return "float";
+        case E_CHAR:
+            return "char";
+        case E_STRING:
+            return "char*";
+        case E_BOOL:    
+            return "short";
+        default:
+            return "__ERROR__";
+    }    
 }

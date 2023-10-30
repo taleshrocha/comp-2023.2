@@ -5,6 +5,9 @@
 #include "exception.h"
 #include "code_generation.h"
 
+extern int command_counter;
+extern CommandEntry commands[100];
+
 int args_types[16];
 char args_names[16][32];
 short ref_flags[16];
@@ -14,6 +17,8 @@ int type_counter = 10;
 int current_return_type = 0;
 
 char functionName[256];
+
+char temp_name[256];
 
 extern int column_counter;
 char message[256];
@@ -68,7 +73,6 @@ void yyerror(char* s, ...) {
         int ends[16];
         int dimensions;  
     } interval;
-    
 
 }
 
@@ -80,6 +84,8 @@ void yyerror(char* s, ...) {
 %type <info> NumExp SimpleExp CastExp UnaryExp Parenthesis AriOp2 AriOp Factor Comps Terms Exp CmdReturnExp AcessMemAddr Args CmdPrint
 %type <type_info> TypeDec 
 %type <interval> Interval
+
+%type  PrintArgs
 
 
 %start Prog 
@@ -100,6 +106,9 @@ Prog :
         );
         #endif
         freeScopes();
+        for(int i = 0; i < command_counter; i++) {
+            generate_cmd(&commands[i]);
+        }
         printf("return 0;\n");
         printf("}\n");
 
@@ -120,27 +129,38 @@ Consts :
         Variable var_data;
         var_data.is_constant = 1;
         var_data.type = $4.type;
-        printf("%s %s;\n", get_c_type($4.type), $2.name);
+
+        // printf("%s %s;\n", get_c_type($4.type), $2.name);
+        new_command(C_VAR, NULL, get_c_type($4.type), strdup($2.name));
         switch ($4.type) {
             case E_INT:
                 var_data.value.v_int = $4.value.v_int;
-                printf("%s = %d;\n", $2.name, $4.value.v_int);
+                // printf("%s = %d;\n", $2.name, $4.value.v_int);
+                sprintf(temp_name, "%d", $4.value.v_int);
+                new_command(C_ATTRIB, strdup($2.name), strdup(temp_name), NULL);
                 break;
             case E_REAL:
                 var_data.value.v_real = $4.value.v_real;
-                printf("%s = %f;\n", $2.name, $4.value.v_real);
+                // printf("%s = %f;\n", $2.name, $4.value.v_real);
+                sprintf(temp_name, "%f", $4.value.v_real);
+                new_command(C_ATTRIB, strdup($2.name), strdup(temp_name), NULL);
                 break;
             case E_BOOL:
                 var_data.value.v_bool = $4.value.v_bool;
-                printf("%s = %d;\n", $2.name, $4.value.v_bool);
+                // printf("%s = %d;\n", $2.name, $4.value.v_bool);
+                sprintf(temp_name, "%d", $4.value.v_bool);
+                new_command(C_ATTRIB, strdup($2.name), strdup(temp_name), NULL);
                 break;
             case E_CHAR:
                 var_data.value.v_char = $4.value.v_char;
-                printf("%s = %c;\n", $2.name, $4.value.v_char);
+                // printf("%s = %c;\n", $2.name, $4.value.v_char);
+                sprintf(temp_name, "%c", $4.value.v_char);
+                new_command(C_ATTRIB, strdup($2.name), strdup(temp_name), NULL);
                 break;
             case E_STRING:
                 var_data.value.v_string = $4.value.v_string;
-                printf("%s = %s;\n", $2.name, $4.value.v_string);
+                // printf("%s = %s;\n", $2.name, $4.value.v_string);
+                new_command(C_ATTRIB, strdup($2.name), strdup($4.value.v_string), NULL);
                 break;
         }
         newSymbol->data.v_data = var_data;
@@ -169,22 +189,28 @@ Vars :
         printCurrentScope(getCurrentScope());
         #endif
         free($4.name);
-        printf("%s %s;\n", get_c_type($4.type), $2.name);
+        // printf("%s %s;\n", get_c_type($4.type), $2.name);
+        new_command(C_VAR, NULL, get_c_type($4.type), strdup($2.name));
         switch ($4.type) {
             case E_INT:
-                printf("%s = %d;\n", $2.name, 0);
+                // printf("%s = %d;\n", $2.name, 0);
+                new_command(C_ATTRIB, strdup($2.name), "0", NULL);
                 break;
             case E_REAL:
-                printf("%s = %f;\n", $2.name, 0.0);
+                // printf("%s = %f;\n", $2.name, 0.0);
+                new_command(C_ATTRIB, strdup($2.name), "0.0", NULL);
                 break;
             case E_BOOL:
-                printf("%s = %d;\n", $2.name, 1);
+                // printf("%s = %d;\n", $2.name, 1);
+                new_command(C_ATTRIB, strdup($2.name), "1", NULL);
                 break;
             case E_CHAR:
-                printf("%s = %s;\n", $2.name, "''");
+                // printf("%s = %s;\n", $2.name, "''");
+                new_command(C_ATTRIB, strdup($2.name), "''", NULL);
                 break;
             case E_STRING:
-                printf("%s = %s;\n", $2.name, "\"\"");
+                // printf("%s = %s;\n", $2.name, "\"\"");
+                new_command(C_ATTRIB, strdup($2.name), "\"\"", NULL);
                 break;
         }
 
@@ -679,15 +705,26 @@ CmdPrint:
         if ($3.type != E_STRING) {
             yyerror("First argument of print must be of type string");
         } else {
-            char* pch = strstr ($3.name,"%r");
-            if (pch != NULL)
-                memcpy(pch,"%f",2);
-            printf("printf(%s", $3.name);
+
         }
-        args_types[args_size] = $3.type;
-        strcpy(args_names[args_size], $3.name);
-        args_size++;
-    } PrintArgs RPAR {
+        // args_types[args_size] = $3.type;
+        // strcpy(args_names[args_size], $3.name);
+        // args_size++;
+    } PrintArgs {
+        // TODO replace all occurrences of %r with %f
+        // TODO replace all occurrences of %i with %d
+        // TODO replace all occurrences of %b with %?
+        char* pch = strstr ($3.name,"%r");
+        if (pch != NULL)
+            memcpy(pch,"%f",2);
+        // printf("printf(%s", $3.name);
+        temp_name[0] = '\0';
+        for(size_t i = 0; i < args_size; i++){
+            strcat(temp_name, ",");
+            strcat(temp_name, args_names[i]);
+        }
+        new_command(C_PRINT, NULL, strdup($3.name), strdup(temp_name));
+    } RPAR {
         args_size = 0;
     }
 ;
@@ -697,11 +734,8 @@ PrintArgs:
         args_types[args_size] = $2.type;
         strcpy(args_names[args_size], $2.name);
         args_size++;
-        printf(",%s", $2.name);
 }   PrintArgs
 |   /* NOTHING */ {
-        printf(");\n");
-
 }
 ;
 
