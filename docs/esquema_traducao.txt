@@ -1,0 +1,164 @@
+int counter = 0;
+int * quadruple = malloc(sizeof(int)*100);
+
+
+bool a = true or (false or true);
+bool b = true and a;
+
+Exp:
+    Exp OR Terms {
+	list_of_labels[label_counter] = "sdjgklsdhg";//funcao para criar labels
+        quadruple[counter++]= new_entry(IF, $1.name, list_of_labels[label_counter]);
+        quadruple[counter++]= new_entry(ATTRIB, $3.name, NULL, $$.name);
+	$$.name = strcat("t", counter);
+        quadruple[counter++]= new_entry(LABEL, list_of_labels[label_counter], NULL, NULL);
+        quadruple[counter++]= new_entry(ATTRIB, $1.name, NULL, $$.name);
+        label_counter++;
+}
+|  Exp AND Terms {
+	list_of_labels[label_counter] = "sdjgklsdhg";//funcao para criar labels
+        quadruple[counter++]= new_entry(IF, "!"+$1.name, list_of_labels[label_counter]);
+        quadruple[counter++]= new_entry(ATTRIB, $3.name, NULL, $$.name);
+	$$.name = strcat("t", counter);
+        quadruple[counter++]= new_entry(LABEL, list_of_labels[label_counter], NULL, NULL);
+        quadruple[counter++]= new_entry(ATTRIB, $1.name, NULL, $$.name);
+        label_counter++;
+}
+
+
+
+
+
+CmdAux:
+    AcessMemAddr
+|   AcessMemAddr ATTRIB Exp {
+        quadruple[counter++]= new_entry(ATTRIB, $3.name, NULL, $1.name);
+	// $3.name = t2
+.....
+
+
+goto func_call324
+funcasjfkl
+t1 = func_return_value
+$$.name = t1
+
+
+
+}
+
+
+
+
+const abc = 50 * (1 + 2);
+
+
+int abc;
+abc = 50 * (1 + 2);
+
+
+
+typedef Struct {
+	char * result;
+	char * op1;
+	char * op2;
+	int operator;
+} cmd_entry;
+
+cmd_entry * new_entry(int operator, 
+			char * result,
+			char * op1,
+			char * op2){
+
+	cmd_entry * temp = malloc(sizeof(cmd_entry));
+
+	temp->result = result;
+	temp->operator = operator;
+	temp->op1 = op1;
+	temp->op2 = op2;
+	return temp;
+}
+
+
+
+char * generate_cmd(cmd_entry * entry){
+
+	char * cmd;
+
+	switch(entry->operator){
+		case OR:
+			cmd = "entry->result = entry->op1 || entry->op2;";
+			break;
+
+		case VAR:
+			cmd = "entry->op1 entry->result;";
+			break;
+		case ATTRIB:
+			cmd = "entry->result = entry->op1;";
+			break;
+		case IF:
+			cmd = "if entry->op1 goto entry->op2;";
+		case IFFALSE:
+			cmd = "if !entry->op1 goto entry->op2;";
+		case GOTO:
+			cmd = "goto entry->op2";
+		case LABEL:
+			cmd = "entry->op1 :";
+	
+	}
+
+	return cmd;
+}
+
+
+
+CONST ID ATTRIB Exp SEMICOLON {
+	quadruple[counter++]= new_entry(VAR, $4.type, $1.name);
+        quadruple[counter++]= new_entry(ATTRIB, $3.value, NULL, $1.name);
+} Consts
+
+
+
+if(10 > 0)
+begin
+
+end
+
+
+
+
+CmdConditional:
+    IF Exp {
+	
+       quadruple[counter++]= new_entry(IF, $2.name, null);
+       quadruple[counter++]= new_entry(GOTO, null, null);
+    }
+THEN CmdBlock CmdConditionalEnd
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

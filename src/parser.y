@@ -1,8 +1,9 @@
 %{
 #include <stdio.h>
-#include <lexer.l.h>
-#include <symtab.h>
+#include "lexer.l.h"
+#include "symtab.h"
 #include "exception.h"
+#include "code_generation.h"
 
 int args_types[16];
 char args_names[16][32];
@@ -88,6 +89,8 @@ void yyerror(char* s, ...) {
 Prog : 
     {
         pushScope();
+        printf("#include <stdio.h>\n\n");
+        printf("int main() {\n");
     } 
     Decl CmdBlock {
         // TODO free das tabelas
@@ -97,6 +100,8 @@ Prog :
         );
         #endif
         freeScopes();
+        printf("}\n");
+
     }
 ;
 Decl : 
@@ -114,21 +119,27 @@ Consts :
         Variable var_data;
         var_data.is_constant = 1;
         var_data.type = $4.type;
+        printf("%s %s;\n", get_c_type($4.type), $2.name);
         switch ($4.type) {
             case E_INT:
                 var_data.value.v_int = $4.value.v_int;
+                printf("%s = %d;\n", $2.name, $4.value.v_int);
                 break;
             case E_REAL:
                 var_data.value.v_real = $4.value.v_real;
+                printf("%s = %f;\n", $2.name, $4.value.v_real);
                 break;
             case E_BOOL:
                 var_data.value.v_bool = $4.value.v_bool;
+                printf("%s = %d;\n", $2.name, $4.value.v_bool);
                 break;
             case E_CHAR:
                 var_data.value.v_char = $4.value.v_char;
+                printf("%s = %c;\n", $2.name, $4.value.v_char);
                 break;
             case E_STRING:
                 var_data.value.v_string = $4.value.v_string;
+                printf("%s = %s;\n", $2.name, $4.value.v_string);
                 break;
         }
         newSymbol->data.v_data = var_data;
@@ -136,6 +147,8 @@ Consts :
         #ifdef DEBUG
         printCurrentScope(getCurrentScope());
         #endif
+        
+
     } Consts
 |   /* NOTHING */
 ;
@@ -646,7 +659,7 @@ CmdPrint:
         if ($3.type != E_STRING) {
             yyerror("First argument of print must be of type string");
         } else {
-            // printf("%s\n", $3.value.v_string);
+            printf("printf(%s", $3.name);
         }
         args_types[args_size] = $3.type;
         strcpy(args_names[args_size], $3.name);
@@ -661,8 +674,12 @@ PrintArgs:
         args_types[args_size] = $2.type;
         strcpy(args_names[args_size], $2.name);
         args_size++;
+        printf(",\"%s\"", $2.name);
 }   PrintArgs
-|   /* NOTHING */ {}
+|   /* NOTHING */ {
+        printf(")\n");
+
+}
 ;
 
 CmdRead:
@@ -1128,7 +1145,10 @@ int main(int argc, char const *argv[])
         yyin=fopen(argv[1],"r");
     }
     int result = yyparse();
-    if (result == 0) {
+    if (result != 0) {
+        yyerror("DEU RUIM");
+    }
+    /* if (result == 0) {
         printf("parsing was successful\n");
     } else if (result == 1) {
         printf("parsing failed because of invalid input\n");
@@ -1136,7 +1156,7 @@ int main(int argc, char const *argv[])
         printf("parsing failed due to memory exhaustion\n");
     } else {
         printf("other parsing error: %d\n", result);
-    }
+    } */
     if (argc == 2) {
         fclose(yyin);
     }

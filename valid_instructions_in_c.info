@@ -1,0 +1,17 @@
+// declarações
+
+int var_int;
+float var_float;
+short var_bool;
+char var_char;
+char* var_string;
+
+// atribuições e operações
+var1 = var2 +|-|*|/ var3
+var1 = var2 >|<|>=|<=|==|!= var3
+var1 = var2
+
+// branching
+if var1 GOTO n
+GOTO n
+

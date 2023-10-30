@@ -35,7 +35,7 @@ release: all
 
 # executable
 
-$(BIN)/parser: $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/exception.o
+$(BIN)/parser: $(OBJS)/symtab.o $(OBJS)/parser.o $(OBJS)/lexer.o $(OBJS)/exception.o $(OBJS)/code_generation.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -I $(INCLUDE) -o $@ 
 
 # objects
@@ -53,6 +53,9 @@ $(OBJS)/lexerTest.o: $(SRC)/lexerTest.c
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 $(OBJS)/exception.o: $(SRC)/exception.c 
+	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
+
+$(OBJS)/code_generation.o: $(SRC)/code_generation.c 
 	$(CC) $(CFLAGS) -c $< $(LIBS) -I$(INCLUDE) -o $@ 
 
 # sources
