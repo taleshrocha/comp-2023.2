@@ -12,7 +12,7 @@ begin
         r := 10.0;
         area := circle_area(r)
     end;
-    print("%r", area);
+    print("%r\n", area);
 
-    print("end of program")
+    print("end of program\n")
 end

@@ -100,6 +100,7 @@ Prog :
         );
         #endif
         freeScopes();
+        printf("return 0;\n");
         printf("}\n");
 
     }
@@ -168,6 +169,25 @@ Vars :
         printCurrentScope(getCurrentScope());
         #endif
         free($4.name);
+        printf("%s %s;\n", get_c_type($4.type), $2.name);
+        switch ($4.type) {
+            case E_INT:
+                printf("%s = %d;\n", $2.name, 0);
+                break;
+            case E_REAL:
+                printf("%s = %f;\n", $2.name, 0.0);
+                break;
+            case E_BOOL:
+                printf("%s = %d;\n", $2.name, 1);
+                break;
+            case E_CHAR:
+                printf("%s = %s;\n", $2.name, "''");
+                break;
+            case E_STRING:
+                printf("%s = %s;\n", $2.name, "\"\"");
+                break;
+        }
+
     } Vars
 |   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
@@ -659,6 +679,9 @@ CmdPrint:
         if ($3.type != E_STRING) {
             yyerror("First argument of print must be of type string");
         } else {
+            char* pch = strstr ($3.name,"%r");
+            if (pch != NULL)
+                memcpy(pch,"%f",2);
             printf("printf(%s", $3.name);
         }
         args_types[args_size] = $3.type;
@@ -674,10 +697,10 @@ PrintArgs:
         args_types[args_size] = $2.type;
         strcpy(args_names[args_size], $2.name);
         args_size++;
-        printf(",\"%s\"", $2.name);
+        printf(",%s", $2.name);
 }   PrintArgs
 |   /* NOTHING */ {
-        printf(")\n");
+        printf(");\n");
 
 }
 ;
