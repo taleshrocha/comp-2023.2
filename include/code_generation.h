@@ -35,6 +35,8 @@ typedef struct CommandEntry {
 
 void new_command(int operator, char * result,char * op1,char * op2);
 
+char* create_label(char c);
+
 char* get_c_type(int type_id);
 
 void generate_cmd(CommandEntry * entry);

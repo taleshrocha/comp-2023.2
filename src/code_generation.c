@@ -10,12 +10,33 @@ int command_counter = 0;
 int temp_var_counter = 0;
 int short_circuit_label_counter = 0;
 
+static int labels_counter[256] = {0};
+/*
+On = OR (curto circuito)
+An = AND (curto circuito)
+In = IF-ELSE
+Cn = SUBPROGRAM CALL
+Rn = SUBPROGRAM RETURN
+
+in = int temp variable
+fn = float temp variable
+bn = boolean temp variable
+cn = char temp variable
+sn = string temp variable
+*/
+static char labels[1024][8];
+
 void new_command(int operator, char * result,char * op1,char * op2) {
 	commands[command_counter].result = result;
 	commands[command_counter].operator = operator;
 	commands[command_counter].op1 = op1;
 	commands[command_counter].op2 = op2;
     command_counter++;
+}
+
+char* create_label(char c) {
+    sprintf(labels[labels_counter[c]], "%c%d", c, labels_counter[c]);
+    return labels[labels_counter[c]++];
 }
 
 void generate_cmd(CommandEntry * entry){

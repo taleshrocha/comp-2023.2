@@ -70,11 +70,9 @@ typedef struct Array
 {
 	int type_id;
     int inner_type;
-    int size;
-    int capacity[16]; //capacidade da dimensao i
-    int starts[16]; //começo do intervalor da dimensao i
-    int ends[16];	//final do intervalo da dimensao i
-    int dimensions;  //numero de dimensoes
+    int capacity; // capacidade do array
+    int start;   // começo do intervalo
+    int end;	  // final do intervalo
 } Array;
 
 

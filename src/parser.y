@@ -35,6 +35,7 @@ void yyerror(char* s, ...) {
 
 %union {
     struct {
+        char* var;
         int type;
         char* name;
         int is_constant;
@@ -58,20 +59,16 @@ void yyerror(char* s, ...) {
             } record_data;
             struct {
                 int inner_type;
-                int size;
-                int capacity[16];
-                int starts[16];
-                int ends[16];
-                int dimensions;
+                int capacity;
+                int start;
+                int end;
             } array_data;
         };
     } type_info;
     struct {
-        int size;
-        int capacity[16];
-        int starts[16];
-        int ends[16];
-        int dimensions;  
+        int capacity;
+        int start;
+        int end;
     } interval;
 
 }
@@ -279,20 +276,15 @@ TypeDec :
         newSymbol->symbol_type = K_ARRAY;
         Array data;
         data.inner_type =	$6.type;
-        data.dimensions = 	$3.dimensions;
         data.type_id 	= 	type_counter++;
         $$.type = data.type_id;
         newSymbol->name = (char*) malloc(sizeof(char) * 32);
         sprintf(newSymbol->name, "ARRAY %d", data.type_id);
         $$.name = strdup(newSymbol->name);
         $$.to_rename = 1;
-        data.size = 1;
-        for (int i = 0; i < $3.dimensions; i++) {
-            data.capacity[i] = $3.capacity[i];
-            data.starts[i] = $3.starts[i];
-            data.ends[i] = $3.ends[i];
-            data.size *= data.capacity[i];
-        }
+        data.capacity = $3.capacity;
+        data.start = $3.start;
+        data.end = $3.end;
         newSymbol->data.a_data = data;
         Symbol_Table* scope = getCurrentScope();
         while(scope->parent != NULL){
@@ -328,13 +320,12 @@ TypeDec :
 Interval :
     Exp INTERVAL Exp {
         if ($1.type == E_INT && $3.type == E_INT) {
-            $$.dimensions = 1;
             if($3.value.v_int - $1.value.v_int <= 0){
             	yyerror("intervals cannot be negative.");
             }
-            $$.capacity[0] = $3.value.v_int - $1.value.v_int;
-            $$.starts[0] = $1.value.v_int;
-            $$.ends[0] = $3.value.v_int;
+            $$.capacity = $3.value.v_int - $1.value.v_int;
+            $$.start = $1.value.v_int;
+            $$.end = $3.value.v_int;
         } else {
             yyerror("intervals can only be defined with integer values.");
         }
@@ -574,20 +565,32 @@ AcessMemAddr:
                         switch ($$.type) {
                             case E_INT:
                                 $$.value.v_int = entry->data.v_data.value.v_int;
+                                sprintf(temp_name, "%d", $$.value.v_int);
+                                $$.var = strdup(temp_name);
                                 break;
                             case E_REAL:
                                 $$.value.v_real = entry->data.v_data.value.v_real;
+                                sprintf(temp_name, "%d", $$.value.v_int);
+                                $$.var = strdup(temp_name);
                                 break;
                             case E_BOOL:
                                 $$.value.v_bool = entry->data.v_data.value.v_bool;
+                                sprintf(temp_name, "%d", $$.value.v_int);
+                                $$.var = strdup(temp_name);
                                 break;
                             case E_CHAR:
                                 $$.value.v_char = entry->data.v_data.value.v_char;
+                                sprintf(temp_name, "%d", $$.value.v_int);
+                                $$.var = strdup(temp_name);
                                 break;
                             case E_STRING:
                                 $$.value.v_string = entry->data.v_data.value.v_string;
+                                sprintf(temp_name, "%d", $$.value.v_int);
+                                $$.var = strdup(temp_name);
                                 break;
                         }
+                    } else {
+                        $$.var = $1.name;
                     }
                     break;
                 default:
@@ -755,10 +758,14 @@ Exp:
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_bool || $3.value.v_bool;
+            char* label = create_label('O');
+            new_command(C_IF, NULL, $1.var, label);
+            new_command(C_ATTRIB, NULL, $1.var, label);
         } else {
             yyerror("OR operation must be between bool values, but was between %s and %s", type_name($1.type), type_name($3.type));
         }
         $$.is_constant = $1.is_constant && $3.is_constant;
+
     }
 |   Terms {
         $$.type = $1.type;
@@ -1015,6 +1022,7 @@ UnaryExp:
         if ($2.type == E_INT) {
             $$.type = E_INT;
             $$.value.v_int = - $2.value.v_int;
+            new_command(C_MINUS, )
         } else if ($2.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = - $2.value.v_real;
@@ -1026,6 +1034,7 @@ UnaryExp:
     }
 |   CastExp {
         $$.type = $1.type;
+        $$.var = $1.var;
         $$.name = $1.name;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
@@ -1139,6 +1148,7 @@ CastExp:
 |   SimpleExp                       {
     $$.type = $1.type;
     $$.name = $1.name;
+    $$.var = $1.var;
     $$.is_constant = $1.is_constant;
     $$.value = $1.value;
     
@@ -1148,6 +1158,7 @@ SimpleExp:
     NumExp {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
         
@@ -1155,6 +1166,7 @@ SimpleExp:
 |   AcessMemAddr {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
 }
@@ -1165,6 +1177,7 @@ NumExp:
         $$.type = E_INT;
         $$.value.v_int = $1.value.v_int;
         $$.name = $1.name;
+        $$.var = $1.name;
         $$.is_constant = 1;
         
 }
@@ -1172,24 +1185,28 @@ NumExp:
         $$.type = E_REAL;
         $$.value.v_real = $1.value.v_real;
         $$.name = $1.name;
+        $$.var = $1.name;
         $$.is_constant = 1;
 }
 |   V_BOOL   {
         $$.type = E_BOOL;
         $$.value.v_bool = $1.value.v_bool;
         $$.name = $1.name;
+        $$.var = $1.name;
         $$.is_constant = 1;
 }
 |   V_CHAR   {
         $$.type = E_CHAR;
         $$.value.v_char = $1.value.v_char;
         $$.name = $1.name;
+        $$.var = $1.name;
         $$.is_constant = 1;
 }
 |   V_STRING {
         $$.type = E_STRING;
         $$.value.v_string = $1.value.v_string;
         $$.name = $1.name;
+        $$.var = $1.name;
         $$.is_constant = 1;
 }
 ;
