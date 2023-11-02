@@ -25,7 +25,7 @@ cn = char temp variable
 sn = string temp variable
 */
 static char labels[1024][8];
-
+static int counter  = 0;
 void new_command(int operator, char * result,char * op1,char * op2) {
 	commands[command_counter].result = result;
 	commands[command_counter].operator = operator;
@@ -35,8 +35,8 @@ void new_command(int operator, char * result,char * op1,char * op2) {
 }
 
 char* create_label(char c) {
-    sprintf(labels[labels_counter[c]], "%c%d", c, labels_counter[c]);
-    return labels[labels_counter[c]++];
+    sprintf(labels[counter], "%c%d", c, labels_counter[(int)c]++);
+    return labels[counter++];
 }
 
 void generate_cmd(CommandEntry * entry){
@@ -51,7 +51,7 @@ void generate_cmd(CommandEntry * entry){
 			break;
 		// branching
         case C_IF: 
-            printf("if %s goto %s;\n", entry->op1, entry->op2);
+            printf("if (%s) goto %s;\n", entry->op1, entry->op2);
             break;
 		case C_GOTO:
             printf("goto %s;\n", entry->op1);

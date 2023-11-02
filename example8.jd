@@ -1,0 +1,8 @@
+begin
+    var var1 : bool;
+
+    var1 := true || false;
+    
+    print("%s\n",var1);
+    return
+end

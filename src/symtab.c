@@ -285,7 +285,7 @@ char* get_c_type(int type_id) {
         case E_STRING:
             return "char*";
         case E_BOOL:    
-            return "short";
+            return "bool";
         default:
             return "__ERROR__";
     }    

@@ -14,6 +14,12 @@ short ref_flags[16];
 size_t args_size;
 int type_counter = 10;
 
+char temp_vars[256][10];
+int temp_var_count;
+
+char temp_flags[256][10];
+int temp_flag_count;
+
 int current_return_type = 0;
 
 char functionName[256];
@@ -38,6 +44,7 @@ void yyerror(char* s, ...) {
         char* var;
         int type;
         char* name;
+        char label[10];
         int is_constant;
         union {
             int v_int;
@@ -92,7 +99,9 @@ void yyerror(char* s, ...) {
 Prog : 
     {
         pushScope();
-        printf("#include <stdio.h>\n\n");
+        printf("#include <stdio.h>\n");
+        printf("#include <stdbool.h>\n\n");
+        
         printf("int main() {\n");
     } 
     Decl CmdBlock {
@@ -199,7 +208,7 @@ Vars :
                 break;
             case E_BOOL:
                 // printf("%s = %d;\n", $2.name, 1);
-                new_command(C_ATTRIB, strdup($2.name), "1", NULL);
+                new_command(C_ATTRIB, strdup($2.name), "false", NULL);
                 break;
             case E_CHAR:
                 // printf("%s = %s;\n", $2.name, "''");
@@ -518,6 +527,8 @@ CmdAux:
                 $1.name, type_name($1.type), type_name($3.type)
             );
         }
+        new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
+
         free($1.name);
         free($3.name);
     }
@@ -754,22 +765,42 @@ CmdRead:
 ;
 
 Exp:
-    Exp OR Terms {
-        if ($1.type == E_BOOL && $3.type == E_BOOL) {
-            $$.type = E_BOOL;
-            $$.value.v_bool = $1.value.v_bool || $3.value.v_bool;
-            char* label = create_label('O');
-            new_command(C_IF, NULL, $1.var, label);
-            new_command(C_ATTRIB, NULL, $1.var, label);
+    Exp OR {
+        if ($1.type != E_BOOL){
+            yyerror("OR operation must be between bool values but the first arg is %s", type_name($1.type));
         } else {
-            yyerror("OR operation must be between bool values, but was between %s and %s", type_name($1.type), type_name($3.type));
+            char* temp_var = create_label('b');
+            new_command(C_VAR, NULL, "bool", temp_var);
+            strcat(temp_vars[temp_var_count++], temp_var);
+            char* label1 = create_label('O');
+            new_command(C_IF, NULL, strdup($1.var), label1);
+            strcat(temp_flags[temp_flag_count++], label1);
         }
-        $$.is_constant = $1.is_constant && $3.is_constant;
+    }
+    Terms {
+        if ($4.type != E_BOOL){
+            yyerror("OR operation must be between bool values but the first arg is %s", type_name($4.type));
+        } else {
+            int pos1 = temp_var_count-1;
+            int pos2 = temp_flag_count-1;
 
+            char* label2 = create_label('O');
+            new_command(C_ATTRIB, temp_vars[pos1], strdup($4.var), NULL);
+            new_command(C_GOTO, NULL, label2, NULL);
+            new_command(C_LABEL, NULL, temp_flags[pos2], NULL);
+            new_command(C_ATTRIB, temp_vars[pos1], strdup($1.var), NULL);
+            new_command(C_LABEL, NULL, label2, NULL);
+            $$.var = strdup(temp_vars[pos1]);
+            temp_var_count--;
+            temp_flag_count--;
+        }
+
+        $$.is_constant = $1.is_constant && $4.is_constant;
     }
 |   Terms {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
 }
@@ -788,6 +819,7 @@ Terms:
 |   Comps {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
     }
@@ -887,6 +919,7 @@ Comps:
 |   Factor  {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
         
@@ -906,6 +939,7 @@ Factor:
 |   AriOp {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
         
@@ -940,6 +974,7 @@ AriOp:
 |   AriOp2 {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
 }
@@ -983,6 +1018,7 @@ AriOp2:
 |   Parenthesis {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
         
@@ -993,6 +1029,7 @@ Parenthesis:
     UnaryExp {
         $$.type = $1.type;
         $$.name = $1.name;
+        $$.var = $1.var;
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
         
@@ -1000,6 +1037,7 @@ Parenthesis:
 |   LPAR Exp RPAR {
         $$.type = $2.type;
         $$.name = $2.name;
+        $$.var = $2.var;
         $$.is_constant = $2.is_constant;
         $$.value = $2.value;
 }
@@ -1022,7 +1060,7 @@ UnaryExp:
         if ($2.type == E_INT) {
             $$.type = E_INT;
             $$.value.v_int = - $2.value.v_int;
-            new_command(C_MINUS, )
+            // new_command(C_MINUS, )
         } else if ($2.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = - $2.value.v_real;
