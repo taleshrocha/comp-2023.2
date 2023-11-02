@@ -721,17 +721,10 @@ CmdPrint:
         } else {
 
         }
-        // args_types[args_size] = $3.type;
-        // strcpy(args_names[args_size], $3.name);
-        // args_size++;
     } PrintArgs {
-        // TODO replace all occurrences of %r with %f
-        // TODO replace all occurrences of %i with %d
-        // TODO replace all occurrences of %b with %?
         char* pch = strstr ($3.name,"%r");
         if (pch != NULL)
             memcpy(pch,"%f",2);
-        // printf("printf(%s", $3.name);
         temp_name[0] = '\0';
         for(size_t i = 0; i < args_size; i++){
             strcat(temp_name, ",");
@@ -765,36 +758,33 @@ CmdRead:
 ;
 
 Exp:
-    Exp OR {
+    Terms OR {
         if ($1.type != E_BOOL){
             yyerror("OR operation must be between bool values but the first arg is %s", type_name($1.type));
         } else {
             char* temp_var = create_label('b');
             new_command(C_VAR, NULL, "bool", temp_var);
-            strcat(temp_vars[temp_var_count++], temp_var);
+            strcpy(temp_vars[temp_var_count++], temp_var);
             char* label1 = create_label('O');
             new_command(C_IF, NULL, strdup($1.var), label1);
-            strcat(temp_flags[temp_flag_count++], label1);
+            strcpy(temp_flags[temp_flag_count++], label1);
         }
     }
-    Terms {
+    Exp {
         if ($4.type != E_BOOL){
             yyerror("OR operation must be between bool values but the first arg is %s", type_name($4.type));
         } else {
-            int pos1 = temp_var_count-1;
-            int pos2 = temp_flag_count-1;
+            int pos1 = --temp_var_count;
+            int pos2 = --temp_flag_count;
 
             char* label2 = create_label('O');
-            new_command(C_ATTRIB, temp_vars[pos1], strdup($4.var), NULL);
+            new_command(C_ATTRIB, strdup(temp_vars[pos1]), strdup($4.var), NULL);
             new_command(C_GOTO, NULL, label2, NULL);
-            new_command(C_LABEL, NULL, temp_flags[pos2], NULL);
-            new_command(C_ATTRIB, temp_vars[pos1], strdup($1.var), NULL);
+            new_command(C_LABEL, NULL, strdup(temp_flags[pos2]), NULL);
+            new_command(C_ATTRIB, strdup(temp_vars[pos1]), strdup($1.var), NULL);
             new_command(C_LABEL, NULL, label2, NULL);
             $$.var = strdup(temp_vars[pos1]);
-            temp_var_count--;
-            temp_flag_count--;
         }
-
         $$.is_constant = $1.is_constant && $4.is_constant;
     }
 |   Terms {
@@ -807,7 +797,7 @@ Exp:
 ;
 
 Terms:
-    Terms AND Comps {
+    Comps AND Terms {
         if ($1.type == E_BOOL && $3.type == E_BOOL) {
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_bool && $3.value.v_bool;

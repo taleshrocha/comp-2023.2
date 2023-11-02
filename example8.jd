@@ -1,8 +1,8 @@
 begin
     var var1 : bool;
 
-    var1 := true || false;
+    var1 := (false || false) || (false || true);
     
-    print("%s\n",var1);
+    print("%d\n",var1);
     return
 end
