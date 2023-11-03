@@ -53,6 +53,9 @@ void generate_cmd(CommandEntry * entry){
         case C_IF: 
             printf("if (%s) goto %s;\n", entry->op1, entry->op2);
             break;
+        case C_IFN: 
+            printf("if (!%s) goto %s;\n", entry->op1, entry->op2);
+            break;
 		case C_GOTO:
             printf("goto %s;\n", entry->op1);
             break;
@@ -94,9 +97,6 @@ void generate_cmd(CommandEntry * entry){
         case C_NEQ:
             printf("%s = %s != %s;\n", entry->result, entry->op1, entry->op2);
 			break;
-        case C_CAST:
-            printf("%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
-			break;
         // Operadores unários
         case C_NOT:
             printf("%s = !%s;\n", entry->result, entry->op1);
@@ -114,6 +114,22 @@ void generate_cmd(CommandEntry * entry){
         case C_READ:
             printf("scanf(\"%%s\", &%s);\n", entry->result);
 			break;
+        // Comandos de coerção
+        case C_CAST:
+            printf("%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
+            break;
+        case C_CAST_INT_STRING:
+            printf("sprintf(%s, \"%%d\", %s);", entry->result, entry->op1);
+            break;
+        case C_CAST_REAL_STRING:
+            printf("sprintf(%s, \"%%f\", %s);", entry->result, entry->op1);
+            break;
+        case C_CAST_CHAR_STRING:
+            printf("sprintf(%s, \"%%c\", %s);", entry->result, entry->op1);
+            break;
+        case C_CAST_BOOL_STRING:
+            printf("sprintf(%s, \"%%s\", %s ? \"true\" : \"false\" );", entry->result, entry->op1);
+            break;
 	}
 }
 
