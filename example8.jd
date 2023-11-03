@@ -1,8 +1,9 @@
+const abc := false || false || true;
 begin
-    var var1 : bool;
+    var var1 : string;
 
-    var1 := true || true;
+    read(var1);
     
-    print("%d\n",var1);
+    print("%s\n",var1);
     return
 end

@@ -112,23 +112,11 @@ void generate_cmd(CommandEntry * entry){
             printf("printf(%s%s);\n", entry->op1, entry->op2);
 			break;
         case C_READ:
-            printf("scanf(\"%%s\", &%s);\n", entry->result);
+            printf("scanf(\"%%s\", %s);\n", entry->result);
 			break;
         // Comandos de coerção
         case C_CAST:
             printf("%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
-            break;
-        case C_CAST_INT_STRING:
-            printf("sprintf(%s, \"%%d\", %s);", entry->result, entry->op1);
-            break;
-        case C_CAST_REAL_STRING:
-            printf("sprintf(%s, \"%%f\", %s);", entry->result, entry->op1);
-            break;
-        case C_CAST_CHAR_STRING:
-            printf("sprintf(%s, \"%%c\", %s);", entry->result, entry->op1);
-            break;
-        case C_CAST_BOOL_STRING:
-            printf("sprintf(%s, \"%%s\", %s ? \"true\" : \"false\" );", entry->result, entry->op1);
             break;
 	}
 }
