@@ -1,14 +1,7 @@
 begin
-    loop
-        var v1 : int;
-        loop
-            v1 := v1 + 1;
-            print("oi interno\n");
-            exit when v1 >= 10
-        end;
-        v1 := v1 + 1;
-        print("oi externo\n");
-        exit when v1 >= 20
+    var x : int; 
+    for x := 1 to 10 step 1 begin
+        print("%d\n", x)
     end;
     return
 end

@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "code_generation.h"
 
+CommandEntry buffer_commands[100];
+int buffer_counter = 0;
+
 CommandEntry commands[100];
 // CommandEntry* commands = malloc(sizeof(CommandEntry)*100);
 int command_counter = 0;
@@ -32,6 +35,21 @@ void new_command(int operator, char * result,char * op1,char * op2) {
 	commands[command_counter].op1 = op1;
 	commands[command_counter].op2 = op2;
     command_counter++;
+}
+
+void new_command_bufferized(int operator, char * result,char * op1,char * op2) {
+	buffer_commands[buffer_counter].result = result;
+	buffer_commands[buffer_counter].operator = operator;
+	buffer_commands[buffer_counter].op1 = op1;
+	buffer_commands[buffer_counter].op2 = op2;
+    buffer_counter++;
+}
+
+void commit_commands() {
+    for(int i = 0; i < buffer_counter; i++) {
+        new_command(buffer_commands[i].operator, buffer_commands[i].result, buffer_commands[i].op1, buffer_commands[i].op2);
+    }
+    buffer_counter = 0;
 }
 
 char* create_label(char c) {

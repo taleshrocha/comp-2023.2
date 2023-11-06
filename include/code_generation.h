@@ -40,6 +40,9 @@ typedef struct CommandEntry {
 
 void new_command(int operator, char * result,char * op1,char * op2);
 
+void new_command_bufferized(int operator, char * result,char * op1,char * op2);
+
+void commit_commands();
 char* create_label(char c);
 
 char* get_c_type(int type_id);

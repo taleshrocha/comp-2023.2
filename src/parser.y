@@ -128,6 +128,7 @@ Decl :
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
+        commit_commands();
         if (!$4.is_constant) {
             yyerror("Expression %s must be constant", $4.name);
         }
@@ -520,6 +521,7 @@ Cmds:
 CmdAux:
     AcessMemAddr
 |   AcessMemAddr ATTRIB Exp {
+        commit_commands();
         if ($1.type > 9) {
             yyerror("Type of '%s' ('%s') cannot be assigned directly.", $1.name, type_name($1.type));
         }
@@ -545,21 +547,57 @@ CmdAux:
     }
 |   CmdBlock {}
 |   CmdConditional {}
-|   CONTINUE {}
-|   BREAK {}
-|   FOR AcessMemAddr ATTRIB Exp TO Exp STEP Exp CmdBlock {
+|   CONTINUE {
+        if (exit_labels_count <= 0) {
+            yyerror("Continue must be inside a loop.\n");
+        } else {
+            new_command(C_GOTO, NULL, temp_flags[temp_flag_count-1], NULL);
+        }
+}
+|   BREAK {
+        if (exit_labels_count <= 0) {
+            yyerror("Break must be inside a loop.\n");
+        } else {
+            new_command(C_GOTO, NULL, exit_labels[exit_labels_count-1], NULL);
+        }
+}
+|   FOR AcessMemAddr ATTRIB Exp TO {
+        commit_commands();
+        new_command(C_ATTRIB, strdup($2.var), strdup($4.var), NULL);
+        char* label1 = create_label('L');
+        char* label2 = create_label('E');
+        char* label3 = create_label('C');
+        strcpy(temp_flags[temp_flag_count++], label1);
+        strcpy(temp_flags[temp_flag_count++], label3);
+        strcpy(exit_labels[exit_labels_count++], label2);
+} Exp {
+    commit_commands();
+    char* temp_var = create_label('b');
+    new_command(C_LABEL, NULL, strdup(temp_flags[temp_flag_count-2]), NULL);
+    new_command(C_VAR, NULL, "bool", strdup(temp_var));
+    new_command(C_GREATER, strdup(temp_var), strdup($2.var), strdup($7.var));
+    new_command(C_IF, NULL, strdup(temp_var), strdup(exit_labels[exit_labels_count-1]));
+} 
+STEP Exp CmdBlock {
+        new_command(C_LABEL, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+        commit_commands();
+        new_command(C_ADD, strdup($2.var), strdup($2.var), strdup($10.var));
+        new_command(C_GOTO, NULL, temp_flags[--temp_flag_count], NULL);
+        new_command(C_LABEL, NULL, strdup(exit_labels[--exit_labels_count]), NULL);
+
         if ($2.type != E_INT) {
             yyerror("Type of '%s' must be int.", $2.name);
         }
         if ($4.type != E_INT) {
             yyerror("Type of '%s' must be int.", $4.name);
         }
-        if ($6.type != E_INT) {
-            yyerror("Type of '%s' must be int.", $6.name);
+        if ($7.type != E_INT) {
+            yyerror("Type of '%s' must be int.", $7.name);
         }
-        if ($8.type != E_INT) {
-            yyerror("Type of '%s' must be int.", $8.name);
+        if ($10.type != E_INT) {
+            yyerror("Type of '%s' must be int.", $10.name);
         }
+
     }
 |   LOOP {pushScope();} Vars {
         char* label1 = create_label('L');
@@ -575,6 +613,7 @@ CmdAux:
     popScope();
 }
 |   EXIT WHEN Exp { 
+        commit_commands();
         if ($3.type != E_BOOL) {
             yyerror("Type of '%s' must be boolean.", $3.name);
         } else {
@@ -656,6 +695,7 @@ AcessMemAddr:
     }
 
 |   AcessMemAddr LBRA Exp RBRA {
+        commit_commands();
         Symbol_Entry* entry = searchArrayType($1.type);
         if(entry == NULL){
             yyerror("Symbol '%s' not an array, its type is %s.", $1.name, type_name($1.type));
@@ -704,6 +744,7 @@ ArgsAux : COMMA Args {}
 
 CmdConditional:
     IF Exp {
+        commit_commands();
         if ($2.type != E_BOOL) {
             yyerror("Result type of expression in IF statement should be boolean, but was os type %s", type_name($2.type));
         }
@@ -760,6 +801,7 @@ CmdReturnExp:
 
 CmdPrint:
     PRINT LPAR Exp {
+        commit_commands();
         if ($3.type != E_STRING) {
             yyerror("First argument of print must be of type string");
         } else {
@@ -809,10 +851,10 @@ Exp:
         // } else if (!$1.is_constant) {
         } else {
             char* temp_var = create_label('b');
-            new_command(C_VAR, NULL, "bool", temp_var);
+            new_command_bufferized(C_VAR, NULL, "bool", temp_var);
             strcpy(temp_vars[temp_var_count++], temp_var);
             char* label1 = create_label('O');
-            new_command(C_IF, NULL, strdup($1.var), label1);
+            new_command_bufferized(C_IF, NULL, strdup($1.var), label1);
             strcpy(temp_flags[temp_flag_count++], label1);
         }
     }
@@ -825,11 +867,11 @@ Exp:
             int pos2 = --temp_flag_count;
 
             char* label2 = create_label('O');
-            new_command(C_ATTRIB, strdup(temp_vars[pos1]), strdup($4.var), NULL);
-            new_command(C_GOTO, NULL, label2, NULL);
-            new_command(C_LABEL, NULL, strdup(temp_flags[pos2]), NULL);
-            new_command(C_ATTRIB, strdup(temp_vars[pos1]), strdup($1.var), NULL);
-            new_command(C_LABEL, NULL, label2, NULL);
+            new_command_bufferized(C_ATTRIB, strdup(temp_vars[pos1]), strdup($4.var), NULL);
+            new_command_bufferized(C_GOTO, NULL, label2, NULL);
+            new_command_bufferized(C_LABEL, NULL, strdup(temp_flags[pos2]), NULL);
+            new_command_bufferized(C_ATTRIB, strdup(temp_vars[pos1]), strdup($1.var), NULL);
+            new_command_bufferized(C_LABEL, NULL, label2, NULL);
             $$.var = strdup(temp_vars[pos1]);
         }
         $$.is_constant = $1.is_constant && $4.is_constant;
@@ -854,10 +896,10 @@ Terms:
             yyerror("OR operation must be between bool values but the first arg is %s", type_name($1.type));
         } else {
             char* temp_var = create_label('b');
-            new_command(C_VAR, NULL, "bool", temp_var);
+            new_command_bufferized(C_VAR, NULL, "bool", temp_var);
             strcpy(temp_vars[temp_var_count++], temp_var);
             char* label1 = create_label('A');
-            new_command(C_IFN, NULL, strdup($1.var), label1);
+            new_command_bufferized(C_IFN, NULL, strdup($1.var), label1);
             strcpy(temp_flags[temp_flag_count++], label1);
         }
     }
@@ -869,11 +911,11 @@ Terms:
             int pos2 = --temp_flag_count;
 
             char* label2 = create_label('A');
-            new_command(C_ATTRIB, strdup(temp_vars[pos1]), strdup($4.var), NULL);
-            new_command(C_GOTO, NULL, label2, NULL);
-            new_command(C_LABEL, NULL, strdup(temp_flags[pos2]), NULL);
-            new_command(C_ATTRIB, strdup(temp_vars[pos1]), strdup($1.var), NULL);
-            new_command(C_LABEL, NULL, label2, NULL);
+            new_command_bufferized(C_ATTRIB, strdup(temp_vars[pos1]), strdup($4.var), NULL);
+            new_command_bufferized(C_GOTO, NULL, label2, NULL);
+            new_command_bufferized(C_LABEL, NULL, strdup(temp_flags[pos2]), NULL);
+            new_command_bufferized(C_ATTRIB, strdup(temp_vars[pos1]), strdup($1.var), NULL);
+            new_command_bufferized(C_LABEL, NULL, label2, NULL);
             $$.var = strdup(temp_vars[pos1]);
         }
         $$.is_constant = $1.is_constant && $4.is_constant;
@@ -912,8 +954,8 @@ Comps:
             yyerror("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_NEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_NEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
 
         $$.is_constant = $1.is_constant && $3.is_constant;
@@ -942,8 +984,8 @@ Comps:
             yyerror("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_EQ, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_EQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -962,8 +1004,8 @@ Comps:
             yyerror("Incompatible type for '<' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_LESSER, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_LESSER, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -982,8 +1024,8 @@ Comps:
             yyerror("Incompatible type for '>' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_GREATER, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_GREATER, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1002,8 +1044,8 @@ Comps:
             yyerror("Incompatible type for '<=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_LEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_LEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1022,8 +1064,8 @@ Comps:
             yyerror("Incompatible type for '>=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_GEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_GEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1046,8 +1088,8 @@ Factor:
             $$.type = E_BOOL;
             $$.value.v_bool = !$2.value.v_bool;
             char* temp_var = create_label('b');
-            new_command(C_VAR, NULL, "bool", temp_var);
-            new_command(C_NOT, strdup(temp_var), strdup($2.var), NULL);
+            new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+            new_command_bufferized(C_NOT, strdup(temp_var), strdup($2.var), NULL);
             $$.var = strdup(temp_var);
         } else {
             yyerror("Incompatible type for '!' operation between %s (%s)", $2.name, type_name($2.type));
@@ -1073,16 +1115,16 @@ AriOp:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int + $3.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real + $3.value.v_real;
             temp_var = create_label('f');
-            new_command(C_VAR, NULL, "float", temp_var);
+            new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
             yyerror("Incompatible type for '+' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
-        new_command(C_ADD, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_ADD, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1096,16 +1138,16 @@ AriOp:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int - $3.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real - $3.value.v_real;
             temp_var = create_label('f');
-            new_command(C_VAR, NULL, "float", temp_var);
+            new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
             yyerror("Incompatible type for '-' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
-        new_command(C_SUBTRACT, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_SUBTRACT, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1129,16 +1171,16 @@ AriOp2:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int * $3.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real * $3.value.v_real;
             temp_var = create_label('f');
-            new_command(C_VAR, NULL, "float", temp_var);
+            new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
             yyerror("Incompatible type for '*' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
-        new_command(C_MULTIPLICATE, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_MULTIPLICATE, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1152,16 +1194,16 @@ AriOp2:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int / $3.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real / $3.value.v_real;
             temp_var = create_label('f');
-            new_command(C_VAR, NULL, "float", temp_var);
+            new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
             yyerror("Incompatible type for '/' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
-        new_command(C_DIVIDE, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_DIVIDE, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1175,11 +1217,11 @@ AriOp2:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int % $3.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else {
             yyerror("Incompatible type. - AriOp2 \n");
         }
-        new_command(C_MODULE, strdup(temp_var), strdup($1.var), strdup($3.var));
+        new_command_bufferized(C_MODULE, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
         strcpy($$.name, $1.name);
@@ -1225,16 +1267,16 @@ UnaryExp:
             $$.type = E_INT;
             $$.value.v_int = + $2.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else if ($2.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = + $2.value.v_real;
             temp_var = create_label('f');
-            new_command(C_VAR, NULL, "float", temp_var);
+            new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else { 
             yyerror("Incompatible type. - UnaryExp \n");
         }
-        new_command(C_PLUS, strdup(temp_var), strdup($2.var), NULL);
+        new_command_bufferized(C_PLUS, strdup(temp_var), strdup($2.var), NULL);
         $$.var = strdup(temp_var);
         $$.is_constant = $2.is_constant;
         strcpy($$.name,"+");
@@ -1247,16 +1289,16 @@ UnaryExp:
             $$.type = E_INT;
             $$.value.v_int = - $2.value.v_int;
             temp_var = create_label('i');
-            new_command(C_VAR, NULL, "int", temp_var);
+            new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else if ($2.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = - $2.value.v_real;
             temp_var = create_label('f');
-            new_command(C_VAR, NULL, "float", temp_var);
+            new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else { 
             yyerror("Incompatible type. - UnaryExp \n");
         }
-        new_command(C_MINUS, strdup(temp_var), strdup($2.var), NULL);
+        new_command_bufferized(C_MINUS, strdup(temp_var), strdup($2.var), NULL);
         $$.var = strdup(temp_var);
         $$.is_constant = $2.is_constant;
         strcpy($$.name,"-");
@@ -1295,8 +1337,8 @@ CastExp:
             yyerror("string cannot be converted to int!\n");
         }
         char* temp_var = create_label('i');
-        new_command(C_VAR, NULL, "int", temp_var);
-        new_command(C_CAST, temp_var, "int", $4.var);
+        new_command_bufferized(C_VAR, NULL, "int", temp_var);
+        new_command_bufferized(C_CAST, temp_var, "int", $4.var);
         $$.var = strdup(temp_var);
         $$.is_constant = $4.is_constant;
         $$.name = strdup("(int) ");
@@ -1323,8 +1365,8 @@ CastExp:
             yyerror("string cannot be converted to real!\n");
         }
         char* temp_var = create_label('f');
-        new_command(C_VAR, NULL, "float", temp_var);
-        new_command(C_CAST, temp_var, "float", $4.var);
+        new_command_bufferized(C_VAR, NULL, "float", temp_var);
+        new_command_bufferized(C_CAST, temp_var, "float", $4.var);
         $$.var = strdup(temp_var);
         $$.is_constant = $4.is_constant;
         $$.name = strdup("(float) ");
@@ -1350,8 +1392,8 @@ CastExp:
             yyerror("string cannot be converted to bool!");
         }
         char* temp_var = create_label('b');
-        new_command(C_VAR, NULL, "bool", temp_var);
-        new_command(C_CAST, temp_var, "bool", $4.var);
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        new_command_bufferized(C_CAST, temp_var, "bool", $4.var);
         $$.is_constant = $4.is_constant;
         $$.name = strdup("(bool) ");
         strcat($$.name, $4.name);
