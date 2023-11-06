@@ -20,6 +20,9 @@ int temp_var_count;
 char temp_flags[256][10];
 int temp_flag_count;
 
+char loop_flags[256][10];
+int loop_flag_count;
+
 char exit_labels[256][10];
 int exit_labels_count;
 
@@ -551,7 +554,7 @@ CmdAux:
         if (exit_labels_count <= 0) {
             yyerror("Continue must be inside a loop.\n");
         } else {
-            new_command(C_GOTO, NULL, temp_flags[temp_flag_count-1], NULL);
+            new_command(C_GOTO, NULL, loop_flags[loop_flag_count-1], NULL);
         }
 }
 |   BREAK {
@@ -567,24 +570,23 @@ CmdAux:
         char* label1 = create_label('L');
         char* label2 = create_label('E');
         char* label3 = create_label('C');
-        strcpy(temp_flags[temp_flag_count++], label1);
-        strcpy(temp_flags[temp_flag_count++], label3);
+        strcpy(loop_flags[loop_flag_count++], label1);
+        strcpy(loop_flags[loop_flag_count++], label3);
         strcpy(exit_labels[exit_labels_count++], label2);
 } Exp {
     commit_commands();
     char* temp_var = create_label('b');
-    new_command(C_LABEL, NULL, strdup(temp_flags[temp_flag_count-2]), NULL);
+    new_command(C_LABEL, NULL, strdup(loop_flags[loop_flag_count-2]), NULL);
     new_command(C_VAR, NULL, "bool", strdup(temp_var));
     new_command(C_GREATER, strdup(temp_var), strdup($2.var), strdup($7.var));
     new_command(C_IF, NULL, strdup(temp_var), strdup(exit_labels[exit_labels_count-1]));
 } 
 STEP Exp CmdBlock {
-        new_command(C_LABEL, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+        new_command(C_LABEL, NULL, strdup(loop_flags[--loop_flag_count]), NULL);
         commit_commands();
         new_command(C_ADD, strdup($2.var), strdup($2.var), strdup($10.var));
-        new_command(C_GOTO, NULL, temp_flags[--temp_flag_count], NULL);
+        new_command(C_GOTO, NULL, loop_flags[--loop_flag_count], NULL);
         new_command(C_LABEL, NULL, strdup(exit_labels[--exit_labels_count]), NULL);
-
         if ($2.type != E_INT) {
             yyerror("Type of '%s' must be int.", $2.name);
         }
@@ -602,12 +604,12 @@ STEP Exp CmdBlock {
 |   LOOP {pushScope();} Vars {
         char* label1 = create_label('L');
         char* label2 = create_label('E');
-        strcpy(temp_flags[temp_flag_count++], label1);
+        strcpy(loop_flags[loop_flag_count++], label1);
         strcpy(exit_labels[exit_labels_count++], label2);
         new_command(C_LABEL, NULL, strdup(label1), NULL);
         
 } Cmds {
-    new_command(C_GOTO, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+    new_command(C_GOTO, NULL, strdup(loop_flags[--loop_flag_count]), NULL);
 } END {
     new_command(C_LABEL, NULL, strdup(exit_labels[--exit_labels_count]), NULL);
     popScope();
