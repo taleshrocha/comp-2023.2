@@ -20,6 +20,9 @@ int temp_var_count;
 char temp_flags[256][10];
 int temp_flag_count;
 
+char exit_labels[256][10];
+int exit_labels_count;
+
 int current_return_type = 0;
 
 char functionName[256];
@@ -558,10 +561,28 @@ CmdAux:
             yyerror("Type of '%s' must be int.", $8.name);
         }
     }
-|   LOOP {pushScope();} Vars Cmds END {popScope();}
+|   LOOP {pushScope();} Vars {
+        char* label1 = create_label('L');
+        char* label2 = create_label('E');
+        strcpy(temp_flags[temp_flag_count++], label1);
+        strcpy(exit_labels[exit_labels_count++], label2);
+        new_command(C_LABEL, NULL, strdup(label1), NULL);
+        
+} Cmds {
+    new_command(C_GOTO, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+} END {
+    new_command(C_LABEL, NULL, strdup(exit_labels[--exit_labels_count]), NULL);
+    popScope();
+}
 |   EXIT WHEN Exp { 
         if ($3.type != E_BOOL) {
             yyerror("Type of '%s' must be boolean.", $3.name);
+        } else {
+            if (exit_labels_count <= 0) {
+                yyerror("Exit when must be inside a loop.\n");
+            } else {
+                new_command(C_IF, NULL, strdup($3.var), exit_labels[exit_labels_count-1]);
+            }
         }
     }
 |   CmdReturn {}

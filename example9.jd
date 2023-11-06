@@ -1,0 +1,14 @@
+begin
+    loop
+        var v1 : int;
+        loop
+            v1 := v1 + 1;
+            print("oi interno\n");
+            exit when v1 >= 10
+        end;
+        v1 := v1 + 1;
+        print("oi externo\n");
+        exit when v1 >= 20
+    end;
+    return
+end
