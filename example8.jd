@@ -1,9 +1,14 @@
-const abc := false || false || true;
 begin
-    var var1 : string;
-
-    read(var1);
-    
-    print("%s\n",var1);
+    if (true || true && 10 < 5 && ( 10 / 5 ) == 2) then
+    begin
+        print("oi\n");
+        if (false && 10 % 5 == 0) then begin
+            print("oi3\n")
+        end else begin 
+            print("oi4\n")
+        end
+    end else begin
+        print("oi2\n")
+    end;
     return
 end

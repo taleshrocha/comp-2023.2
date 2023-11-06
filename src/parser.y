@@ -686,7 +686,22 @@ CmdConditional:
         if ($2.type != E_BOOL) {
             yyerror("Result type of expression in IF statement should be boolean, but was os type %s", type_name($2.type));
         }
-    } THEN CmdBlock CmdConditionalEnd
+        char* label1 = create_label('I');
+        char* label2 = create_label('I');
+        char* label3 = create_label('I');
+        new_command(C_IF, NULL, strdup($2.var), label1);
+        new_command(C_GOTO, NULL, label2, NULL);
+        new_command(C_LABEL, NULL, strdup(label1), NULL);
+        strcpy(temp_flags[temp_flag_count++], label3);
+        strcpy(temp_flags[temp_flag_count++], label2);
+        strcpy(temp_flags[temp_flag_count++], label3);
+
+    } THEN CmdBlock {
+        new_command(C_GOTO, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+        new_command(C_LABEL, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+    } CmdConditionalEnd {
+        new_command(C_LABEL, NULL, strdup(temp_flags[--temp_flag_count]), NULL);
+    }
 ;
 
 CmdConditionalEnd:
@@ -770,7 +785,8 @@ Exp:
     Terms OR {
         if ($1.type != E_BOOL){
             yyerror("OR operation must be between bool values but the first arg is %s", type_name($1.type));
-        } else if (!$1.is_constant) {
+        // } else if (!$1.is_constant) {
+        } else {
             char* temp_var = create_label('b');
             new_command(C_VAR, NULL, "bool", temp_var);
             strcpy(temp_vars[temp_var_count++], temp_var);
@@ -782,7 +798,8 @@ Exp:
     Exp {
         if ($4.type != E_BOOL){
             yyerror("OR operation must be between bool values but the first arg is %s", type_name($4.type));
-        } else if (!$4.is_constant) {
+        // } else if (!$4.is_constant) {
+        } else  {
             int pos1 = --temp_var_count;
             int pos2 = --temp_flag_count;
 
@@ -1376,7 +1393,7 @@ SimpleExp:
     NumExp {
         $$.type = $1.type;
         $$.name = $1.name;
-        $$.var = $1.var;
+        $$.var = strdup($1.var);
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
 }
