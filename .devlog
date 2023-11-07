@@ -2,3 +2,21 @@
 1. Tipos de dados tabela de simbolos (nome e escopo do id)
 2. Func tab simbolos
 3. Verificar o lex (.l)
+
+
+[Geração de código]
+Funções e Procedimentos
+* chamadas/invocações
+* passagem de parametros (cópia e referência)
+* retorno
+* pilha de invocações - chamadas recursivas (diretas ou indiretas)
+
+Tipos - records e arrays
+* definições
+* aliases
+* record com arrays
+* arrays de records
+
+cast de strings
+
+entrada e saida
