@@ -240,6 +240,7 @@ void freeScope(Symbol_Table * scope) {
 
 
 char* type_name(int type_id) {
+	Symbol_Entry* type = NULL;
     switch (type_id) {
         case E_UNDEFINED:
             return "undefined";
@@ -262,7 +263,7 @@ char* type_name(int type_id) {
         case E_PROCEDURE:
             return "procedure";
         default:
-            Symbol_Entry* type = searchRecordType(type_id);
+            type = searchRecordType(type_id);
             if (type != NULL){
                 return type->name;
             }

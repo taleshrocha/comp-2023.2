@@ -108,9 +108,11 @@ Prog :
         printf("#include <stdio.h>\n");
         printf("#include <stdbool.h>\n");
         printf("#include <stdlib.h>\n\n");
-        printf("int main() {\n");
     } 
-    Decl CmdBlock {
+    Decl {
+        
+        printf("int main() {\n");
+        } CmdBlock {
         // TODO free das tabelas
         #ifdef DEBUG
         printf(
@@ -234,22 +236,24 @@ Vars :
 ;
 Types :
     TYPE ID ATTRIB TypeDec SEMICOLON {
-
+	    Symbol_Entry* entry = NULL;
         if ($4.to_rename == 0){ 
-            Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
-            newSymbol->symbol_type = K_SIMPLETYPE;
+            entry = malloc(sizeof(Symbol_Entry));
+            entry->symbol_type = K_SIMPLETYPE;
             SimpleType data;
             data.inner_type = $4.type;
-            newSymbol->name = strdup($2.name);
-            newSymbol->data.s_data = data;
+            entry->name = strdup($2.name);
+            entry->data.s_data = data;
             data.type_id 	= 	type_counter++;
-        	insertSymbol(getCurrentScope(), newSymbol);
+        	insertSymbol(getCurrentScope(), entry);
         } else {
-            Symbol_Entry* entry = searchSymbol(getCurrentScope(), $4.name, 1);
+            entry = searchSymbol(getCurrentScope(), $4.name, 1);
             free(entry->name);
             entry->name = $2.name;
         }
 
+	    create_command(entry);
+        
         #ifdef DEBUG
         printCurrentScope(getCurrentScope());
         #endif
@@ -315,6 +319,9 @@ TypeDec :
 		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->symbol_type = K_RECORD;
         Record data;
+
+	
+	
         for(size_t i = 0; i < args_size; i++){
         	data.field_types[i] = args_types[i];
             strcpy(data.field_names[i], args_names[i]);

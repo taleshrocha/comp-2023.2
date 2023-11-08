@@ -1,6 +1,8 @@
 #ifndef CODE_GENERATION_H
 #define CODE_GENERATION_H
 
+#include "symtab.h"
+
 typedef enum COMMANDS {
     C_VAR,
     C_ATTRIB,
@@ -28,7 +30,8 @@ typedef enum COMMANDS {
     C_MINUS,
     C_PLUS,
     C_PRINT,
-    C_READ
+    C_READ,
+    C_TYPE
 } COMMANDS;
 
 typedef struct CommandEntry {
@@ -49,7 +52,7 @@ char* get_c_type(int type_id);
 
 void generate_cmd(CommandEntry * entry);
 
-
+void create_command(Symbol_Entry * symbol);
 
 
 #endif // CODE_GENERATION_H

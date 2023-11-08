@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "code_generation.h"
+#include "symtab.h"
+#include <string.h>
 
 CommandEntry buffer_commands[100];
 int buffer_counter = 0;
@@ -137,6 +139,43 @@ void generate_cmd(CommandEntry * entry){
             printf("%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
             break;
 	}
+
 }
 
+
+void create_command(Symbol_Entry * symbol){
+
+	char* command = calloc(sizeof(char), 1000);
+
+	switch(symbol->symbol_type){
+		
+		case K_RECORD: 
+			strcat(command, "typedef struct ");
+			strcat(command, symbol->name);
+			strcat(command, " {\n");
+			for(int i = 0; i < symbol->data.r_data.n_fields; i++){
+				strcat(command, get_c_type(symbol->data.r_data.field_types[i]));
+				strcat(command, " ");
+				strcat(command, symbol->data.r_data.field_names[i]);
+				strcat(command, ";\n");	
+			}
+			strcat(command,"} ");
+			strcat(command, symbol->name);
+			strcat(command, ";\n\n");
+			break;
+		case K_VARIABLE: 
+            break;
+        case K_SUBPROGRAM: 
+            break;
+        case K_ARRAY: 
+            break;
+        case K_SIMPLETYPE: 
+            break;
+
+
+	}
+	printf(command);
+	new_command(C_TYPE, strdup(command), "", "");
+
+}
 
