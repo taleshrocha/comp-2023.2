@@ -1,5 +1,0 @@
-type oi := record x : int; end;
-
-begin
-    return
-end
