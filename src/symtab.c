@@ -276,6 +276,7 @@ char* type_name(int type_id) {
 }
 
 char* get_c_type(int type_id) {
+	Symbol_Entry* type = NULL;
     switch (type_id) {
         case E_INT:
             return "int";
@@ -288,6 +289,15 @@ char* get_c_type(int type_id) {
         case E_BOOL:    
             return "bool";
         default:
+            type = searchRecordType(type_id);
+            if (type != NULL){
+                return type->name;
+            }
+            //TODO: Verificar este caso
+            type = searchArrayType(type_id);
+            if (type != NULL){
+                return type->name;
+            }
             return "__ERROR__";
-    }    
+    }
 }

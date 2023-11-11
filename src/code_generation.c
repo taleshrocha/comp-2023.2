@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "code_generation.h"
 #include "symtab.h"
+#include <stdio.h>
 #include <string.h>
 
 CommandEntry buffer_commands[100];
@@ -154,7 +155,8 @@ void create_command(Symbol_Entry * symbol){
 			strcat(command, symbol->name);
 			strcat(command, " {\n");
 			for(int i = 0; i < symbol->data.r_data.n_fields; i++){
-				strcat(command, get_c_type(symbol->data.r_data.field_types[i]));
+                strcat(command, "\t");
+                strcat(command, get_c_type(symbol->data.r_data.field_types[i]));
 				strcat(command, " ");
 				strcat(command, symbol->data.r_data.field_names[i]);
 				strcat(command, ";\n");	
@@ -174,7 +176,7 @@ void create_command(Symbol_Entry * symbol){
 
 
 	}
-	printf(command);
+	printf("%s\n",command);
 	new_command(C_TYPE, strdup(command), "", "");
 
 }

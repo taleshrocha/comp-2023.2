@@ -1,0 +1,10 @@
+type oi := record x : int; end;
+type oioi := record x : oi; end;
+
+begin
+    var a : int;
+    var b : bool;
+    var c : real;
+    var d : string;
+    return
+end
