@@ -146,7 +146,7 @@ Consts :
         var_data.type = $4.type;
 
         // printf("%s %s;\n", get_c_type($4.type), $2.name);
-        new_command(C_VAR, NULL, get_c_type($4.type), strdup($2.name));
+        new_command(C_VAR, NULL, strdup(get_c_type($4.type)), strdup($2.name));
         switch ($4.type) {
             case E_INT:
                 var_data.value.v_int = $4.value.v_int;
@@ -206,7 +206,7 @@ Vars :
         #endif
 
         free($4.name);
-        
+
         new_command(C_VAR, NULL, strdup(get_c_type($4.type)), strdup($2.name));
         switch ($4.type) {
             case E_INT:
@@ -585,6 +585,7 @@ CmdAux:
                 $1.name, type_name($1.type), type_name($3.type)
             );
         }
+        
         new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
 
         if ($1.name != NULL) {
@@ -741,6 +742,15 @@ AcessMemAddr:
             }
         }
         $$.name = $1.name; // todo: concatenar $1.name e $3.name
+
+        // FIX: correção para geração de codigo - comando atribuição envolvendo struct
+        char*temp=strdup($1.name);
+        strcat(temp, ".");
+        strcat(temp, strdup($3.name));
+        $$.var = strdup(temp);
+        free(temp);
+
+
         free($3.name); // todo remover esse free?
     }
 

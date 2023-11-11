@@ -9,6 +9,7 @@ end;
 
 begin
     var a : teste;
+    a.x2 := 4;
 
     return
 end
