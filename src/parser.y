@@ -319,8 +319,6 @@ TypeDec :
 		Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->symbol_type = K_RECORD;
         Record data;
-
-	
 	
         for(size_t i = 0; i < args_size; i++){
         	data.field_types[i] = args_types[i];
@@ -329,7 +327,9 @@ TypeDec :
         data.n_fields 	= args_size;
         data.type_id 	= type_counter++;
         $$.type = data.type_id;
+
         newSymbol->name = (char*) malloc(sizeof(char) * 32);
+
         sprintf(newSymbol->name, "RECORD %d", data.type_id);
         $$.name = strdup(newSymbol->name);
         $$.to_rename = 1;
@@ -365,6 +365,18 @@ Fields :
         free($1.name);
         free($3.name);
     	args_size++;
+
+        // Checagem de campos com mesmo nome
+        for(size_t i = 0; i < args_size; i++){
+            for(size_t j = i+1; j < args_size; j++){
+                if(strcmp(args_names[i], args_names[j]) == 0){
+                    yyerror(
+                        "duplicate member %s.\n",
+                        args_names[i]
+                    );
+                }
+            }
+        }
     } SEMICOLON Fields {}
 |   /* NOTHING */ {}
 ;
@@ -391,6 +403,7 @@ ProcedureDecl :
         #ifdef DEBUG
         printf("\nIDENTIFIED PARAMETERS - PROCEDURE: %s\n", $2.name);
         #endif
+
         for(size_t i = 0; i < args_size; i++){
             procedure.params_types[i] = args_types[i];
             strcpy(procedure.params_names[i], args_names[i]);
@@ -422,13 +435,39 @@ Parameters:
         strcpy(args_names[args_size], $1.name);
         ref_flags[args_size] = 0; 
         args_types[args_size++] = $3.type; 
+
+        // Checagem de parametros com mesmo nome
+        for(size_t i = 0; i < args_size; i++){
+            for(size_t j = i+1; j < args_size; j++){
+                if(strcmp(args_names[i], args_names[j]) == 0){
+                    yyerror(
+                        "duplicate parameter %s.\n",
+                        args_names[i]
+                    );
+                }
+            }
+        }
+
         free($1.name);
         free($3.name);
     } ParametersAux
 |   REF ID COLON TypeDec {
         strcpy(args_names[args_size], $2.name);
         ref_flags[args_size] = 1; 
-        args_types[args_size++] = $4.type; 
+        args_types[args_size++] = $4.type;
+
+        // Checagem de parametros com mesmo nome
+        for(size_t i = 0; i < args_size; i++){
+            for(size_t j = i+1; j < args_size; j++){
+                if(strcmp(args_names[i], args_names[j]) == 0){
+                    yyerror(
+                        "duplicate parameter %s.\n",
+                        args_names[i]
+                    );
+                }
+            }
+        }
+
         free($2.name);
         free($4.name);
     } ParametersAux
@@ -460,6 +499,7 @@ FunctionDecl:
         #ifdef DEBUG
         printf("\nIDENTIFIED PARAMETERS - FUNCTION: %s\n", $2.name);
         #endif
+
         for(size_t i = 0; i < args_size; i++){
             function.params_types[i] = args_types[i];
             strcpy(function.params_names[i], args_names[i]);

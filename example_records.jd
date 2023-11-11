@@ -1,6 +1,13 @@
 type oi := record x : int; end;
 type oioi := record x : oi; end;
 
+type teste := record 
+    x1 : oi; 
+    x2 : int; 
+    x3 : string;
+    x3 : real;
+end;
+
 begin
     var a : int;
     var b : bool;
