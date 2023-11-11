@@ -9,7 +9,14 @@ end;
 
 begin
     var a : teste;
+
     a.x2 := 4;
+    if ( a.x2 > 0 ) then
+    begin
+        a.x2 := 2
+    end;
+
+    a.x1.x := 0;
 
     return
 end

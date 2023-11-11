@@ -744,13 +744,20 @@ AcessMemAddr:
         $$.name = $1.name; // todo: concatenar $1.name e $3.name
 
         // FIX: correção para geração de codigo - comando atribuição envolvendo struct
-        char*temp=strdup($1.name);
-        strcat(temp, ".");
-        strcat(temp, strdup($3.name));
+        char*temp;
+        if(strlen($$.var) > 0){
+            temp=strdup($$.var);
+            strcat(temp, ".");
+            strcat(temp, strdup($3.name));
+        }
+        else{
+            temp=strdup($1.name);
+            strcat(temp, ".");
+            strcat(temp, strdup($3.name));
+        }
+
         $$.var = strdup(temp);
         free(temp);
-
-
         free($3.name); // todo remover esse free?
     }
 
