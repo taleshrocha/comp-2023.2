@@ -200,12 +200,14 @@ Vars :
         newSymbol->data.v_data = var_data;
 
         insertSymbol(getCurrentScope(), newSymbol);
+
         #ifdef DEBUG
         printCurrentScope(getCurrentScope());
         #endif
+
         free($4.name);
-        // printf("%s %s;\n", get_c_type($4.type), $2.name);
-        new_command(C_VAR, NULL, get_c_type($4.type), strdup($2.name));
+        
+        new_command(C_VAR, NULL, strdup(get_c_type($4.type)), strdup($2.name));
         switch ($4.type) {
             case E_INT:
                 // printf("%s = %d;\n", $2.name, 0);
@@ -230,7 +232,6 @@ Vars :
                 // to_free_later(strdup($2.name));
                 break;
         }
-
     } Vars
 |   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
