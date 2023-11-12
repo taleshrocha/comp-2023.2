@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <exception.h>
+#include <stdint.h>
 
 CommandEntry buffer_commands[100];
 int buffer_counter = 0;
@@ -37,7 +38,7 @@ static int counter  = 0;
 int top = -1;
 
 typedef struct {
-	int memoryAddress;
+	uintptr_t memoryAddress;
 	int variables[10];
 	int localVariables[10];
 } Register;
@@ -62,6 +63,16 @@ Register popRegister(Register registro) {
 	}
     return registro;
 }
+
+
+void create_Register(Register* reg_temp, char ** registro) {
+    reg_temp->memoryAddress = (uintptr_t)registro;
+    printMessage(SUCCESS, "Registro de memória criado: %d \n", reg_temp->memoryAddress);
+}
+
+    // TODO depois que alcançarmos a funções e procedimentos, precisamos pegar o endereço de memória e colocar na Stack;
+    // asm("movl $1f, %0" : "=r" (enderecoDeRetorno));
+    // asm("jmp funcaoSecundaria");
 
 void new_command(int operator, char * result,char * op1,char * op2) {
 	commands[command_counter].result = result;
@@ -100,6 +111,8 @@ void generate_cmd(CommandEntry * entry){
         // atribuição de valor simples
 		case C_ATTRIB: 
             printf("%s = %s;\n", entry->result, entry->op1);
+            Register temp;
+            create_Register(&temp, &entry->result);
 			break;
 		// branching
         case C_IF: 
@@ -211,4 +224,3 @@ void create_command(Symbol_Entry * symbol){
 	new_command(C_TYPE, strdup(command), "", "");
 
 }
-
