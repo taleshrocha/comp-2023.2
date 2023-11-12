@@ -32,7 +32,11 @@ void pushRegister(Register register) {
 }
 
 void popRegister(Register register) {
-	
+	if(top >= 0) {
+		return Stack[top--];
+	} else {
+		printMessage(ERROR, "Stack empty")
+	}
 }
 
 void initializeParsing(){
