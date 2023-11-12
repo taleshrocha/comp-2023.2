@@ -3,6 +3,7 @@
 #include "symtab.h"
 #include <stdio.h>
 #include <string.h>
+#include <exception.h>
 
 CommandEntry buffer_commands[100];
 int buffer_counter = 0;
@@ -32,6 +33,36 @@ sn = string temp variable
 */
 static char labels[1024][8];
 static int counter  = 0;
+
+int top = -1;
+
+typedef struct {
+	int memoryAddress;
+	int variables[10];
+	int localVariables[10];
+} Register;
+
+Register Stack[100]; // Tamanho da pilha (100)
+
+void pushRegister(Register registro) {
+	if (top < 99) { // Ajustar o tamanho da pilha
+		Stack[++top] = registro;
+	} else {
+		printMessage(ERROR, "Segmentation Fault. Core dumped!");
+	}
+}
+
+Register popRegister(Register registro) {
+	if(top >= 0) {
+		return Stack[top--];
+	} else {
+		printMessage(ERROR, "Stack empty");
+        return registro;
+
+	}
+    return registro;
+}
+
 void new_command(int operator, char * result,char * op1,char * op2) {
 	commands[command_counter].result = result;
 	commands[command_counter].operator = operator;
