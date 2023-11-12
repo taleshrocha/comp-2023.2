@@ -14,6 +14,6 @@ enum MessageType {
     WARNING
 };
 
-void printMessage(enum MessageType messageType, const char *message, va_list vars);
+void printMessage(enum MessageType messageType, const char *message, ...);
 
 #endif // EXCEPTION_H

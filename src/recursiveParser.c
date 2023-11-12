@@ -13,6 +13,32 @@ int getNextToken(){
 
 int lookahead = -1;
 
+int top = -1;
+
+typedef struct {
+	int memoryAddress;
+	int variables[10];
+	int localVariables[10];
+} Register;
+
+Register Stack[100]; // Tamanho da pilha (100)
+
+void pushRegister(Register register) {
+	if (top < 99) { // Ajustar o tamanho da pilha
+		pilha[++top] = register
+	} else {
+		printMessage(ERROR, "Segmentation Fault. Core dumped!")
+	}
+}
+
+void popRegister(Register register) {
+	if(top >= 0) {
+		return Stack[top--];
+	} else {
+		printMessage(ERROR, "Stack empty")
+	}
+}
+
 void initializeParsing(){
 	lookahead = getNextToken();
 	Prog();

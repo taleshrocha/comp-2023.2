@@ -3,6 +3,8 @@
 #include "symtab.h"
 #include <stdio.h>
 #include <string.h>
+#include <exception.h>
+#include <stdint.h>
 
 CommandEntry buffer_commands[100];
 int buffer_counter = 0;
@@ -32,6 +34,46 @@ sn = string temp variable
 */
 static char labels[1024][8];
 static int counter  = 0;
+
+int top = -1;
+
+typedef struct {
+	uintptr_t memoryAddress;
+	int variables[10];
+	int localVariables[10];
+} Register;
+
+Register Stack[100]; // Tamanho da pilha (100)
+
+void pushRegister(Register registro) {
+	if (top < 99) { // Ajustar o tamanho da pilha
+		Stack[++top] = registro;
+	} else {
+		printMessage(ERROR, "Segmentation Fault. Core dumped!");
+	}
+}
+
+Register popRegister(Register registro) {
+	if(top >= 0) {
+		return Stack[top--];
+	} else {
+		printMessage(ERROR, "Stack empty");
+        return registro;
+
+	}
+    return registro;
+}
+
+
+void create_Register(Register* reg_temp, char ** registro) {
+    reg_temp->memoryAddress = (uintptr_t)registro;
+    printMessage(SUCCESS, "Registro de memória criado: %d \n", reg_temp->memoryAddress);
+}
+
+    // TODO depois que alcançarmos a funções e procedimentos, precisamos pegar o endereço de memória e colocar na Stack;
+    // asm("movl $1f, %0" : "=r" (enderecoDeRetorno));
+    // asm("jmp funcaoSecundaria");
+
 void new_command(int operator, char * result,char * op1,char * op2) {
 	commands[command_counter].result = result;
 	commands[command_counter].operator = operator;
@@ -69,6 +111,8 @@ void generate_cmd(CommandEntry * entry){
         // atribuição de valor simples
 		case C_ATTRIB: 
             printf("%s = %s;\n", entry->result, entry->op1);
+            Register temp;
+            create_Register(&temp, &entry->result);
 			break;
 		// branching
         case C_IF: 
@@ -180,4 +224,3 @@ void create_command(Symbol_Entry * symbol){
 	new_command(C_TYPE, strdup(command), "", "");
 
 }
-
