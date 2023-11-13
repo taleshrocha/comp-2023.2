@@ -214,6 +214,16 @@ void create_command(Symbol_Entry * symbol){
         case K_SUBPROGRAM: 
             break;
         case K_ARRAY: 
+            strcat(command, "typedef ");
+            strcat(command, get_c_type(symbol->data.a_data.inner_type));
+            strcat(command, " ");
+			strcat(command, symbol->name);
+			strcat(command, "[");
+            char str[10];
+            sprintf(str, "%d", symbol->data.a_data.capacity);
+			strcat(command, str);
+			strcat(command, "]");
+			strcat(command, ";\n\n");
             break;
         case K_SIMPLETYPE: 
             break;

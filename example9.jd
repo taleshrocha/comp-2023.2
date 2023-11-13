@@ -1,9 +1,8 @@
 
-type abacatea := record c: real; end;
-type abacate := record c: abacatea; end;
+type arr := array[0..10] of int;
 
 begin
-    var a : abacate;
-    a.c.c := 3.4;
+    var a : arr;
+    a[0] := 10;
     return
 end

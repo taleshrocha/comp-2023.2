@@ -778,6 +778,11 @@ AcessMemAddr:
             $$.type = entry->data.a_data.inner_type;
             if ($3.type != E_INT) {
                 printf("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
+            } else {
+                $$.var = strdup($1.name);
+                char aux[12];
+                sprintf(aux, "[%d]", $3.value.v_int);
+                strcat($$.var, aux);
             }
         }
         $$.name = $1.name; // TODO: concatenar $1.name e $3.name
