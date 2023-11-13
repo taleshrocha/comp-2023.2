@@ -111,8 +111,8 @@ void generate_cmd(CommandEntry * entry){
         // atribuição de valor simples
 		case C_ATTRIB: 
             printf("%s = %s;\n", entry->result, entry->op1);
-            Register temp;
-            create_Register(&temp, &entry->result);
+            // Register temp;
+            // create_Register(&temp, &entry->result);
 			break;
 		// branching
         case C_IF: 

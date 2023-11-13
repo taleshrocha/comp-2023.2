@@ -1,0 +1,9 @@
+
+type abacatea := record c: real; end;
+type abacate := record c: abacatea; end;
+
+begin
+    var a : abacate;
+    a.c.c := 3.4;
+    return
+end

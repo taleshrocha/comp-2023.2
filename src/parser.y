@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdbool.h>
 #include "lexer.l.h"
 #include "symtab.h"
 #include "exception.h"
@@ -135,7 +136,7 @@ Consts :
     CONST ID ATTRIB Exp SEMICOLON {
         commit_commands();
         if (!$4.is_constant) {
-            yyerror("Expression %s must be constant", $4.name);
+            printf("Expression %s must be constant", $4.name);
         }
         Symbol_Entry * newSymbol = malloc(sizeof(Symbol_Entry));
         newSymbol->name = $2.name;
@@ -347,13 +348,13 @@ Interval :
     Exp INTERVAL Exp {
         if ($1.type == E_INT && $3.type == E_INT) {
             if($3.value.v_int - $1.value.v_int <= 0){
-            	yyerror("intervals cannot be negative.");
+            	printf("intervals cannot be negative.");
             }
             $$.capacity = $3.value.v_int - $1.value.v_int;
             $$.start = $1.value.v_int;
             $$.end = $3.value.v_int;
         } else {
-            yyerror("intervals can only be defined with integer values.");
+            printf("intervals can only be defined with integer values.");
         }
         free($1.name);
         free($3.name);
@@ -371,7 +372,7 @@ Fields :
         for(size_t i = 0; i < args_size; i++){
             for(size_t j = i+1; j < args_size; j++){
                 if(strcmp(args_names[i], args_names[j]) == 0){
-                    yyerror(
+                    printf(
                         "duplicate member %s.\n",
                         args_names[i]
                     );
@@ -441,7 +442,7 @@ Parameters:
         for(size_t i = 0; i < args_size; i++){
             for(size_t j = i+1; j < args_size; j++){
                 if(strcmp(args_names[i], args_names[j]) == 0){
-                    yyerror(
+                    printf(
                         "duplicate parameter %s.\n",
                         args_names[i]
                     );
@@ -461,7 +462,7 @@ Parameters:
         for(size_t i = 0; i < args_size; i++){
             for(size_t j = i+1; j < args_size; j++){
                 if(strcmp(args_names[i], args_names[j]) == 0){
-                    yyerror(
+                    printf(
                         "duplicate parameter %s.\n",
                         args_names[i]
                     );
@@ -574,13 +575,13 @@ CmdAux:
 |   AcessMemAddr ATTRIB Exp {
         commit_commands();
         if ($1.type > 9) {
-            yyerror("Type of '%s' ('%s') cannot be assigned directly.", $1.name, type_name($1.type));
+            printf("Type of '%s' ('%s') cannot be assigned directly.", $1.name, type_name($1.type));
         }
         if ($3.type > 9) {
-            yyerror("Type of '%s' ('%s') cannot be assigned to a variable.", $3.name, type_name($3.type));
+            printf("Type of '%s' ('%s') cannot be assigned to a variable.", $3.name, type_name($3.type));
         }
         if($1.type != $3.type){
-            yyerror(
+            printf(
                 "Type of '%s' ('%s') is different from the type of the value assigned ('%s').",
                 $1.name, type_name($1.type), type_name($3.type)
             );
@@ -601,14 +602,14 @@ CmdAux:
 |   CmdConditional {}
 |   CONTINUE {
         if (exit_labels_count <= 0) {
-            yyerror("Continue must be inside a loop.\n");
+            printf("Continue must be inside a loop.\n");
         } else {
             new_command(C_GOTO, NULL, loop_flags[loop_flag_count-1], NULL);
         }
 }
 |   BREAK {
         if (exit_labels_count <= 0) {
-            yyerror("Break must be inside a loop.\n");
+            printf("Break must be inside a loop.\n");
         } else {
             new_command(C_GOTO, NULL, exit_labels[exit_labels_count-1], NULL);
         }
@@ -637,16 +638,16 @@ STEP Exp CmdBlock {
         new_command(C_GOTO, NULL, loop_flags[--loop_flag_count], NULL);
         new_command(C_LABEL, NULL, strdup(exit_labels[--exit_labels_count]), NULL);
         if ($2.type != E_INT) {
-            yyerror("Type of '%s' must be int.", $2.name);
+            printf("Type of '%s' must be int.", $2.name);
         }
         if ($4.type != E_INT) {
-            yyerror("Type of '%s' must be int.", $4.name);
+            printf("Type of '%s' must be int.", $4.name);
         }
         if ($7.type != E_INT) {
-            yyerror("Type of '%s' must be int.", $7.name);
+            printf("Type of '%s' must be int.", $7.name);
         }
         if ($10.type != E_INT) {
-            yyerror("Type of '%s' must be int.", $10.name);
+            printf("Type of '%s' must be int.", $10.name);
         }
 
     }
@@ -666,10 +667,10 @@ STEP Exp CmdBlock {
 |   EXIT WHEN Exp { 
         commit_commands();
         if ($3.type != E_BOOL) {
-            yyerror("Type of '%s' must be boolean.", $3.name);
+            printf("Type of '%s' must be boolean.", $3.name);
         } else {
             if (exit_labels_count <= 0) {
-                yyerror("Exit when must be inside a loop.\n");
+                printf("Exit when must be inside a loop.\n");
             } else {
                 new_command(C_IF, NULL, strdup($3.var), exit_labels[exit_labels_count-1]);
             }
@@ -685,7 +686,7 @@ AcessMemAddr:
         Symbol_Table* tabela = getCurrentScope();
         Symbol_Entry* entry = searchSymbol(tabela, $1.name, 1);
         if(entry == NULL){
-            yyerror("Symbol '%s' not found.", $1.name);
+            printf("Symbol '%s' not found.", $1.name);
         } else {
             switch(entry->symbol_type) {
                 case 0:
@@ -724,7 +725,7 @@ AcessMemAddr:
                     }
                     break;
                 default:
-                    yyerror("Identifier %s is not a variable or constant!", $1.name);
+                    printf("Identifier %s is not a variable or constant!", $1.name);
             }
         }
         $$.name = $1.name;
@@ -732,17 +733,24 @@ AcessMemAddr:
 |   AcessMemAddr DOT ID {
         Symbol_Entry* entry = searchRecordType($1.type);
         if(entry == NULL){
-            yyerror("Symbol '%s' not a record, its type is %d.", $1.name, $1.type);
+            printf("Symbol '%s' not a record, its type is %d.", $1.name, $1.type);
         } else {
+            bool found = false;
             for(int i = 0; i < entry->data.r_data.n_fields; i++){
                 if(strcmp(entry->data.r_data.field_names[i], $3.name) == 0){
                     $$.type = entry->data.r_data.field_types[i];
                     $$.is_constant = $1.is_constant;
+                    found = true;
+                    break;
                 }
             }
+            if (!found){
+                $$.type = E_UNDEFINED;
+                printf("campo não encontrado\n");
+                // TODO: adicionar erro
+            }
         }
-        $$.name = $1.name; // todo: concatenar $1.name e $3.name
-
+        $$.name = strdup($1.name); // todo: concatenar $1.name e $3.name
         // FIX: correção para geração de codigo - comando atribuição envolvendo struct
         char*temp;
         if(strlen($$.var) > 0){
@@ -757,19 +765,19 @@ AcessMemAddr:
         }
 
         $$.var = strdup(temp);
-        free(temp);
-        free($3.name); // todo remover esse free?
+        // free(temp);
+        // free($3.name); // todo remover esse free?
     }
 
 |   AcessMemAddr LBRA Exp RBRA {
         commit_commands();
         Symbol_Entry* entry = searchArrayType($1.type);
         if(entry == NULL){
-            yyerror("Symbol '%s' not an array, its type is %s.", $1.name, type_name($1.type));
+            printf("Symbol '%s' not an array, its type is %s.", $1.name, type_name($1.type));
         } else {
             $$.type = entry->data.a_data.inner_type;
             if ($3.type != E_INT) {
-                yyerror("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
+                printf("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
             }
         }
         $$.name = $1.name; // TODO: concatenar $1.name e $3.name
@@ -778,7 +786,7 @@ AcessMemAddr:
 |   ID LPAR {args_size=0;} Args RPAR {
     Symbol_Entry* entry = getSubProgram($1.name);
     if (entry == NULL) {
-        yyerror("Symbol '%s' not found.", $1.name);
+        printf("Symbol '%s' not found.", $1.name);
     } else {
         if (entry->data.sp_data.return_type != -1) {
             $$.type = entry->data.sp_data.return_type;
@@ -786,11 +794,11 @@ AcessMemAddr:
         if (entry->data.sp_data.params_size == args_size) {
             for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
                 if (args_types[i] != entry->data.sp_data.params_types[i]) {
-                    yyerror("Type of parameter %s is %s but was expected to be %s.", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
+                    printf("Type of parameter %s is %s but was expected to be %s.", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
                 }
             }
         } else {
-            yyerror("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
+            printf("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
         }
     }
     args_size=0;
@@ -813,7 +821,7 @@ CmdConditional:
     IF Exp {
         commit_commands();
         if ($2.type != E_BOOL) {
-            yyerror("Result type of expression in IF statement should be boolean, but was os type %s", type_name($2.type));
+            printf("Result type of expression in IF statement should be boolean, but was os type %s", type_name($2.type));
         }
         char* label1 = create_label('I');
         char* label2 = create_label('I');
@@ -841,7 +849,7 @@ CmdConditionalEnd:
 CmdReturn:
     RETURN CmdReturnExp {
         if (current_return_type != 0 && current_return_type != $2.type) {
-            yyerror("Error: Return type is %s but was expected to be %s.", type_name($2.type), type_name(current_return_type));
+            printf("Error: Return type is %s but was expected to be %s.", type_name($2.type), type_name(current_return_type));
         }
 
         if(strcmp(functionName, "") != 0){
@@ -849,7 +857,7 @@ CmdReturn:
             Symbol_Entry * functionSymbol = searchSymbol(getCurrentScope(), functionName, 1);
             if(functionSymbol != NULL){
                 if(functionSymbol->data.sp_data.return_type != $2.type){
-                    yyerror(
+                    printf(
                         "Type of the return value is not compatible with the '%s' function's return type.\nType %s was expected, but type %s was found.",
                         functionSymbol->name,
                         type_name(functionSymbol->data.sp_data.return_type), 
@@ -870,7 +878,7 @@ CmdPrint:
     PRINT LPAR Exp {
         commit_commands();
         if ($3.type != E_STRING) {
-            yyerror("First argument of print must be of type string");
+            printf("First argument of print must be of type string");
         } else {
 
         }
@@ -902,10 +910,10 @@ PrintArgs:
 CmdRead:
     READ LPAR AcessMemAddr RPAR {
         if ($3.type != E_STRING) {
-            yyerror("%s must be of type String, but is of type %s", $3.name, type_name($3.type));
+            printf("%s must be of type String, but is of type %s", $3.name, type_name($3.type));
         }
         if ($3.is_constant) {
-            yyerror("\"%s\" cannot be a constant", $3.name);
+            printf("\"%s\" cannot be a constant", $3.name);
         }
         new_command(C_READ, strdup($3.name), NULL, NULL);
     }
@@ -914,7 +922,7 @@ CmdRead:
 Exp:
     Terms OR {
         if ($1.type != E_BOOL){
-            yyerror("OR operation must be between bool values but the first arg is %s", type_name($1.type));
+            printf("OR operation must be between bool values but the first arg is %s", type_name($1.type));
         // } else if (!$1.is_constant) {
         } else {
             char* temp_var = create_label('b');
@@ -927,7 +935,7 @@ Exp:
     }
     Exp {
         if ($4.type != E_BOOL){
-            yyerror("OR operation must be between bool values but the first arg is %s", type_name($4.type));
+            printf("OR operation must be between bool values but the first arg is %s", type_name($4.type));
         // } else if (!$4.is_constant) {
         } else  {
             int pos1 = --temp_var_count;
@@ -960,7 +968,7 @@ Exp:
 Terms:
     Comps AND {
         if ($1.type != E_BOOL){
-            yyerror("OR operation must be between bool values but the first arg is %s", type_name($1.type));
+            printf("OR operation must be between bool values but the first arg is %s", type_name($1.type));
         } else {
             char* temp_var = create_label('b');
             new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -972,7 +980,7 @@ Terms:
     }
     Terms {
         if ($4.type != E_BOOL){
-            yyerror("OR operation must be between bool values but the first arg is %s", type_name($4.type));
+            printf("OR operation must be between bool values but the first arg is %s", type_name($4.type));
         } else {
             int pos1 = --temp_var_count;
             int pos2 = --temp_flag_count;
@@ -1018,7 +1026,7 @@ Comps:
             $$.type = E_BOOL;
             $$.value.v_bool = strcmp($1.value.v_string, $3.value.v_string) != 0;
         } else {
-            yyerror("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1048,7 +1056,7 @@ Comps:
             $$.type = E_BOOL;
             $$.value.v_bool = strcmp($1.value.v_string, $3.value.v_string) == 0;
         } else {
-            yyerror("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1068,7 +1076,7 @@ Comps:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_real < $3.value.v_real;
         } else {
-            yyerror("Incompatible type for '<' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '<' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1088,7 +1096,7 @@ Comps:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_real > $3.value.v_real;
         } else {
-            yyerror("Incompatible type for '>' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '>' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1108,7 +1116,7 @@ Comps:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_real <= $3.value.v_real;
         } else {
-            yyerror("Incompatible type for '<=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '<=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1128,7 +1136,7 @@ Comps:
             $$.type = E_BOOL;
             $$.value.v_bool = $1.value.v_real >= $3.value.v_real;
         } else {
-            yyerror("Incompatible type for '>=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '>=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1159,7 +1167,7 @@ Factor:
             new_command_bufferized(C_NOT, strdup(temp_var), strdup($2.var), NULL);
             $$.var = strdup(temp_var);
         } else {
-            yyerror("Incompatible type for '!' operation between %s (%s)", $2.name, type_name($2.type));
+            printf("Incompatible type for '!' operation between %s (%s)", $2.name, type_name($2.type));
         }
         $$.is_constant = $2.is_constant;
         strcpy($$.name, " ! ");
@@ -1189,7 +1197,7 @@ AriOp:
             temp_var = create_label('f');
             new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
-            yyerror("Incompatible type for '+' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '+' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         new_command_bufferized(C_ADD, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
@@ -1212,7 +1220,7 @@ AriOp:
             temp_var = create_label('f');
             new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
-            yyerror("Incompatible type for '-' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '-' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         new_command_bufferized(C_SUBTRACT, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
@@ -1245,7 +1253,7 @@ AriOp2:
             temp_var = create_label('f');
             new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
-            yyerror("Incompatible type for '*' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '*' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         new_command_bufferized(C_MULTIPLICATE, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
@@ -1268,7 +1276,7 @@ AriOp2:
             temp_var = create_label('f');
             new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else {
-            yyerror("Incompatible type for '/' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
+            printf("Incompatible type for '/' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         new_command_bufferized(C_DIVIDE, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
@@ -1286,7 +1294,7 @@ AriOp2:
             temp_var = create_label('i');
             new_command_bufferized(C_VAR, NULL, "int", temp_var);
         } else {
-            yyerror("Incompatible type. - AriOp2 \n");
+            printf("Incompatible type. - AriOp2 \n");
         }
         new_command_bufferized(C_MODULE, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
@@ -1341,7 +1349,7 @@ UnaryExp:
             temp_var = create_label('f');
             new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else { 
-            yyerror("Incompatible type. - UnaryExp \n");
+            printf("Incompatible type. - UnaryExp \n");
         }
         new_command_bufferized(C_PLUS, strdup(temp_var), strdup($2.var), NULL);
         $$.var = strdup(temp_var);
@@ -1363,7 +1371,7 @@ UnaryExp:
             temp_var = create_label('f');
             new_command_bufferized(C_VAR, NULL, "float", temp_var);
         } else { 
-            yyerror("Incompatible type. - UnaryExp \n");
+            printf("Incompatible type. - UnaryExp \n");
         }
         new_command_bufferized(C_MINUS, strdup(temp_var), strdup($2.var), NULL);
         $$.var = strdup(temp_var);
@@ -1401,7 +1409,7 @@ CastExp:
             $$.value.v_int = $4.value.v_char;
         }
         if ($4.type == E_STRING) {
-            yyerror("string cannot be converted to int!\n");
+            printf("string cannot be converted to int!\n");
         }
         char* temp_var = create_label('i');
         new_command_bufferized(C_VAR, NULL, "int", temp_var);
@@ -1429,7 +1437,7 @@ CastExp:
             $$.value.v_real = $4.value.v_char;
         }
         if ($4.type == E_STRING) {
-            yyerror("string cannot be converted to real!\n");
+            printf("string cannot be converted to real!\n");
         }
         char* temp_var = create_label('f');
         new_command_bufferized(C_VAR, NULL, "float", temp_var);
@@ -1453,10 +1461,10 @@ CastExp:
             $$.value.v_bool = $4.value.v_bool;
         }
         if ($4.type == E_CHAR) {
-            yyerror("char cannot be converted to bool!");
+            printf("char cannot be converted to bool!");
         }
         if ($4.type == E_STRING) {
-            yyerror("string cannot be converted to bool!");
+            printf("string cannot be converted to bool!");
         }
         char* temp_var = create_label('b');
         new_command_bufferized(C_VAR, NULL, "bool", temp_var);
@@ -1467,13 +1475,13 @@ CastExp:
 }
 |   LPAR T_CHAR RPAR Parenthesis      {
     if ($4.type == E_INT) {
-        yyerror("int cannot be converted to char!");
+        printf("int cannot be converted to char!");
     }
     if ($4.type == E_REAL) {
-        yyerror("real cannot be converted to char!");
+        printf("real cannot be converted to char!");
     }
     if ($4.type == E_BOOL) {
-        yyerror("bool cannot be converted to char!");
+        printf("bool cannot be converted to char!");
     }
     if ($4.type == E_CHAR) {
         $$.type = E_CHAR;
@@ -1481,14 +1489,14 @@ CastExp:
         $$.var = $4.var;
     }
     if ($4.type == E_STRING) {
-        yyerror("string cannot be converted to char!");
+        printf("string cannot be converted to char!");
     }
     $$.is_constant = $4.is_constant;
     $$.name = strdup("(char) ");
     strcat($$.name, $4.name);
 }
 |   LPAR T_STRING RPAR Parenthesis      {
-    yyerror("Can't convert anything to string!");
+    printf("Can't convert anything to string!");
     // if ($4.type == E_INT) {
     //     $$.type = E_STRING;
     // }
@@ -1583,7 +1591,7 @@ int main(int argc, char const *argv[])
     }
     int result = yyparse();
     if (result != 0) {
-        yyerror("DEU RUIM");
+        printf("DEU RUIM");
     }
     /* if (result == 0) {
         printf("parsing was successful\n");
