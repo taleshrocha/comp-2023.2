@@ -36,11 +36,12 @@ static char labels[1024][8];
 static int counter  = 0;
 
 int top = -1;
+int variable = 0;
 
 typedef struct {
 	uintptr_t memoryAddress;
-	int variables[10];
-	int localVariables[10];
+	char * variables[10];
+	char localVariables[10];
 } Register;
 
 Register Stack[100]; // Tamanho da pilha (100)
@@ -48,6 +49,7 @@ Register Stack[100]; // Tamanho da pilha (100)
 void pushRegister(Register registro) {
 	if (top < 99) { // Ajustar o tamanho da pilha
 		Stack[++top] = registro;
+		printMessage(SUCCESS, "Registro salvo na stack. \n| Memory Address: %d \n", registro.memoryAddress); 
 	} else {
 		printMessage(ERROR, "Segmentation Fault. Core dumped!");
 	}
@@ -65,9 +67,12 @@ Register popRegister(Register registro) {
 }
 
 
-void create_Register(Register* reg_temp, char ** registro) {
+void create_Register(Register* reg_temp, char ** registro, char * variavel) {
     reg_temp->memoryAddress = (uintptr_t)registro;
+    reg_temp->variables[variable] = variavel;
     printMessage(SUCCESS, "Registro de memória criado: %d \n", reg_temp->memoryAddress);
+    printMessage(SUCCESS, "Nome de variável salvo: %s \n", reg_temp->variables[variable]);
+    variable++;
 }
 
     // TODO depois que alcançarmos a funções e procedimentos, precisamos pegar o endereço de memória e colocar na Stack;
@@ -112,7 +117,9 @@ void generate_cmd(CommandEntry * entry){
 		case C_ATTRIB: 
             printf("%s = %s;\n", entry->result, entry->op1);
             Register temp;
-            create_Register(&temp, &entry->result);
+            create_Register(&temp, &entry->result, entry->result);
+            printf("Registro: %s \n", entry->result);
+            pushRegister(temp);
 			break;
 		// branching
         case C_IF: 
