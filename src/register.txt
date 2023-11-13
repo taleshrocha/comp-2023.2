@@ -1,0 +1,60 @@
+function asda(int x) : int begin 
+    if (x = 0) {
+		return 1;
+	return asda(x-1);
+end
+
+
+
+begin
+	var x : int;
+	var z : int;
+	var c : int;
+	x := asda(3)
+	z := asda(2)
+	c := asda(5)
+	return
+end
+
+==========================
+
+int asdax;
+int asda_return_value ;
+int asda_control;
+
+asda_begin:
+	...
+	asda_control = ?
+	goto asda_begin;
+	asda_call?:
+	x = asda_return_value
+	
+	goto asda_return
+
+
+int x;
+int z;
+int c;
+asda_control = 1
+goto asda_begin;
+asda_call1:
+x = asda_return_value
+asda_control = 2
+goto asda_begin;
+asda_call2:
+z = asda_return_value
+
+goto asda_begin;
+asda_call3:
+c = asda_return_value
+
+asda_return:
+	switch (asda_control)
+		case  1
+			goto asda_call1
+		case 2
+			goto asda_call2
+		case 3
+			goto asda_call3
+
+return 0;
