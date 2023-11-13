@@ -1,8 +1,10 @@
 
-type arr := array[0..10] of int;
+type arr := array[10..20] of int;
+type mat := array[10..20] of arr;
 
 begin
-    var a : arr;
-    a[0] := 10;
+    var m : mat;
+    m[11][11] := 3;
+    print("%d", m[11][11]);
     return
 end

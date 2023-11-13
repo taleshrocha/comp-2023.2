@@ -778,10 +778,12 @@ AcessMemAddr:
             $$.type = entry->data.a_data.inner_type;
             if ($3.type != E_INT) {
                 printf("Expression used to access position of array is not an integer, is of type %s", type_name($3.type));
+            } else if ($3.value.v_int - entry->data.a_data.start >= entry->data.a_data.capacity) {
+                printf("Position %d out of bounds of array of limits %d..%d", $3.value.v_int, entry->data.a_data.start, entry->data.a_data.end);
             } else {
-                $$.var = strdup($1.name);
+                $$.var = strdup($1.var);
                 char aux[12];
-                sprintf(aux, "[%d]", $3.value.v_int);
+                sprintf(aux, "[%d]", $3.value.v_int - entry->data.a_data.start);
                 strcat($$.var, aux);
             }
         }
@@ -1543,7 +1545,10 @@ SimpleExp:
 |   AcessMemAddr {
         $$.type = $1.type;
         $$.name = $1.name;
-        $$.var = $1.var;
+        char* label1 = create_label('a');
+        new_command(C_VAR, NULL, strdup(get_c_type($1.type)), strdup(label1));
+        new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
+        $$.var = strdup(label1);
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;
 }
