@@ -1,0 +1,10 @@
+function sum(a : int, b : int) : int begin
+    var x : int;
+    return a + b
+end;
+
+begin
+    var a : int;
+    a := 5;
+    return
+end

@@ -52,6 +52,7 @@ void yyerror(char* s, ...) {
         int type;
         char* name;
         char label[10];
+        int is_subprog_param;
         int is_constant;
         union {
             int v_int;
@@ -129,7 +130,9 @@ Prog :
 Decl : 
     Consts Types Vars {
         printf("int main() {\ngoto start;\n");
-        } SubProg {printf("start:\n");}
+        } SubProg {
+            new_command(C_LABEL, NULL, "start", NULL);
+        }
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
@@ -423,6 +426,7 @@ ProcedureDecl :
 
         insertSymbol(getCurrentScope(), newSymbol);
         
+
     } CmdBlock SEMICOLON
     {
         // #ifdef DEBUG
@@ -524,6 +528,9 @@ FunctionDecl:
                         //- ainda falta inserir os parametros na tabela de simbolos da funcao
         current_return_type = function.return_type;
         create_command(newSymbol);
+
+        new_command(C_LABEL, NULL, strdup($2.name), NULL);
+
     } CmdBlock SEMICOLON
     {
         current_return_type = 0;
@@ -540,15 +547,23 @@ CmdBlock :
         printCurrentScope(getCurrentScope());
         #endif
         pushScope();
+        //Declaracao de parametros no escopo do subprograma
         if(args_size > 0 && args_size < 101){
             for(size_t i = 0; i < args_size; i++){
                 Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
+
                 newSymbol->name = strdup(args_names[i]);
                 newSymbol->symbol_type = 0;
 
                 Variable var_data;
+
                 var_data.type = args_types[i];
                 var_data.is_constant = 0;
+
+                // Flag para indicar que a variavel, na tabela de simbolos, 
+                    // eh um parametro de subprograma
+                var_data.is_subprog_param = 1;
+
                 newSymbol->data.v_data = var_data;
 
                 // criar registro na tabela
@@ -587,8 +602,53 @@ CmdAux:
             );
         }
         
-        new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
+        /*
 
+        CODIGO COMENTADO - Tratar nomes de variaveis declaradas em subprogramas no codigo gerado
+            codigo fonte: 
+                <nome_variavel> := 10;
+            codigo gerado: 
+                <nome_funcao>_<nome_variavel>[<nome_funcao>_stack_control] := 10;
+        
+        char* temp;
+        char* temp2;
+        if($1.is_subprog_param == 1 && $3.is_subprog_param == 1){
+            temp = strdup(functionName);
+            strcat(temp, "_");
+            strcat(temp, strdup($1.var));
+
+            temp2 = strdup(functionName);
+            strcat(temp2, "_");
+            strcat(temp2, strdup($3.var));
+            new_command(C_ATTRIB, strdup(temp), strdup(temp2), NULL);
+
+            free(temp);
+            free(temp2);
+        }
+        else if($1.is_subprog_param == 1){
+            temp = strdup(functionName);
+            strcat(temp, "_");
+            strcat(temp, strdup($1.var));
+            strcat(temp, "[");
+            strcat(temp, functionName);
+            strcat(temp, "_stack_control]");
+            new_command(C_ATTRIB, strdup(temp), strdup($3.var), NULL);
+            free(temp);
+        }else if($3.is_subprog_param == 1){
+            temp = strdup(functionName);
+            strcat(temp, "_");
+            strcat(temp, strdup($3.var));
+            strcat(temp, "[");
+            strcat(temp, functionName);
+            strcat(temp, "_stack_control]");
+            new_command(C_ATTRIB, strdup($1.var), strdup(temp), NULL);
+            free(temp);
+        }
+        else{
+            new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
+        }
+        */
+        new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
         if ($1.name != NULL) {
             free($1.name);
             $1.name = NULL;
@@ -722,6 +782,7 @@ AcessMemAddr:
                         }
                     } else {
                         $$.var = $1.name;
+                        $$.is_subprog_param = entry->data.v_data.is_subprog_param;
                     }
                     break;
                 default:
@@ -872,7 +933,11 @@ CmdReturn:
                     );
                 }
             }
+            char* temp = strdup(functionName);
+            strcat(temp, "_return");
+            new_command(C_GOTO, NULL, temp, NULL);
         }
+
     }
 ;
 
@@ -1547,6 +1612,9 @@ SimpleExp:
         $$.name = $1.name;
         char* label1 = create_label('a');
         new_command(C_VAR, NULL, strdup(get_c_type($1.type)), strdup(label1));
+        
+        //printf("s1.var: %s\n", $1.var); //printando 'null', deveria printar a chamada de funcao (nome da funcao + parametros)
+        //Erro neste new command quando expressao eh chamada de funcao
         new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
         $$.var = strdup(label1);
         $$.is_constant = $1.is_constant;

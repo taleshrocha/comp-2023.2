@@ -229,9 +229,22 @@ void create_command(Symbol_Entry * symbol){
             strcat(command, " ");
             strcat(command, symbol->name);
             strcat(command, "_return_value[100];\n");
+
+            // return control
             strcat(command, "int ");
             strcat(command, symbol->name);
             strcat(command, "_return_control[100];\n");
+
+            //stack control
+            strcat(command, "int ");
+            strcat(command, symbol->name);
+            strcat(command, "_stack_control;\n");
+
+            // call control
+            strcat(command, "int ");
+            strcat(command, symbol->name);
+            strcat(command, "_call_control;\n");
+
             break;
         case K_ARRAY: 
             strcat(command, "typedef ");
