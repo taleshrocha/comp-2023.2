@@ -193,7 +193,6 @@ void create_command(Symbol_Entry * symbol){
 	char* command = calloc(sizeof(char), 1000);
 
 	switch(symbol->symbol_type){
-		
 		case K_RECORD: 
 			strcat(command, "typedef struct ");
 			strcat(command, symbol->name);
@@ -212,6 +211,21 @@ void create_command(Symbol_Entry * symbol){
 		case K_VARIABLE: 
             break;
         case K_SUBPROGRAM: 
+            for (size_t i = 0; i < symbol->data.sp_data.params_size; i++){
+                strcat(command, get_c_type(symbol->data.sp_data.params_types[i]));
+                if (symbol->data.sp_data.ref_flags[i]) {
+                    strcat(command, "*");
+                }
+                strcat(command, " ");
+                strcat(command, symbol->name);
+                strcat(command, "_");
+                strcat(command, symbol->data.sp_data.params_names[i]);
+                strcat(command, "[100];\n");
+            }
+            strcat(command, symbol->name);
+            strcat(command, "_return_value[100];\n");
+            strcat(command, symbol->name);
+            strcat(command, "_return_control[100];\n");
             break;
         case K_ARRAY: 
             strcat(command, "typedef ");
@@ -226,9 +240,12 @@ void create_command(Symbol_Entry * symbol){
 			strcat(command, ";\n\n");
             break;
         case K_SIMPLETYPE: 
+            // strcat(command, "typedef ");
+            // strcat(command, get_c_type(symbol->data.s_data.inner_type));
+            // strcat(command, " ");
+			// strcat(command, symbol->name);
+			// strcat(command, ";\n\n");
             break;
-
-
 	}
 	printf("%s\n",command);
 	new_command(C_TYPE, strdup(command), "", "");
