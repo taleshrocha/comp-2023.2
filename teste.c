@@ -1,14 +1,14 @@
 #include <stdio.h>
 
 int main() {
+    goto start;
+
     int asda_x[100];
     int asda_return_value[100];
-    int asda_stack_control = 0;
-    int asda_call_control = 0;
+    int asda_stack_control;
+    int asda_call_control;
 
     int asda_z[100];
-    
-    goto start;
 
     asda_begin:
     int b0;
@@ -31,6 +31,7 @@ int main() {
     goto asda_return;
 
     start:
+    asda_stack_control = 0;
     int x;
     asda_x[asda_stack_control] = 3;
     asda_call_control = 0;
@@ -65,4 +66,5 @@ int main() {
     printf("%d\n", x);
     printf("%d\n", y);
     return 0;
+    
 }

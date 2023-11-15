@@ -6,6 +6,9 @@
 #include <exception.h>
 #include <stdint.h>
 
+CommandEntry vars_commands[100];
+int var_counter = 0;
+
 CommandEntry buffer_commands[100];
 int buffer_counter = 0;
 
@@ -222,8 +225,11 @@ void create_command(Symbol_Entry * symbol){
                 strcat(command, symbol->data.sp_data.params_names[i]);
                 strcat(command, "[100];\n");
             }
+            strcat(command, get_c_type(symbol->data.sp_data.return_type));
+            strcat(command, " ");
             strcat(command, symbol->name);
             strcat(command, "_return_value[100];\n");
+            strcat(command, "int ");
             strcat(command, symbol->name);
             strcat(command, "_return_control[100];\n");
             break;

@@ -29,7 +29,7 @@ begin
     minhavar3 := 3;
     var1.x := 12;
     minhavar := 3 * 4;
-    if function1(true, true) then
+    if true then
     begin
       return
     end;

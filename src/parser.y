@@ -110,27 +110,26 @@ Prog :
         printf("#include <stdbool.h>\n");
         printf("#include <stdlib.h>\n\n");
     } 
-    Decl {
-        
-        printf("int main() {\n");
-        } CmdBlock {
+    Decl CmdBlock {
         // TODO free das tabelas
         #ifdef DEBUG
         printf(
             "\n\nFreeing stack and symbol tables.\n"
         );
         #endif
-        freeScopes();
         for(int i = 0; i < command_counter; i++) {
             generate_cmd(&commands[i]);
         }
+        freeScopes();
         printf("return 0;\n");
         printf("}\n");
 
     }
 ;
 Decl : 
-    Consts Types Vars SubProg {}
+    Consts Types Vars {
+        printf("int main() {\ngoto start;\n");
+        } SubProg {printf("start:\n");}
 ;
 Consts :
     CONST ID ATTRIB Exp SEMICOLON {
@@ -524,6 +523,7 @@ FunctionDecl:
         //args_size=0; // Comentado para nao ser zerado 
                         //- ainda falta inserir os parametros na tabela de simbolos da funcao
         current_return_type = function.return_type;
+        create_command(newSymbol);
     } CmdBlock SEMICOLON
     {
         current_return_type = 0;
