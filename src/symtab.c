@@ -20,7 +20,7 @@ int getFunctionReturnType(Symbol_Table * symbolTable, char * functionName){
 }
 
 Symbol_Entry * getSubProgram(char * subprogname) {
-    printf("PRINT INSIDE: %s", subprogname);
+    printf("PRINT INSIDE: %s\n", subprogname);
     Symbol_Table* scope = getCurrentScope();
     while(scope->parent != NULL){
         scope = scope->parent;

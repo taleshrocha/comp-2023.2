@@ -118,12 +118,12 @@ Prog :
             "\n\nFreeing stack and symbol tables.\n"
         );
         #endif
-        freeScopes();
         for(int i = 0; i < command_counter; i++) {
             generate_cmd(&commands[i]);
         }
         printf("return 0;\n");
         printf("}\n");
+        freeScopes();
 
     }
 ;

@@ -71,16 +71,13 @@ Register popRegister(Register registro) {
 
 void getTestTable(char * name) {
     printf("NAME: %s \n", name);
-    Symbol_Entry* entry = getSubProgram(name);
-    printf("NAME: %s \n", entry->name);
-
-    // Symbol_Entry* entry = searchSymbol(getCurrentScope(), name, 0);
-
-    // if (entry != NULL) {
-    //     printf("TABLE: %s \n", entry->name);
-    // } else {
-    //     printf("Symbol not found: %s\n", name);
-    // }
+    Symbol_Entry* entry = searchSymbol(getCurrentScope(), name, 0);
+    if(entry != NULL){
+        printf("TABLE: %s \n", entry->name);
+    }
+    else {
+        printf("Symbol not found: %s\n", name);
+    }
 }
 
 void printRegister() {
