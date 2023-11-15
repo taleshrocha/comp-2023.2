@@ -37,12 +37,14 @@ static int counter  = 0;
 
 int top = -1;
 int variable = 0;
-
+#define MAX_PARAMS 16 
 typedef struct {
 	uintptr_t memoryAddress;
 	char * variables[10];
-	char * parameters[10];
 	char * localVariables[10];
+    char   params[16][32];
+    char   functionNames[16][32];
+    short  ref_flags[16];
 	int sizeofVariables;
 } Register;
 
@@ -70,19 +72,22 @@ Register popRegister(Register registro) {
 }
 
 void getTestTable(char * name) {
-    printf("NAME: %s \n", name);
-    Symbol_Entry* entry = searchSymbol(getCurrentScope(), name, 0);
+    Symbol_Entry* entry = getSubProgram(name);
     if(entry != NULL){
-        printf("TABLE: %s \n", entry->name);
-    }
-    else {
-        printf("Symbol not found: %s\n", name);
+        printf("Function Name: %s \n", entry->name);
+        for(size_t i = 0; i < sizeof(entry->data.sp_data.params_size); i++) {
+            if(entry->data.sp_data.params_types[i] != 0) {
+                printf("Params names: %s \n", entry->data.sp_data.params_names[i]);
+                printf("Params types: %d \n", entry->data.sp_data.params_types[i]);
+                printf("Ref flags: %d \n", entry->data.sp_data.ref_flags[i]);
+            }
+        }
     }
 }
 
 void printRegister() {
 	printf("Printing Register: \n");
-	for(int i = 0; i < top; i++) {
+	for(int i = 0; i < 10; i++) {
 		for(int j = 0; j < Stack[i].sizeofVariables; j++) {
 			printf("Name: %s [stack: %d | pos: %d]\n", Stack[i].variables[j], i, j);
             getTestTable(Stack[i].variables[j]);
@@ -91,9 +96,27 @@ void printRegister() {
 }
 
 
-void createRegister(Register* reg_temp, char ** registro, char * variavel) {
+void createRegister(Register* reg_temp, char ** registro, char * name) {
     reg_temp->memoryAddress = (uintptr_t)registro;
-    reg_temp->variables[reg_temp->sizeofVariables] = variavel;
+    reg_temp->variables[reg_temp->sizeofVariables] = name;
+    Symbol_Entry* entry = getSubProgram(name);
+    // reg_temp->functionNames[reg_temp->sizeofVariables] = name;
+    snprintf(reg_temp->functionNames[reg_temp->sizeofVariables], sizeof(reg_temp->functionNames[reg_temp->sizeofVariables]), "%s", name);
+    if (entry != NULL) {
+        size_t paramIndex = 0;
+        for (size_t i = 0; i < entry->data.sp_data.params_size; ++i) {
+            const char* paramName = entry->data.sp_data.params_names[i];
+            if (paramName[0] != '\0') {
+                snprintf(reg_temp->params[paramIndex], sizeof(reg_temp->params[paramIndex]), "%s", paramName);
+                paramIndex++;
+                if (paramIndex >= MAX_PARAMS) {
+                    break;
+                }
+            }
+        }
+    } else {
+        printMessage(ERROR, "Subprogram not found: %s\n", name);
+    }
     printMessage(SUCCESS, "Registro de memória criado: %d \n", reg_temp->memoryAddress);
     printMessage(SUCCESS, "Nome de variável salvo: %s \n", reg_temp->variables[variable]);
     reg_temp->sizeofVariables++;
@@ -140,11 +163,6 @@ void generate_cmd(CommandEntry * entry){
         // atribuição de valor simples
 		case C_ATTRIB: 
             printf("%s = %s;\n", entry->result, entry->op1);
-            Register temp;
-            temp.sizeofVariables = 0;
-            createRegister(&temp, &entry->result, entry->result);
-            printf("Registro: %s \n", entry->result);
-            pushRegister(temp);
 			break;
 		// branching
         case C_IF: 
@@ -215,8 +233,10 @@ void generate_cmd(CommandEntry * entry){
         case C_CAST:
             printf("%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
             break;
+        case C_FUNCTION:
+            break;
 	}
-	printRegister();
+	// printRegister();
 }
 
 
@@ -244,6 +264,14 @@ void create_command(Symbol_Entry * symbol){
 		case K_VARIABLE: 
             break;
         case K_SUBPROGRAM: 
+            printf("Get function!");
+            Register temp;
+            temp.sizeofVariables = 0;
+            printf("RECEIVED: %s \n", symbol->name);
+            createRegister(&temp, &symbol->name, symbol->name);
+            pushRegister(temp);
+            // getTestTable(symbol->name);
+            printRegister();
             break;
         case K_ARRAY: 
             break;

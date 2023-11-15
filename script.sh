@@ -5,4 +5,4 @@ echo "Compiling...\n"
 make
 echo "\n"
 echo "Executing...\n\n"
-./bin/parser < example4.jd
+./bin/parser < example2.jd

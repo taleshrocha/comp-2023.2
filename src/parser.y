@@ -522,6 +522,7 @@ FunctionDecl:
         //args_size=0; // Comentado para nao ser zerado 
                         //- ainda falta inserir os parametros na tabela de simbolos da funcao
         current_return_type = function.return_type;
+        create_command(newSymbol);
     } CmdBlock SEMICOLON
     {
         current_return_type = 0;

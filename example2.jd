@@ -20,16 +20,26 @@ begin
   return par1 != par2
 end;
 
+function function33 (andre : bool, joao : bool) : bool
+begin
+  if 3.0 > 1.0 then
+  begin
+    return false
+  end;
+  return andre != joao
+end;
+
 begin
     var var1 : tipo1;
     var minhavar : int;
     var minhavar4 : bool;
     var minhavar2 : int;
     var minhavar3 : int;
+    var b0: bool;
     minhavar3 := 3;
     var1.x := 12;
     minhavar := 3 * 4;
-    if function1(true, true) then
+    if b0 then
     begin
       return
     end;

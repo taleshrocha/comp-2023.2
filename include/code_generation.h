@@ -31,7 +31,8 @@ typedef enum COMMANDS {
     C_PLUS,
     C_PRINT,
     C_READ,
-    C_TYPE
+    C_TYPE,
+    C_FUNCTION,
 } COMMANDS;
 
 typedef struct CommandEntry {
