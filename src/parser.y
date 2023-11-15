@@ -388,12 +388,6 @@ SubProg :
 
 ProcedureDecl :
     PROCEDURE ID LPAR {args_size=0;} Parameters RPAR {
-		Symbol_Entry* entry = NULL;
-		entry = malloc(sizeof(Symbol_Entry));
-		entry->symbol_type = K_PROCEDURE;
-		entry->name = strdup($2.name);
-		insertSymbol(getCurrentScope(), entry);
-		generate_cmd();
         #ifdef DEBUG
         printf("\n\tProcessing procedure...\n\n");
         #endif

@@ -54,5 +54,7 @@ void generate_cmd(CommandEntry * entry);
 
 void create_command(Symbol_Entry * symbol);
 
+void getTestTable(char * name);
+
 
 #endif // CODE_GENERATION_H

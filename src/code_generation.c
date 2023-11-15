@@ -48,6 +48,7 @@ typedef struct {
 
 Register Stack[100]; // Tamanho da pilha (100)
 
+
 void pushRegister(Register registro) {
 	if (top < 99) { // Ajustar o tamanho da pilha
 		Stack[++top] = registro;
@@ -68,7 +69,18 @@ Register popRegister(Register registro) {
     return registro;
 }
 
-void getVariableTable(Register registro) {
+void getTestTable(char * name) {
+    printf("NAME: %s \n", name);
+    Symbol_Entry* entry = getSubProgram(name);
+    printf("NAME: %s \n", entry->name);
+
+    // Symbol_Entry* entry = searchSymbol(getCurrentScope(), name, 0);
+
+    // if (entry != NULL) {
+    //     printf("TABLE: %s \n", entry->name);
+    // } else {
+    //     printf("Symbol not found: %s\n", name);
+    // }
 }
 
 void printRegister() {
@@ -76,6 +88,7 @@ void printRegister() {
 	for(int i = 0; i < top; i++) {
 		for(int j = 0; j < Stack[i].sizeofVariables; j++) {
 			printf("Name: %s [stack: %d | pos: %d]\n", Stack[i].variables[j], i, j);
+            getTestTable(Stack[i].variables[j]);
 		}
 	}
 }
