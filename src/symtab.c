@@ -195,7 +195,7 @@ void printCurrentScope(Symbol_Table * symbolTable){
     for (size_t i = 0; i < symbolTable->symbol_size; i++)
     {
         printf(
-            "%ld. Name: %s. Type: %d\n ",
+            "%ld. Name: %s. Type: %d\n",
             i, 
             symbolTable->symbols[i]->name,
             symbolTable->symbols[i]->symbol_type

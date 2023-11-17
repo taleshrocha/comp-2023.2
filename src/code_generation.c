@@ -125,10 +125,10 @@ void generate_cmd(CommandEntry * entry){
             printf("if (!%s) goto %s;\n", entry->op1, entry->op2);
             break;
 		case C_GOTO:
-            printf("goto %s;\n", entry->op1);
+            printf("goto %s;\n\n", entry->op1);
             break;
 		case C_LABEL:
-            printf("%s:\n", entry->op1);
+            printf("%s:\n\n", entry->op1);
             break;
         // Operadores aritméticos
         case C_ADD:

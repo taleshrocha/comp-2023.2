@@ -29,7 +29,7 @@ typedef enum EntryKind {
 typedef struct Variable
 {
     int is_constant;
-    int is_subprog_param;
+    int is_subprog_var;
     int type;
     union Value {
         int v_int;

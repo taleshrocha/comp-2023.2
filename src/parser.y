@@ -36,6 +36,9 @@ char temp_name[256];
 extern int column_counter;
 char message[256];
 
+// Flag para indicar que o parsing está dentro de um subprograma
+int parsing_subprogram = 0;
+
 void yyerror(char* s, ...) {
     va_list vars;
     va_start(vars, s);
@@ -52,7 +55,7 @@ void yyerror(char* s, ...) {
         int type;
         char* name;
         char label[10];
-        int is_subprog_param;
+        int is_subprog_var;
         int is_constant;
         union {
             int v_int;
@@ -130,7 +133,9 @@ Prog :
 Decl : 
     Consts Types Vars {
         printf("int main() {\ngoto start;\n");
+        parsing_subprogram = 1;
         } SubProg {
+            parsing_subprogram = 0;
             new_command(C_LABEL, NULL, "start", NULL);
         }
 ;
@@ -200,6 +205,12 @@ Vars :
         Variable var_data;
         var_data.type = $4.type;
         var_data.is_constant = 0;
+        if(parsing_subprogram == 1){
+            var_data.is_subprog_var = 1;
+        }
+        else{
+            var_data.is_subprog_var = 0;
+        }
         newSymbol->data.v_data = var_data;
 
         insertSymbol(getCurrentScope(), newSymbol);
@@ -210,31 +221,73 @@ Vars :
 
         free($4.name);
 
-        new_command(C_VAR, NULL, strdup(get_c_type($4.type)), strdup($2.name));
+        
+        char* subprog_var_name = strdup(functionName);
+        if(parsing_subprogram == 1){
+            strcat(subprog_var_name, "_");
+            strcat(subprog_var_name, strdup($2.name));
+            strcat(subprog_var_name, "[100]");
+            new_command(C_VAR, NULL, strdup(get_c_type($4.type)), strdup(subprog_var_name));
+        }
+        else{
+            new_command(C_VAR, NULL, strdup(get_c_type($4.type)), strdup($2.name));
+        }
+
+        free(subprog_var_name);
+        subprog_var_name = strdup(functionName);
+        strcat(subprog_var_name, "_");
+        strcat(subprog_var_name, strdup($2.name));
+        strcat(subprog_var_name, "[");
+        strcat(subprog_var_name, strdup(functionName));
+        strcat(subprog_var_name, "_stack_control]");
+
         switch ($4.type) {
             case E_INT:
                 // printf("%s = %d;\n", $2.name, 0);
-                new_command(C_ATTRIB, strdup($2.name), "0", NULL);
+                if(parsing_subprogram == 1){
+                    new_command(C_ATTRIB, strdup(subprog_var_name), "0", NULL);
+                }
+                else{
+                    new_command(C_ATTRIB, strdup($2.name), "0", NULL);
+                }
                 break;
             case E_REAL:
                 // printf("%s = %f;\n", $2.name, 0.0);
-                new_command(C_ATTRIB, strdup($2.name), "0.0", NULL);
+                if(parsing_subprogram == 1){
+                    new_command(C_ATTRIB, strdup(subprog_var_name), "0.0", NULL);
+                }
+                else{
+                    new_command(C_ATTRIB, strdup($2.name), "0.0", NULL);
+                }
                 break;
             case E_BOOL:
                 // printf("%s = %d;\n", $2.name, 1);
-                new_command(C_ATTRIB, strdup($2.name), "false", NULL);
+                if(parsing_subprogram == 1){
+                    new_command(C_ATTRIB, strdup(subprog_var_name), "false", NULL);
+                }else{
+                    new_command(C_ATTRIB, strdup($2.name), "false", NULL);
+                }
                 break;
             case E_CHAR:
                 // printf("%s = %s;\n", $2.name, "''");
-                new_command(C_ATTRIB, strdup($2.name), "''", NULL);
+                if(parsing_subprogram == 1){
+                    new_command(C_ATTRIB, strdup(subprog_var_name), "''", NULL);
+                }else{
+                    new_command(C_ATTRIB, strdup($2.name), "''", NULL);
+                }
                 break;
             case E_STRING:
                 // printf("%s = %s;\n", $2.name, "\"\"");
-                new_command(C_ATTRIB, strdup($2.name), "malloc(sizeof(char)*100)", NULL);
+                if(parsing_subprogram == 1){
+                    new_command(C_ATTRIB, strdup(subprog_var_name), "malloc(sizeof(char)*100)", NULL);
+                }else{
+                    new_command(C_ATTRIB, strdup($2.name), "malloc(sizeof(char)*100)", NULL);
+                }
                 // TODO:
                 // to_free_later(strdup($2.name));
                 break;
         }
+        free(subprog_var_name);
     } Vars
 |   {/*printf("end of vars\n");*/}/* NOTHING */
 ;
@@ -551,7 +604,6 @@ CmdBlock :
         if(args_size > 0 && args_size < 101){
             for(size_t i = 0; i < args_size; i++){
                 Symbol_Entry * newSymbol = malloc (sizeof(Symbol_Entry));
-
                 newSymbol->name = strdup(args_names[i]);
                 newSymbol->symbol_type = 0;
 
@@ -562,7 +614,7 @@ CmdBlock :
 
                 // Flag para indicar que a variavel, na tabela de simbolos, 
                     // eh um parametro de subprograma
-                var_data.is_subprog_param = 1;
+                var_data.is_subprog_var = 1;
 
                 newSymbol->data.v_data = var_data;
 
@@ -602,17 +654,10 @@ CmdAux:
             );
         }
         
-        /*
-
-        CODIGO COMENTADO - Tratar nomes de variaveis declaradas em subprogramas no codigo gerado
-            codigo fonte: 
-                <nome_variavel> := 10;
-            codigo gerado: 
-                <nome_funcao>_<nome_variavel>[<nome_funcao>_stack_control] := 10;
-        
+        //TODO: revisar o codigo abaixo depois
         char* temp;
         char* temp2;
-        if($1.is_subprog_param == 1 && $3.is_subprog_param == 1){
+        if($1.is_subprog_var == 1 && $3.is_subprog_var == 1){
             temp = strdup(functionName);
             strcat(temp, "_");
             strcat(temp, strdup($1.var));
@@ -625,7 +670,7 @@ CmdAux:
             free(temp);
             free(temp2);
         }
-        else if($1.is_subprog_param == 1){
+        else if($1.is_subprog_var == 1){
             temp = strdup(functionName);
             strcat(temp, "_");
             strcat(temp, strdup($1.var));
@@ -634,7 +679,7 @@ CmdAux:
             strcat(temp, "_stack_control]");
             new_command(C_ATTRIB, strdup(temp), strdup($3.var), NULL);
             free(temp);
-        }else if($3.is_subprog_param == 1){
+        }else if($3.is_subprog_var == 1){
             temp = strdup(functionName);
             strcat(temp, "_");
             strcat(temp, strdup($3.var));
@@ -647,8 +692,8 @@ CmdAux:
         else{
             new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
         }
-        */
-        new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
+
+
         if ($1.name != NULL) {
             free($1.name);
             $1.name = NULL;
@@ -782,7 +827,7 @@ AcessMemAddr:
                         }
                     } else {
                         $$.var = $1.name;
-                        $$.is_subprog_param = entry->data.v_data.is_subprog_param;
+                        $$.is_subprog_var = entry->data.v_data.is_subprog_var;
                     }
                     break;
                 default:
@@ -868,6 +913,12 @@ AcessMemAddr:
         } else {
             printf("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
         }
+
+        //TODO: Criação de label para retorno após termino da execucao do subprograma
+
+            //char* label_function_call = strdup(functionName);
+            //strcat(label_function_call, "_");
+            //new_command(C_LABEL, strdup(label_function_call), NULL, NULL);
     }
     args_size=0;
 }
@@ -916,6 +967,7 @@ CmdConditionalEnd:
 
 CmdReturn:
     RETURN CmdReturnExp {
+        commit_commands();
         if (current_return_type != 0 && current_return_type != $2.type) {
             printf("Error: Return type is %s but was expected to be %s.", type_name($2.type), type_name(current_return_type));
         }
@@ -933,6 +985,17 @@ CmdReturn:
                     );
                 }
             }
+
+
+            // <FUNCTION_NAME>_return_value[<FUNCTION_NAME>_stack_control] = i0;
+            char* return_assignment = strdup(functionName);
+            strcat(return_assignment, "_return_value[");
+            strcat(return_assignment, strdup(functionName));
+            strcat(return_assignment, "_stack_control]");
+            new_command(C_ATTRIB, strdup(return_assignment), strdup($2.var), NULL);
+            free(return_assignment);
+
+            //GOTO <FUNCTION_NAME> LABEL;
             char* temp = strdup(functionName);
             strcat(temp, "_return");
             new_command(C_GOTO, NULL, temp, NULL);
@@ -1613,9 +1676,27 @@ SimpleExp:
         char* label1 = create_label('a');
         new_command(C_VAR, NULL, strdup(get_c_type($1.type)), strdup(label1));
         
+        //TODO: realizar tratamento de chamadas de função
         //printf("s1.var: %s\n", $1.var); //printando 'null', deveria printar a chamada de funcao (nome da funcao + parametros)
         //Erro neste new command quando expressao eh chamada de funcao
-        new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
+        
+        char* subprog_var_name;
+        if($1.is_subprog_var == 1){
+            subprog_var_name = strdup(functionName);
+            strcat(subprog_var_name, "_");
+            strcat(subprog_var_name, strdup($1.var));
+            strcat(subprog_var_name, "[");
+            strcat(subprog_var_name, functionName);
+            strcat(subprog_var_name, "_stack_control]");
+
+            new_command(C_ATTRIB, strdup(label1), strdup(subprog_var_name), NULL);
+            free(subprog_var_name);
+        }
+        else{
+            new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
+        }
+
+    
         $$.var = strdup(label1);
         $$.is_constant = $1.is_constant;
         $$.value = $1.value;

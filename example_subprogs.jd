@@ -1,10 +1,10 @@
-function sum(a : int, b : int) : int begin
+function SOMAR(a : int, b : int) : int begin
     var x : int;
     return a + b
 end;
 
 begin
-    var a : int;
-    a := 5;
+    var x : int;
+    x := 5;
     return
 end
