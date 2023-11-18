@@ -225,15 +225,18 @@ void create_command(Symbol_Entry * symbol){
                 strcat(command, symbol->data.sp_data.params_names[i]);
                 strcat(command, "[100];\n");
             }
-            strcat(command, get_c_type(symbol->data.sp_data.return_type));
-            strcat(command, " ");
-            strcat(command, symbol->name);
-            strcat(command, "_return_value[100];\n");
+            
+            if (symbol->data.sp_data.return_type != 0) {
+                strcat(command, get_c_type(symbol->data.sp_data.return_type));
+                strcat(command, " ");
+                strcat(command, symbol->name);
+                strcat(command, "_return_value[100];\n");
+            }
 
             // return control
             strcat(command, "int ");
             strcat(command, symbol->name);
-            strcat(command, "_return_control[100];\n");
+            strcat(command, "_return_control[100];\n");            
 
             //stack control
             strcat(command, "int ");
@@ -269,4 +272,28 @@ void create_command(Symbol_Entry * symbol){
 	printf("%s\n",command);
 	new_command(C_TYPE, strdup(command), "", "");
 
+}
+
+
+void generate_return_control() {
+    Symbol_Table* scope = getCurrentScope();
+    while(scope->parent != NULL){
+        scope = scope->parent;
+    }
+    for (size_t i = 0; i < scope->symbol_size; i++){
+        Symbol_Entry* symbol = scope->symbols[i];
+        if(symbol->symbol_type == K_SUBPROGRAM){
+            printf("\t%s_return:\n", symbol->name);
+            printf("switch (%s_stack_control) {\ncase 0:\n", symbol->name);
+            printf("switch (%s_call_control) {\n", symbol->name);
+            for(int i = 0; i < symbol->data.sp_data.num_calls; i++){
+                printf("case %d:\n", i);
+                printf("goto %s_%d;\n", symbol->name, i);
+
+            }
+            // printf("}\ndefault:\n%s_stack_control--;\ngoto %s_rec;\n}\n", symbol->name, symbol->name);
+            printf("}\n}\n");
+        }
+    }
+    
 }

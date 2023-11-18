@@ -125,7 +125,10 @@ Prog :
         for(int i = 0; i < command_counter; i++) {
             generate_cmd(&commands[i]);
         }
+        printf("goto end;\n");
+        generate_return_control();
         freeScopes();
+        printf("end:\n");
         printf("\nreturn 0;\n");
         printf("}\n");
 
@@ -479,8 +482,11 @@ ProcedureDecl :
         newSymbol->data.sp_data = procedure;
 
         insertSymbol(getCurrentScope(), newSymbol);
-        
 
+        create_command(newSymbol);
+
+        new_command(C_LABEL, NULL, strdup($2.name), NULL);
+        
     } CmdBlock SEMICOLON
     {
         // #ifdef DEBUG
@@ -926,7 +932,7 @@ AcessMemAddr:
                             type_name(entry->data.sp_data.params_types[i])
                         );
                     }
-                    else{
+                    else {
                     // Geracao de codigo
                         // Atribuicao dos parametros do subprograma com base nos argumentos
                         char* subprog_param = strdup($1.name);
@@ -949,7 +955,6 @@ AcessMemAddr:
             }
 
         //Atualizar numero de vezes que o subprograma foi invocado
-            entry->data.sp_data.num_calls++;
 
         // <function>_call_control = numChamadas
             char* call_control = strdup($1.name);
@@ -983,6 +988,7 @@ AcessMemAddr:
             new_command(C_LABEL, NULL, strdup(label_return), NULL);
             free(label_return); 
             $$.is_function_call = 1;
+            entry->data.sp_data.num_calls++;
         }
         args_size=0;
     }
@@ -990,7 +996,7 @@ AcessMemAddr:
 
 Args : 
     Exp {
-        strcpy(args_names[args_size], strdup($1.name));
+        strcpy(args_names[args_size], strdup($1.var));
         args_types[args_size++] = $1.type; 
         free($1.name);
     } ArgsAux

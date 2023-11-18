@@ -1,21 +1,13 @@
 
-type arr := array[0..10] of int;
-type INT2 := arr;
-
-procedure procedure1 (par1 : bool, par2 : int) 
+function not(par1 : int) : int 
 begin 
-  var var1 : bool;
-  return
+  return par1+par1
 end;
 
 begin
-    var x : INT2;
-    begin
-        var y : int;
-        y := 1;
-        print("%d", y)
-    end;
-    x[0] := 1;
-    print("%d", x[0]);
+    var x : int;
+    x := 10;
+    x := not(x);
+    print("%d\n", x);
     return
 end
