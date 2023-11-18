@@ -4,6 +4,6 @@ end;
 
 begin
     var x : int;
-    x := SOMAR(5 ,10);
+    x := SOMAR(5, 10);
     return
 end

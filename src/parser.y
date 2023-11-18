@@ -906,10 +906,13 @@ AcessMemAddr:
         free($3.name); // TODO remover esse free?
     }
 |   ID LPAR {args_size=0;} Args RPAR {
+    
         Symbol_Entry* entry = getSubProgram($1.name);
+
         if (entry == NULL) {
             printf("Symbol '%s' not found.", $1.name);
-        } else {
+        } 
+        else {
             if (entry->data.sp_data.return_type != -1) {
                 $$.type = entry->data.sp_data.return_type;
             }
@@ -917,11 +920,24 @@ AcessMemAddr:
                 for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
                     if (args_types[i] != entry->data.sp_data.params_types[i]) {
                         printf(
-                            "Type of parameter %s is %s but was expected to be %s.", 
-                            args_names[i], 
+                            "Type of parameter '%s' is %s but was expected to be %s.\n", 
+                            entry->data.sp_data.params_names[i],
                             type_name(args_types[i]), 
                             type_name(entry->data.sp_data.params_types[i])
                         );
+                    }
+                    else{
+                    // Geracao de codigo
+                        // Atribuicao dos parametros do subprograma com base nos argumentos
+                        char* subprog_param = strdup($1.name);
+                        strcat(subprog_param, "_");
+                        strcat(subprog_param, strdup(entry->data.sp_data.params_names[i]));
+                        strcat(subprog_param, "[");
+                        strcat(subprog_param, strdup($1.name));
+                        strcat(subprog_param, "_stack_control]");
+
+                        new_command(C_ATTRIB, strdup(subprog_param), strdup(args_names[i]), NULL);
+                        free(subprog_param);
                     }
                 }
             } else {
@@ -931,15 +947,26 @@ AcessMemAddr:
                     args_size
                 );
             }
+
         //Atualizar numero de vezes que o subprograma foi invocado
             entry->data.sp_data.num_calls++;
 
-        /*
-            TODO: Atribuição dos parametros do subprograma
-            Antes do 'goto subprog_name;'
-                    deve haver atribuicao dos parametros do subprograma com base nos argumentos
-        */
-        // GOTO para inicio do subprograma
+        // <function>_call_control = numChamadas
+            char* call_control = strdup($1.name);
+            strcat(call_control, "_call_control");
+
+            char numChamadas[50];
+            sprintf(numChamadas, "%d", entry->data.sp_data.num_calls);
+
+            new_command(
+                C_ATTRIB, 
+                strdup(call_control), 
+                numChamadas, 
+                NULL
+            );
+
+
+        // GOTO para inicio (label) do subprograma
             new_command(C_GOTO, NULL, strdup(entry->name), NULL);
 
         //Criação de label para retorno após termino da execucao do subprograma
@@ -963,6 +990,7 @@ AcessMemAddr:
 
 Args : 
     Exp {
+        strcpy(args_names[args_size], strdup($1.name));
         args_types[args_size++] = $1.type; 
         free($1.name);
     } ArgsAux
