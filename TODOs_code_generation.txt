@@ -1,0 +1,3 @@
+- Chamada de Funcao recursiva
+- Switch-case para retorno de funcao
+- 'goto end' (ver teste.c)
