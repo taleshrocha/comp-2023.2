@@ -109,82 +109,82 @@ void generate_cmd(CommandEntry * entry){
 	switch(entry->operator){
         // criação de variável
 		case C_VAR: 
-            printf("%s %s;\n", entry->op1, entry->op2);
+            printf("\t%s %s;\n", entry->op1, entry->op2);
 			break;
         // atribuição de valor simples
 		case C_ATTRIB: 
-            printf("%s = %s;\n", entry->result, entry->op1);
+            printf("\t%s = %s;\n", entry->result, entry->op1);
             // Register temp;
             // create_Register(&temp, &entry->result);
 			break;
 		// branching
         case C_IF: 
-            printf("if (%s) goto %s;\n", entry->op1, entry->op2);
+            printf("\tif (%s) goto %s;\n", entry->op1, entry->op2);
             break;
         case C_IFN: 
-            printf("if (!%s) goto %s;\n", entry->op1, entry->op2);
+            printf("\tif (!%s) goto %s;\n", entry->op1, entry->op2);
             break;
 		case C_GOTO:
-            printf("goto %s;\n\n", entry->op1);
+            printf("\tgoto %s;\n\n", entry->op1);
             break;
 		case C_LABEL:
             printf("%s:\n\n", entry->op1);
             break;
         // Operadores aritméticos
         case C_ADD:
-            printf("%s = %s + %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s + %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_SUBTRACT:
-            printf("%s = %s - %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s - %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_MULTIPLICATE:
-            printf("%s = %s * %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s * %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_DIVIDE:
-            printf("%s = %s / %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s / %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_MODULE:
-            printf("%s = %s %% %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s %% %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         // Operadores relacionais
         case C_GREATER:
-            printf("%s = %s > %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s > %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_LESSER:
-            printf("%s = %s < %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s < %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_GEQ:
-            printf("%s = %s >= %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s >= %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_LEQ:
-            printf("%s = %s <= %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s <= %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_EQ:
-            printf("%s = %s == %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s == %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         case C_NEQ:
-            printf("%s = %s != %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = %s != %s;\n", entry->result, entry->op1, entry->op2);
 			break;
         // Operadores unários
         case C_NOT:
-            printf("%s = !%s;\n", entry->result, entry->op1);
+            printf("\t%s = !%s;\n", entry->result, entry->op1);
 			break;
         case C_MINUS:
-            printf("%s = -%s;\n", entry->result, entry->op1);
+            printf("\t%s = -%s;\n", entry->result, entry->op1);
 			break;
         case C_PLUS:
-            printf("%s = +%s;\n", entry->result, entry->op1);
+            printf("\t%s = +%s;\n", entry->result, entry->op1);
 			break;
         // Comandos de entrada e saida
         case C_PRINT:
-            printf("printf(%s%s);\n", entry->op1, entry->op2);
+            printf("\tprintf(%s%s);\n", entry->op1, entry->op2);
 			break;
         case C_READ:
-            printf("scanf(\"%%s\", %s);\n", entry->result);
+            printf("\tscanf(\"%%s\", %s);\n", entry->result);
 			break;
         // Comandos de coerção
         case C_CAST:
-            printf("%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
+            printf("\t%s = (%s) %s;\n", entry->result, entry->op1, entry->op2);
             break;
 	}
 

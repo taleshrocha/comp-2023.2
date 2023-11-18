@@ -48,6 +48,7 @@ typedef struct SubProgram
     int params_types[16];
     short ref_flags[16];
     size_t params_size;
+    int num_calls; // Total de vezes que o subprograma foi invocado
 } SubProgram;
 
 typedef struct Record {

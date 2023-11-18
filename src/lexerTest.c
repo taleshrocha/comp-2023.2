@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 // #include "terminalDefines.h"
-#include "symbolTable.h"
+// #include "symbolTable.h"
 #include "lexer.h"
 
 int main() {

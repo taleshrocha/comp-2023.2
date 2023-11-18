@@ -56,6 +56,7 @@ void yyerror(char* s, ...) {
         char* name;
         char label[10];
         int is_subprog_var;
+        int is_function_call;
         int is_constant;
         union {
             int v_int;
@@ -125,7 +126,7 @@ Prog :
             generate_cmd(&commands[i]);
         }
         freeScopes();
-        printf("return 0;\n");
+        printf("\nreturn 0;\n");
         printf("}\n");
 
     }
@@ -474,7 +475,7 @@ ProcedureDecl :
         }
         procedure.params_size = args_size;
         procedure.return_type = 0;
-
+        procedure.num_calls = 0;
         newSymbol->data.sp_data = procedure;
 
         insertSymbol(getCurrentScope(), newSymbol);
@@ -571,6 +572,7 @@ FunctionDecl:
         }
 
         function.params_size = args_size;
+        function.num_calls = 0;
         newSymbol->data.sp_data = function;
 
         // criar registro na tabela
@@ -654,6 +656,13 @@ CmdAux:
             );
         }
         
+        //TODO: Tratar atribuição de retorno de função
+            // Atributo is_function_call em 'Exp' ?
+                // Exemplo:
+                // Se $3.is_function_call == 1, 
+                    //entao fazemos a atribuição func_return_value[func_stack_control] ao AcessMemAddr.
+
+
         //TODO: revisar o codigo abaixo depois
         char* temp;
         char* temp2;
@@ -897,31 +906,59 @@ AcessMemAddr:
         free($3.name); // TODO remover esse free?
     }
 |   ID LPAR {args_size=0;} Args RPAR {
-    Symbol_Entry* entry = getSubProgram($1.name);
-    if (entry == NULL) {
-        printf("Symbol '%s' not found.", $1.name);
-    } else {
-        if (entry->data.sp_data.return_type != -1) {
-            $$.type = entry->data.sp_data.return_type;
-        }
-        if (entry->data.sp_data.params_size == args_size) {
-            for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
-                if (args_types[i] != entry->data.sp_data.params_types[i]) {
-                    printf("Type of parameter %s is %s but was expected to be %s.", args_names[i], type_name(args_types[i]), type_name(entry->data.sp_data.params_types[i]));
-                }
-            }
+        Symbol_Entry* entry = getSubProgram($1.name);
+        if (entry == NULL) {
+            printf("Symbol '%s' not found.", $1.name);
         } else {
-            printf("Wrong number of parameters. %ld parameters expected, %ld given", entry->data.sp_data.params_size, args_size);
+            if (entry->data.sp_data.return_type != -1) {
+                $$.type = entry->data.sp_data.return_type;
+            }
+            if (entry->data.sp_data.params_size == args_size) {
+                for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
+                    if (args_types[i] != entry->data.sp_data.params_types[i]) {
+                        printf(
+                            "Type of parameter %s is %s but was expected to be %s.", 
+                            args_names[i], 
+                            type_name(args_types[i]), 
+                            type_name(entry->data.sp_data.params_types[i])
+                        );
+                    }
+                }
+            } else {
+                printf(
+                    "Wrong number of parameters. %ld parameters expected, %ld given", 
+                    entry->data.sp_data.params_size, 
+                    args_size
+                );
+            }
+        //Atualizar numero de vezes que o subprograma foi invocado
+            entry->data.sp_data.num_calls++;
+
+        /*
+            TODO: Atribuição dos parametros do subprograma
+            Antes do 'goto subprog_name;'
+                    deve haver atribuicao dos parametros do subprograma com base nos argumentos
+        */
+        // GOTO para inicio do subprograma
+            new_command(C_GOTO, NULL, strdup(entry->name), NULL);
+
+        //Criação de label para retorno após termino da execucao do subprograma
+            // Criacao da label de retorno
+            char* label_return = strdup(entry->name);
+            strcat(label_return, "_");
+
+            // Conversão numero da chamada (int) para string
+            char buffer[50];
+            sprintf(buffer, "%d", entry->data.sp_data.num_calls);
+            strcat(label_return, buffer);
+
+            // Label de retorno
+            new_command(C_LABEL, NULL, strdup(label_return), NULL);
+            free(label_return); 
+            $$.is_function_call = 1;
         }
-
-        //TODO: Criação de label para retorno após termino da execucao do subprograma
-
-            //char* label_function_call = strdup(functionName);
-            //strcat(label_function_call, "_");
-            //new_command(C_LABEL, strdup(label_function_call), NULL, NULL);
+        args_size=0;
     }
-    args_size=0;
-}
 ;
 
 Args : 
@@ -986,8 +1023,7 @@ CmdReturn:
                 }
             }
 
-
-            // <FUNCTION_NAME>_return_value[<FUNCTION_NAME>_stack_control] = i0;
+        // <FUNCTION_NAME>_return_value[<FUNCTION_NAME>_stack_control] = i0;
             char* return_assignment = strdup(functionName);
             strcat(return_assignment, "_return_value[");
             strcat(return_assignment, strdup(functionName));
@@ -995,7 +1031,7 @@ CmdReturn:
             new_command(C_ATTRIB, strdup(return_assignment), strdup($2.var), NULL);
             free(return_assignment);
 
-            //GOTO <FUNCTION_NAME> LABEL;
+        //GOTO <FUNCTION_NAME> LABEL;
             char* temp = strdup(functionName);
             strcat(temp, "_return");
             new_command(C_GOTO, NULL, temp, NULL);
@@ -1097,6 +1133,7 @@ Exp:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 };
 
@@ -1139,6 +1176,7 @@ Terms:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
     }
 ;
@@ -1288,6 +1326,7 @@ Comps:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 ;
@@ -1314,6 +1353,7 @@ Factor:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 ;
@@ -1370,6 +1410,7 @@ AriOp:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 ;
@@ -1444,6 +1485,7 @@ AriOp2:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 ;
@@ -1454,6 +1496,7 @@ Parenthesis:
         $$.name = $1.name;
         $$.var = $1.var;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
         
 }
@@ -1521,6 +1564,7 @@ UnaryExp:
         $$.var = $1.var;
         $$.name = $1.name;
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 ;
@@ -1658,6 +1702,7 @@ CastExp:
     $$.name = $1.name;
     $$.var = $1.var;
     $$.is_constant = $1.is_constant;
+    $$.is_function_call = $1.is_function_call;
     $$.value = $1.value;
     
 }
@@ -1668,6 +1713,7 @@ SimpleExp:
         $$.name = $1.name;
         $$.var = strdup($1.var);
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 |   AcessMemAddr {
@@ -1675,10 +1721,6 @@ SimpleExp:
         $$.name = $1.name;
         char* label1 = create_label('a');
         new_command(C_VAR, NULL, strdup(get_c_type($1.type)), strdup(label1));
-        
-        //TODO: realizar tratamento de chamadas de função
-        //printf("s1.var: %s\n", $1.var); //printando 'null', deveria printar a chamada de funcao (nome da funcao + parametros)
-        //Erro neste new command quando expressao eh chamada de funcao
         
         char* subprog_var_name;
         if($1.is_subprog_var == 1){
@@ -1690,15 +1732,29 @@ SimpleExp:
             strcat(subprog_var_name, "_stack_control]");
 
             new_command(C_ATTRIB, strdup(label1), strdup(subprog_var_name), NULL);
+
             free(subprog_var_name);
         }
         else{
-            new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
+            if($1.is_function_call == 1){
+                char* return_var = strdup($1.name);
+                strcat(return_var, "_return_value[");
+                strcat(return_var, strdup($1.name));
+                strcat(return_var, "_stack_control]");
+
+                new_command(C_ATTRIB, strdup(label1), strdup(return_var), NULL);
+                free(return_var);
+            }
+            else{
+            //Erro neste new command quando expressao eh chamada de funcao
+                //Resolvido com inserção do tratamento "if($1.is_function_call)" ?
+                new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
+            }
         }
 
-    
         $$.var = strdup(label1);
         $$.is_constant = $1.is_constant;
+        $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
 }
 ;
