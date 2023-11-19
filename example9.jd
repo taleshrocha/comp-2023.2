@@ -1,13 +1,18 @@
 
-function not(par1 : int) : int 
+function double(par1 : int) : int 
 begin 
-  return par1+par1
+  var par2: int;
+  par2 := par1+par1;
+  return par2
 end;
 
 begin
     var x : int;
-    x := 10;
-    x := not(x);
-    print("%d\n", x);
+    var i : int;
+    x := 1;
+    for i := 0 to 10 step 1 begin
+        x := double(x);
+        print("%d - %d\n", i, x)
+    end;
     return
 end

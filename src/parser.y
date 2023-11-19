@@ -485,7 +485,9 @@ ProcedureDecl :
 
         create_command(newSymbol);
 
-        new_command(C_LABEL, NULL, strdup($2.name), NULL);
+        char* temp = strdup($2.name);
+        strcat(temp, "_subprogram");
+        new_command(C_LABEL, NULL, strdup(temp), NULL);
         
     } CmdBlock SEMICOLON
     {
@@ -590,7 +592,9 @@ FunctionDecl:
         current_return_type = function.return_type;
         create_command(newSymbol);
 
-        new_command(C_LABEL, NULL, strdup($2.name), NULL);
+        char* temp = strdup($2.name);
+        strcat(temp, "_subprogram");
+        new_command(C_LABEL, NULL, strdup(temp), NULL);
 
     } CmdBlock SEMICOLON
     {
@@ -676,10 +680,16 @@ CmdAux:
             temp = strdup(functionName);
             strcat(temp, "_");
             strcat(temp, strdup($1.var));
+            strcat(temp, "[");
+            strcat(temp, functionName);
+            strcat(temp, "_stack_control]");
 
             temp2 = strdup(functionName);
             strcat(temp2, "_");
             strcat(temp2, strdup($3.var));
+            strcat(temp2, "[");
+            strcat(temp2, functionName);
+            strcat(temp2, "_stack_control]");
             new_command(C_ATTRIB, strdup(temp), strdup(temp2), NULL);
 
             free(temp);
@@ -694,7 +704,7 @@ CmdAux:
             strcat(temp, "_stack_control]");
             new_command(C_ATTRIB, strdup(temp), strdup($3.var), NULL);
             free(temp);
-        }else if($3.is_subprog_var == 1){
+        } else if($3.is_subprog_var == 1){
             temp = strdup(functionName);
             strcat(temp, "_");
             strcat(temp, strdup($3.var));
@@ -850,6 +860,7 @@ AcessMemAddr:
             }
         }
         $$.name = $1.name;
+        $$.var = $1.name;
     }
 |   AcessMemAddr DOT ID {
         Symbol_Entry* entry = searchRecordType($1.type);
@@ -962,17 +973,18 @@ AcessMemAddr:
 
             char numChamadas[50];
             sprintf(numChamadas, "%d", entry->data.sp_data.num_calls);
-
             new_command(
                 C_ATTRIB, 
                 strdup(call_control), 
-                numChamadas, 
+                strdup(numChamadas), 
                 NULL
             );
 
 
         // GOTO para inicio (label) do subprograma
-            new_command(C_GOTO, NULL, strdup(entry->name), NULL);
+        char* temp = strdup(entry->name);
+        strcat(temp, "_subprogram");
+        new_command(C_GOTO, NULL, strdup(temp), NULL);
 
         //Criação de label para retorno após termino da execucao do subprograma
             // Criacao da label de retorno
@@ -998,7 +1010,7 @@ Args :
     Exp {
         strcpy(args_names[args_size], strdup($1.var));
         args_types[args_size++] = $1.type; 
-        free($1.name);
+        // free($1.name);
     } ArgsAux
 |   /* NOTHING */ {}
 ;
@@ -1161,6 +1173,7 @@ Exp:
         strcpy($$.name, $1.name);
         strcat($$.name, " || ");
         strcat($$.name, $4.name);
+        $$.is_subprog_var = 0;
     }
 |   Terms {
         $$.type = $1.type;
@@ -1169,6 +1182,7 @@ Exp:
         $$.is_constant = $1.is_constant;
         $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
+        $$.is_subprog_var = 0;
 };
 
 Terms:
