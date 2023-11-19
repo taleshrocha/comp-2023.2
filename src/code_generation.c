@@ -43,6 +43,7 @@ typedef struct {
 	char * variables[10];
 	char * localVariables[10];
     char   params[16][32];
+    int    paramsType[16];
     char   functionNames[16][32];
     short  ref_flags[16];
     int    functionReturn;
@@ -89,18 +90,18 @@ void getStack(char * name) {
 void getParams(int start) {
     for(int i = 0; i < 16; i++) {
         if(strcmp(Stack[start].params[i], "") != 0) {
-            printf("Params saved: %s \n", Stack[start].params[i]);
+            printf("Params saved: %s | type: [%d] | ref: [%d] \n", Stack[start].params[i], Stack[start].paramsType[i], Stack[start].ref_flags[i]);
         }
     }
 }
 
 void getSavedFunction(char * name) {
-    printf("Checking function: %s \n", name);
+    printf("Checking function saved: %s \n", name);
     for(int i = 0; i < 16; i ++) {
         for(int j = 0; j < 16; j++) {
             if(strcmp(Stack[i].functionNames[j], name) == 0) {
-                printf("Function saved: %s \n", Stack[i].functionNames[j]);
-                printf("Return type: %d \n", Stack[i].functionReturn);
+                printf("Function name saved: %s \n", Stack[i].functionNames[j]);
+                printf("Return type saved: %d \n", Stack[i].functionReturn);
                 getParams(i);
             }
         }
@@ -131,6 +132,8 @@ void createRegister(Register* reg_temp, char ** registro, char * name) {
             const char* paramName = entry->data.sp_data.params_names[i];
             if (paramName[0] != '\0') {
                 snprintf(reg_temp->params[paramIndex], sizeof(reg_temp->params[paramIndex]), "%s", paramName);
+                reg_temp->paramsType[paramIndex] = entry->data.sp_data.params_types[i];
+                reg_temp->ref_flags[paramIndex] = entry->data.sp_data.ref_flags[i];
                 paramIndex++;
                 if (paramIndex >= MAX_PARAMS) {
                     break;
@@ -288,7 +291,6 @@ void create_command(Symbol_Entry * symbol){
 		case K_VARIABLE: 
             break;
         case K_SUBPROGRAM: 
-            printf("Get function! \n");
             Register temp;
             temp.sizeofVariables = 0;
             printf("RECEIVED: %s \n", symbol->name);
