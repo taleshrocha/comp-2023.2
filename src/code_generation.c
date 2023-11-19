@@ -45,6 +45,7 @@ typedef struct {
     char   params[16][32];
     char   functionNames[16][32];
     short  ref_flags[16];
+    int    functionReturn;
 	int sizeofVariables;
 } Register;
 
@@ -71,7 +72,7 @@ Register popRegister(Register registro) {
     return registro;
 }
 
-void getTestTable(char * name) {
+void getStack(char * name) {
     Symbol_Entry* entry = getSubProgram(name);
     if(entry != NULL){
         printf("Function Name: %s \n", entry->name);
@@ -85,12 +86,34 @@ void getTestTable(char * name) {
     }
 }
 
+void getParams(int start) {
+    for(int i = 0; i < 16; i++) {
+        if(strcmp(Stack[start].params[i], "") != 0) {
+            printf("Params saved: %s \n", Stack[start].params[i]);
+        }
+    }
+}
+
+void getSavedFunction(char * name) {
+    printf("Checking function: %s \n", name);
+    for(int i = 0; i < 16; i ++) {
+        for(int j = 0; j < 16; j++) {
+            if(strcmp(Stack[i].functionNames[j], name) == 0) {
+                printf("Function saved: %s \n", Stack[i].functionNames[j]);
+                printf("Return type: %d \n", Stack[i].functionReturn);
+                getParams(i);
+            }
+        }
+    }
+}
+
+
 void printRegister() {
 	printf("Printing Register: \n");
 	for(int i = 0; i < 10; i++) {
 		for(int j = 0; j < Stack[i].sizeofVariables; j++) {
 			printf("Name: %s [stack: %d | pos: %d]\n", Stack[i].variables[j], i, j);
-            getTestTable(Stack[i].variables[j]);
+            getStack(Stack[i].variables[j]);
 		}
 	}
 }
@@ -114,6 +137,7 @@ void createRegister(Register* reg_temp, char ** registro, char * name) {
                 }
             }
         }
+        reg_temp->functionReturn = entry->data.sp_data.return_type;
     } else {
         printMessage(ERROR, "Subprogram not found: %s\n", name);
     }
@@ -264,14 +288,15 @@ void create_command(Symbol_Entry * symbol){
 		case K_VARIABLE: 
             break;
         case K_SUBPROGRAM: 
-            printf("Get function!");
+            printf("Get function! \n");
             Register temp;
             temp.sizeofVariables = 0;
             printf("RECEIVED: %s \n", symbol->name);
             createRegister(&temp, &symbol->name, symbol->name);
             pushRegister(temp);
-            // getTestTable(symbol->name);
-            printRegister();
+            // getStack(symbol->name);
+            // printRegister();
+            getSavedFunction(symbol->name);
             break;
         case K_ARRAY: 
             break;
