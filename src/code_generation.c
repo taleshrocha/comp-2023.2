@@ -38,23 +38,13 @@ static int counter  = 0;
 int top = -1;
 int variable = 0;
 #define MAX_PARAMS 16 
-typedef struct {
-	uintptr_t memoryAddress;
-	char * variables[10];
-	char * localVariables[10];
-    char   params[16][32];
-    int    paramsType[16];
-    char   functionNames[16][32];
-    short  ref_flags[16];
-    int    functionReturn;
-	int sizeofVariables;
-} Register;
 
 Register Stack[100]; // Tamanho da pilha (100)
 
 
 void pushRegister(Register registro) {
 	if (top < 99) { // Ajustar o tamanho da pilha
+		getScope(&registro);
 		Stack[++top] = registro;
 		printMessage(SUCCESS, "Registro salvo na stack. \n|Memory Address: %d \n", registro.memoryAddress); 
 	} else {
@@ -95,19 +85,47 @@ void getParams(int start) {
     }
 }
 
-void getSavedFunction(char * name) {
+void getLocalVariables(int start) {
+	for(int i = 0; i < 16; i++) {
+		if(strcmp(Stack[start].localVariables[i], "") != 0) {
+			printf("Local variable [%s] | Type [%d] \n", Stack[start].localVariables[i], Stack[start].localTypes[i]);
+		}
+	}
+}
+
+
+void printSavedFunction(char * name) {
     printf("Checking function saved: %s \n", name);
     for(int i = 0; i < 16; i ++) {
-        for(int j = 0; j < 16; j++) {
-            if(strcmp(Stack[i].functionNames[j], name) == 0) {
-                printf("Function name saved: %s \n", Stack[i].functionNames[j]);
-                printf("Return type saved: %d \n", Stack[i].functionReturn);
-                getParams(i);
-            }
-        }
+		if(strcmp(Stack[i].functionNames[0], name) == 0) {
+			printf("Function name saved: %s \n", Stack[i].functionNames[0]);
+			printf("Return type saved: %d \n", Stack[i].functionReturn);
+			getParams(i);
+			getLocalVariables(i);
+		}
     }
 }
 
+Register getRegister(char * name) {
+	Register nullRegister;
+	for(int i = 0; i < 5; i++) {
+		if(strcmp(Stack[i].functionNames[0], name) == 0) {
+			return Stack[i];
+		}
+	}
+	return nullRegister;
+}
+
+int count_aa = 0;
+
+void getScope(Register * temp) {
+	Symbol_Table * scope = getCurrentScope();
+	Symbol_Table* children = scope->children[count_aa++];
+	for(int i = 0; i < children->symbol_size; i++) {
+		snprintf(temp->localVariables[i], sizeof(temp->localVariables[i]), "%s", children->symbols[i]->name);
+		temp->localTypes[i] = children->symbols[i]->data.v_data.type;
+	}
+}
 
 void printRegister() {
 	printf("Printing Register: \n");
@@ -118,6 +136,7 @@ void printRegister() {
 		}
 	}
 }
+
 
 
 void createRegister(Register* reg_temp, char ** registro, char * name) {
@@ -266,7 +285,8 @@ void generate_cmd(CommandEntry * entry){
 	// printRegister();
 }
 
-
+Register temp;
+Register returnTemp;
 void create_command(Symbol_Entry * symbol){
 
 	char* command = calloc(sizeof(char), 1000);
@@ -291,14 +311,14 @@ void create_command(Symbol_Entry * symbol){
 		case K_VARIABLE: 
             break;
         case K_SUBPROGRAM: 
-            Register temp;
             temp.sizeofVariables = 0;
             printf("RECEIVED: %s \n", symbol->name);
             createRegister(&temp, &symbol->name, symbol->name);
             pushRegister(temp);
-            // getStack(symbol->name);
-            // printRegister();
-            getSavedFunction(symbol->name);
+            printSavedFunction(symbol->name);
+            returnTemp = getRegister(symbol->name);
+            printf("NAME OF RETURNED FUNCTION: %s \n", returnTemp.functionNames[0]); 
+            //printSavedFunction(returnTemp.functionNames[0]); checar se a função foi retornada corretamente
             break;
         case K_ARRAY: 
             break;
