@@ -42,6 +42,19 @@ typedef struct CommandEntry {
 	int operator;
 } CommandEntry;
 
+typedef struct {
+	uintptr_t memoryAddress;
+	char * variables[10];
+	char * localVariables[16][32];
+	int    localTypes[16];
+    char   params[16][32];
+    int    paramsType[16];
+    char   functionNames[16][32];
+    short  ref_flags[16];
+    int    functionReturn;
+	int sizeofVariables;
+} Register;
+
 void new_command(int operator, char * result,char * op1,char * op2);
 
 void new_command_bufferized(int operator, char * result,char * op1,char * op2);
@@ -56,6 +69,10 @@ void generate_cmd(CommandEntry * entry);
 void create_command(Symbol_Entry * symbol);
 
 void getTestTable(char * name);
+
+Register getRegister(char * name);
+
+void getScope();
 
 
 #endif // CODE_GENERATION_H
