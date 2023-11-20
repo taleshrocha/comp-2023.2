@@ -4,71 +4,84 @@
 
 int main() {
 goto start;
-int double_par1[100];
-int double_return_value[100];
-int double_return_control[100];
-int double_stack_control;
-int double_call_control;
+int fatorial_x[100];
+int fatorial_return_value[100];
+int fatorial_return_control[100];
+int fatorial_stack_control;
+int fatorial_external_call_control;
+int fatorial_internal_call_control;
 
-double_subprogram:
+fatorial_subprogram:
 
-	int double_par2[100];
-	double_par2[double_stack_control] = 0;
 	int a0;
-	a0 = double_par1[double_stack_control];
+	a0 = fatorial_x[fatorial_stack_control];
+	bool b0;
+	b0 = a0 == 1;
+	if (b0) goto I0;
+	goto I1;
+
+I0:
+
+	fatorial_return_value[fatorial_stack_control] = 1;
+	goto fatorial_return;
+
+	goto I2;
+
+I1:
+
+I2:
+
 	int a1;
-	a1 = double_par1[double_stack_control];
-	int i0;
-	i0 = a0 + a1;
-	double_par2[double_stack_control] = i0;
+	a1 = fatorial_x[fatorial_stack_control];
 	int a2;
-	a2 = double_par2[double_stack_control];
-	double_return_value[double_stack_control] = a2;
-	goto double_return;
+	a2 = fatorial_x[fatorial_stack_control];
+	int i0;
+	i0 = a2 - 1;
+	fatorial_stack_control = fatorial_stack_control + 1;
+	fatorial_x[fatorial_stack_control] = i0;
+	fatorial_internal_call_control = 0;
+	goto fatorial_subprogram;
+
+fatorial_internal_call_0:
+
+	int a3;
+	a3 = fatorial_return_value[fatorial_stack_control+1];
+	int i1;
+	i1 = a1 * a3;
+	fatorial_return_value[fatorial_stack_control] = i1;
+	goto fatorial_return;
 
 start:
 
 	int x;
 	x = 0;
-	int i;
-	i = 0;
-	x = 1;
-	i = 0;
-L0:
-
-	bool b0;
-	b0 = i > 10;
-	if (b0) goto E0;
-	int a3;
-	a3 = x;
-	double_par1[double_stack_control] = a3;
-	double_call_control = 0;
-	goto double_subprogram;
-
-double_0:
-
+	x = 4;
 	int a4;
-	a4 = double_return_value[double_stack_control];
-	x = a4;
+	a4 = x;
 	int a5;
-	a5 = i;
+	a5 = x;
+	fatorial_stack_control = fatorial_stack_control + 1;
+	fatorial_x[fatorial_stack_control] = a5;
+	fatorial_external_call_control = 0;
+	goto fatorial_subprogram;
+
+fatorial_external_call_0:
+
 	int a6;
-	a6 = x;
-	printf("%d - %d\n",i,x);
-C0:
-
-	i = i + 1;
-	goto L0;
-
-E0:
-
+	a6 = fatorial_return_value[fatorial_stack_control+1];
+	printf("fatorial of %d is %d\n",a5,a6);
 goto end;
-	double_return:
-switch (double_stack_control) {
+	fatorial_return:
+switch (fatorial_stack_control--) {
+case 1:
+switch (fatorial_external_call_control) {
 case 0:
-switch (double_call_control) {
+goto fatorial_external_call_0;
+}
+default:
+switch (fatorial_internal_call_control) {
 case 0:
-goto double_0;
+goto fatorial_internal_call_0;
 }
 }
 end:

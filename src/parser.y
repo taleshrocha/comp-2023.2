@@ -13,6 +13,7 @@ int args_types[16];
 char args_names[16][32];
 short ref_flags[16];
 size_t args_size;
+size_t print_args_size;
 int type_counter = 10;
 
 char temp_vars[256][10];
@@ -478,7 +479,8 @@ ProcedureDecl :
         }
         procedure.params_size = args_size;
         procedure.return_type = 0;
-        procedure.num_calls = 0;
+        procedure.num_external_calls = 0;
+        procedure.num_internal_calls = 0;
         newSymbol->data.sp_data = procedure;
 
         insertSymbol(getCurrentScope(), newSymbol);
@@ -580,7 +582,8 @@ FunctionDecl:
         }
 
         function.params_size = args_size;
-        function.num_calls = 0;
+        function.num_external_calls = 0;
+        function.num_internal_calls = 0;
         newSymbol->data.sp_data = function;
 
         // criar registro na tabela
@@ -861,6 +864,7 @@ AcessMemAddr:
         }
         $$.name = $1.name;
         $$.var = $1.name;
+        $$.is_function_call = false;
     }
 |   AcessMemAddr DOT ID {
         Symbol_Entry* entry = searchRecordType($1.type);
@@ -897,6 +901,7 @@ AcessMemAddr:
         }
 
         $$.var = strdup(temp);
+        $$.is_function_call = false;
         // free(temp);
         // free($3.name); // todo remover esse free?
     }
@@ -921,9 +926,10 @@ AcessMemAddr:
         }
         $$.name = $1.name; // TODO: concatenar $1.name e $3.name
         free($3.name); // TODO remover esse free?
+        $$.is_function_call = false;
     }
 |   ID LPAR {args_size=0;} Args RPAR {
-    
+        commit_commands();
         Symbol_Entry* entry = getSubProgram($1.name);
 
         if (entry == NULL) {
@@ -933,6 +939,28 @@ AcessMemAddr:
             if (entry->data.sp_data.return_type != -1) {
                 $$.type = entry->data.sp_data.return_type;
             }
+
+            char call_id[50];
+            char return_id[500];
+            char* stack_info = strdup($1.name);
+            strcat(stack_info, "_stack_control");
+            new_command(
+                C_ADD, 
+                strdup(stack_info), 
+                strdup(stack_info), 
+                "1"
+            );
+            char* call_control = strdup($1.name);
+            if(strcmp(functionName, strdup($1.name)) == 0){
+                sprintf(return_id, "internal_call_%d", entry->data.sp_data.num_internal_calls);
+                sprintf(call_id, "%d", entry->data.sp_data.num_internal_calls++);
+                strcat(call_control, "_internal_call_control");
+            } else {
+                sprintf(return_id, "external_call_%d", entry->data.sp_data.num_external_calls);
+                sprintf(call_id, "%d", entry->data.sp_data.num_external_calls++);
+                strcat(call_control, "_external_call_control");
+            }
+
             if (entry->data.sp_data.params_size == args_size) {
                 for (size_t i = 0; i < entry->data.sp_data.params_size; i++) {
                     if (args_types[i] != entry->data.sp_data.params_types[i]) {
@@ -965,42 +993,33 @@ AcessMemAddr:
                 );
             }
 
-        //Atualizar numero de vezes que o subprograma foi invocado
-
-        // <function>_call_control = numChamadas
-            char* call_control = strdup($1.name);
-            strcat(call_control, "_call_control");
-
-            char numChamadas[50];
-            sprintf(numChamadas, "%d", entry->data.sp_data.num_calls);
+            //Atualizar numero de vezes que o subprograma foi invocado
+            // <function>_call_control = numChamadas
             new_command(
                 C_ATTRIB, 
                 strdup(call_control), 
-                strdup(numChamadas), 
+                strdup(call_id), 
                 NULL
             );
-
-
-        // GOTO para inicio (label) do subprograma
-        char* temp = strdup(entry->name);
-        strcat(temp, "_subprogram");
-        new_command(C_GOTO, NULL, strdup(temp), NULL);
-
-        //Criação de label para retorno após termino da execucao do subprograma
+            // GOTO para inicio (label) do subprograma
+            char* temp = strdup(entry->name);
+            strcat(temp, "_subprogram");
+            new_command(C_GOTO, NULL, strdup(temp), NULL);
+            
+            //Criação de label para retorno após termino da execucao do subprograma
             // Criacao da label de retorno
             char* label_return = strdup(entry->name);
             strcat(label_return, "_");
 
             // Conversão numero da chamada (int) para string
             char buffer[50];
-            sprintf(buffer, "%d", entry->data.sp_data.num_calls);
+            sprintf(buffer, "%s", strdup(return_id));
             strcat(label_return, buffer);
 
             // Label de retorno
             new_command(C_LABEL, NULL, strdup(label_return), NULL);
             free(label_return); 
-            $$.is_function_call = 1;
-            entry->data.sp_data.num_calls++;
+            $$.is_function_call = true;
         }
         args_size=0;
     }
@@ -1099,26 +1118,27 @@ CmdPrint:
         } else {
 
         }
-    } PrintArgs {
-        char* pch = strstr ($3.name,"%r");
+    } {print_args_size = 0;} PrintArgs {
+        char* pch = strstr($3.name,"%r");
         if (pch != NULL)
             memcpy(pch,"%f",2);
         temp_name[0] = '\0';
-        for(size_t i = 0; i < args_size; i++){
+        for(size_t i = 0; i < print_args_size; i++){
             strcat(temp_name, ",");
             strcat(temp_name, args_names[i]);
         }
-        new_command(C_PRINT, NULL, strdup($3.name), strdup(temp_name));
+
+        new_command(C_PRINT, NULL, strdup($3.var), strdup(temp_name));
     } RPAR {
-        args_size = 0;
+        print_args_size = 0;
     }
 ;
 
 PrintArgs:
     COMMA Exp {
-        args_types[args_size] = $2.type;
-        strcpy(args_names[args_size], $2.name);
-        args_size++;
+        args_types[print_args_size] = $2.type;
+        strcpy(args_names[print_args_size], strdup($2.var));
+        print_args_size++;
 }   PrintArgs
 |   /* NOTHING */ {
 }
@@ -1783,18 +1803,18 @@ SimpleExp:
 
             free(subprog_var_name);
         }
-        else{
+        else {
             if($1.is_function_call == 1){
                 char* return_var = strdup($1.name);
                 strcat(return_var, "_return_value[");
                 strcat(return_var, strdup($1.name));
-                strcat(return_var, "_stack_control]");
+                strcat(return_var, "_stack_control+1]");
 
                 new_command(C_ATTRIB, strdup(label1), strdup(return_var), NULL);
                 free(return_var);
             }
             else{
-            //Erro neste new command quando expressao eh chamada de funcao
+                //Erro neste new command quando expressao eh chamada de funcao
                 //Resolvido com inserção do tratamento "if($1.is_function_call)" ?
                 new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
             }

@@ -1,0 +1,14 @@
+function fatorial(x : int) : int 
+begin 
+  if (x == 1) then begin
+    return 1
+  end;
+  return x*fatorial(x-1)
+end;
+
+begin
+    var x : int;
+    x := 4;
+    print("fatorial of %d is %d\n", x , fatorial(x));
+    return
+end

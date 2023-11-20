@@ -246,7 +246,12 @@ void create_command(Symbol_Entry * symbol){
             // call control
             strcat(command, "int ");
             strcat(command, symbol->name);
-            strcat(command, "_call_control;\n");
+            strcat(command, "_external_call_control;\n");
+
+            // call control
+            strcat(command, "int ");
+            strcat(command, symbol->name);
+            strcat(command, "_internal_call_control;\n");
 
             break;
         case K_ARRAY: 
@@ -284,14 +289,17 @@ void generate_return_control() {
         Symbol_Entry* symbol = scope->symbols[i];
         if(symbol->symbol_type == K_SUBPROGRAM){
             printf("\t%s_return:\n", symbol->name);
-            printf("switch (%s_stack_control) {\ncase 0:\n", symbol->name);
-            printf("switch (%s_call_control) {\n", symbol->name);
-            for(int i = 0; i < symbol->data.sp_data.num_calls; i++){
+            printf("switch (%s_stack_control--) {\ncase 1:\n", symbol->name);
+            printf("switch (%s_external_call_control) {\n", symbol->name);
+            for(int i = 0; i < symbol->data.sp_data.num_external_calls; i++){
                 printf("case %d:\n", i);
-                printf("goto %s_%d;\n", symbol->name, i);
-
+                printf("goto %s_external_call_%d;\n", symbol->name, i);
             }
-            // printf("}\ndefault:\n%s_stack_control--;\ngoto %s_rec;\n}\n", symbol->name, symbol->name);
+            printf("}\ndefault:\nswitch (%s_internal_call_control) {\n", symbol->name);
+            for(int i = 0; i < symbol->data.sp_data.num_internal_calls; i++){
+                printf("case %d:\n", i);
+                printf("goto %s_internal_call_%d;\n", symbol->name, i);
+            }
             printf("}\n}\n");
         }
     }
