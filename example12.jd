@@ -1,0 +1,12 @@
+procedure increase(ref a : int) 
+begin 
+    a := a + 10
+end;
+
+begin
+    var x : int;
+    x := 1;
+    increase(x);
+    print("%d\n", x );
+    return
+end

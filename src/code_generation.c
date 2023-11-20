@@ -241,17 +241,17 @@ void create_command(Symbol_Entry * symbol){
             //stack control
             strcat(command, "int ");
             strcat(command, symbol->name);
-            strcat(command, "_stack_control;\n");
+            strcat(command, "_stack_control = 0;\n");
 
             // call control
             strcat(command, "int ");
             strcat(command, symbol->name);
-            strcat(command, "_external_call_control;\n");
+            strcat(command, "_external_call_control = 0;\n");
 
             // call control
             strcat(command, "int ");
             strcat(command, symbol->name);
-            strcat(command, "_internal_call_control;\n");
+            strcat(command, "_internal_call_control[100];\n");
 
             break;
         case K_ARRAY: 
@@ -295,7 +295,7 @@ void generate_return_control() {
                 printf("case %d:\n", i);
                 printf("goto %s_external_call_%d;\n", symbol->name, i);
             }
-            printf("}\ndefault:\nswitch (%s_internal_call_control) {\n", symbol->name);
+            printf("}\ndefault:\nswitch (%s_internal_call_control[%s_stack_control]) {\n", symbol->name, symbol->name);
             for(int i = 0; i < symbol->data.sp_data.num_internal_calls; i++){
                 printf("case %d:\n", i);
                 printf("goto %s_internal_call_%d;\n", symbol->name, i);

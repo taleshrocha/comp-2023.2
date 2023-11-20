@@ -9,6 +9,7 @@
 extern int command_counter;
 extern CommandEntry commands[100];
 
+int on_ref;
 int args_types[16];
 char args_names[16][32];
 short ref_flags[16];
@@ -58,6 +59,7 @@ void yyerror(char* s, ...) {
         char label[10];
         int is_subprog_var;
         int is_function_call;
+        int is_ref;
         int is_constant;
         union {
             int v_int;
@@ -137,10 +139,11 @@ Prog :
 ;
 Decl : 
     Consts Types Vars {
-        printf("int main() {\ngoto start;\n");
+        printf("int main() {\n");
         parsing_subprogram = 1;
         } SubProg {
             parsing_subprogram = 0;
+            printf("goto start;\n");
             new_command(C_LABEL, NULL, "start", NULL);
         }
 ;
@@ -216,6 +219,8 @@ Vars :
         else{
             var_data.is_subprog_var = 0;
         }
+        var_data.is_ref = 0;
+
         newSymbol->data.v_data = var_data;
 
         insertSymbol(getCurrentScope(), newSymbol);
@@ -490,12 +495,18 @@ ProcedureDecl :
         char* temp = strdup($2.name);
         strcat(temp, "_subprogram");
         new_command(C_LABEL, NULL, strdup(temp), NULL);
+
+        strcpy(functionName, $2.name);
         
     } CmdBlock SEMICOLON
     {
+        char* temp = strdup(functionName);
+        strcat(temp, "_return");
+        new_command(C_GOTO, NULL, temp, NULL);
         // #ifdef DEBUG
         // printf("\n\t End of Procedure...\n");
         // #endif
+        strcpy(functionName, "");
     }
 ;
 
@@ -601,6 +612,9 @@ FunctionDecl:
 
     } CmdBlock SEMICOLON
     {
+        char* temp = strdup(functionName);
+        strcat(temp, "_return");
+        new_command(C_GOTO, NULL, temp, NULL);
         current_return_type = 0;
         #ifdef DEBUG
         printf("\n\t End of Function...\n");
@@ -626,6 +640,7 @@ CmdBlock :
 
                 var_data.type = args_types[i];
                 var_data.is_constant = 0;
+                var_data.is_ref = ref_flags[i];
 
                 // Flag para indicar que a variavel, na tabela de simbolos, 
                     // eh um parametro de subprograma
@@ -686,15 +701,19 @@ CmdAux:
             strcat(temp, "[");
             strcat(temp, functionName);
             strcat(temp, "_stack_control]");
-
+            if ($1.is_ref == 1) {
+                sprintf(temp, "*%s", strdup(temp));
+            }
             temp2 = strdup(functionName);
             strcat(temp2, "_");
             strcat(temp2, strdup($3.var));
             strcat(temp2, "[");
             strcat(temp2, functionName);
             strcat(temp2, "_stack_control]");
+            if ($3.is_ref == 1) {
+                sprintf(temp2, "*%s", strdup(temp2));
+            }
             new_command(C_ATTRIB, strdup(temp), strdup(temp2), NULL);
-
             free(temp);
             free(temp2);
         }
@@ -705,6 +724,9 @@ CmdAux:
             strcat(temp, "[");
             strcat(temp, functionName);
             strcat(temp, "_stack_control]");
+            if ($1.is_ref == 1) {
+                sprintf(temp, "*%s", strdup(temp));
+            }
             new_command(C_ATTRIB, strdup(temp), strdup($3.var), NULL);
             free(temp);
         } else if($3.is_subprog_var == 1){
@@ -714,13 +736,15 @@ CmdAux:
             strcat(temp, "[");
             strcat(temp, functionName);
             strcat(temp, "_stack_control]");
+            if ($3.is_ref == 1) {
+                sprintf(temp, "*%s", strdup(temp));
+            }
             new_command(C_ATTRIB, strdup($1.var), strdup(temp), NULL);
             free(temp);
         }
         else{
             new_command(C_ATTRIB, strdup($1.var), strdup($3.var), NULL);
         }
-
 
         if ($1.name != NULL) {
             free($1.name);
@@ -854,8 +878,9 @@ AcessMemAddr:
                                 break;
                         }
                     } else {
-                        $$.var = $1.name;
+                        $$.var = $1.name;  
                         $$.is_subprog_var = entry->data.v_data.is_subprog_var;
+                        $$.is_ref = entry->data.v_data.is_ref;
                     }
                     break;
                 default:
@@ -928,10 +953,19 @@ AcessMemAddr:
         free($3.name); // TODO remover esse free?
         $$.is_function_call = false;
     }
-|   ID LPAR {args_size=0;} Args RPAR {
+|   ID LPAR {
+        args_size=0;
+        Symbol_Entry* entry = getSubProgram($1.name);
+        for (int i = 0; i < 16; i++) {
+            ref_flags[i] = entry->data.sp_data.ref_flags[i];
+        }
+    } Args RPAR {
         commit_commands();
         Symbol_Entry* entry = getSubProgram($1.name);
-
+        for (int i = 0; i < 16; i++) {
+            ref_flags[i] = 0;
+        }
+        on_ref = 0;
         if (entry == NULL) {
             printf("Symbol '%s' not found.", $1.name);
         } 
@@ -942,19 +976,13 @@ AcessMemAddr:
 
             char call_id[50];
             char return_id[500];
-            char* stack_info = strdup($1.name);
-            strcat(stack_info, "_stack_control");
-            new_command(
-                C_ADD, 
-                strdup(stack_info), 
-                strdup(stack_info), 
-                "1"
-            );
             char* call_control = strdup($1.name);
             if(strcmp(functionName, strdup($1.name)) == 0){
                 sprintf(return_id, "internal_call_%d", entry->data.sp_data.num_internal_calls);
                 sprintf(call_id, "%d", entry->data.sp_data.num_internal_calls++);
-                strcat(call_control, "_internal_call_control");
+                strcat(call_control, "_internal_call_control[");
+                strcat(call_control, strdup($1.name));
+                strcat(call_control, "_stack_control]");
             } else {
                 sprintf(return_id, "external_call_%d", entry->data.sp_data.num_external_calls);
                 sprintf(call_id, "%d", entry->data.sp_data.num_external_calls++);
@@ -979,7 +1007,7 @@ AcessMemAddr:
                         strcat(subprog_param, strdup(entry->data.sp_data.params_names[i]));
                         strcat(subprog_param, "[");
                         strcat(subprog_param, strdup($1.name));
-                        strcat(subprog_param, "_stack_control]");
+                        strcat(subprog_param, "_stack_control+1]");
 
                         new_command(C_ATTRIB, strdup(subprog_param), strdup(args_names[i]), NULL);
                         free(subprog_param);
@@ -992,7 +1020,6 @@ AcessMemAddr:
                     args_size
                 );
             }
-
             //Atualizar numero de vezes que o subprograma foi invocado
             // <function>_call_control = numChamadas
             new_command(
@@ -1000,6 +1027,14 @@ AcessMemAddr:
                 strdup(call_control), 
                 strdup(call_id), 
                 NULL
+            );
+            char* stack_info = strdup($1.name);
+            strcat(stack_info, "_stack_control");
+            new_command(
+                C_ADD, 
+                strdup(stack_info), 
+                strdup(stack_info), 
+                "1"
             );
             // GOTO para inicio (label) do subprograma
             char* temp = strdup(entry->name);
@@ -1026,10 +1061,12 @@ AcessMemAddr:
 ;
 
 Args : 
-    Exp {
-        strcpy(args_names[args_size], strdup($1.var));
-        args_types[args_size++] = $1.type; 
-        // free($1.name);
+    {
+        on_ref = ref_flags[args_size];
+    } Exp {
+        strcpy(args_names[args_size], strdup($2.var));
+        args_types[args_size++] = $2.type; 
+        // free($2.name);
     } ArgsAux
 |   /* NOTHING */ {}
 ;
@@ -1163,7 +1200,14 @@ Exp:
         // } else if (!$1.is_constant) {
         } else {
             char* temp_var = create_label('b');
-            new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
             strcpy(temp_vars[temp_var_count++], temp_var);
             char* label1 = create_label('O');
             new_command_bufferized(C_IF, NULL, strdup($1.var), label1);
@@ -1194,6 +1238,7 @@ Exp:
         strcat($$.name, " || ");
         strcat($$.name, $4.name);
         $$.is_subprog_var = 0;
+        $$.is_ref = 0;
     }
 |   Terms {
         $$.type = $1.type;
@@ -1203,6 +1248,8 @@ Exp:
         $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;
         $$.is_subprog_var = 0;
+        $$.is_ref = 0;
+
 };
 
 Terms:
@@ -1211,7 +1258,14 @@ Terms:
             printf("OR operation must be between bool values but the first arg is %s", type_name($1.type));
         } else {
             char* temp_var = create_label('b');
-            new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
             strcpy(temp_vars[temp_var_count++], temp_var);
             char* label1 = create_label('A');
             new_command_bufferized(C_IFN, NULL, strdup($1.var), label1);
@@ -1270,7 +1324,14 @@ Comps:
             printf("Incompatible type for '!=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_NEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
 
@@ -1300,7 +1361,14 @@ Comps:
             printf("Incompatible type for '==' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_EQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
@@ -1320,7 +1388,14 @@ Comps:
             printf("Incompatible type for '<' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_LESSER, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
@@ -1340,7 +1415,14 @@ Comps:
             printf("Incompatible type for '>' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_GREATER, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
@@ -1360,7 +1442,14 @@ Comps:
             printf("Incompatible type for '<=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_LEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
@@ -1380,7 +1469,14 @@ Comps:
             printf("Incompatible type for '>=' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_GEQ, strdup(temp_var), strdup($1.var), strdup($3.var));
         $$.var = strdup(temp_var);
         $$.is_constant = $1.is_constant && $3.is_constant;
@@ -1405,7 +1501,14 @@ Factor:
             $$.type = E_BOOL;
             $$.value.v_bool = !$2.value.v_bool;
             char* temp_var = create_label('b');
-            new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
             new_command_bufferized(C_NOT, strdup(temp_var), strdup($2.var), NULL);
             $$.var = strdup(temp_var);
         } else {
@@ -1433,12 +1536,26 @@ AriOp:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int + $3.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real + $3.value.v_real;
             temp_var = create_label('f');
-            new_command_bufferized(C_VAR, NULL, "float", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         } else {
             printf("Incompatible type for '+' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
@@ -1456,12 +1573,26 @@ AriOp:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int - $3.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real - $3.value.v_real;
             temp_var = create_label('f');
-            new_command_bufferized(C_VAR, NULL, "float", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         } else {
             printf("Incompatible type for '-' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
@@ -1490,12 +1621,26 @@ AriOp2:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int * $3.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real * $3.value.v_real;
             temp_var = create_label('f');
-            new_command_bufferized(C_VAR, NULL, "float", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         } else {
             printf("Incompatible type for '*' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
@@ -1513,12 +1658,26 @@ AriOp2:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int / $3.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else if ($1.type == E_REAL && $3.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = $1.value.v_real / $3.value.v_real;
             temp_var = create_label('f');
-            new_command_bufferized(C_VAR, NULL, "float", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         } else {
             printf("Incompatible type for '/' operation between %s (%s) and %s (%s)", $1.name, type_name($1.type), $3.name, type_name($3.type));
         }
@@ -1536,7 +1695,14 @@ AriOp2:
             $$.type = E_INT;
             $$.value.v_int = $1.value.v_int % $3.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else {
             printf("Incompatible type. - AriOp2 \n");
         }
@@ -1588,12 +1754,26 @@ UnaryExp:
             $$.type = E_INT;
             $$.value.v_int = + $2.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else if ($2.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = + $2.value.v_real;
             temp_var = create_label('f');
-            new_command_bufferized(C_VAR, NULL, "float", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         } else { 
             printf("Incompatible type. - UnaryExp \n");
         }
@@ -1610,12 +1790,26 @@ UnaryExp:
             $$.type = E_INT;
             $$.value.v_int = - $2.value.v_int;
             temp_var = create_label('i');
-            new_command_bufferized(C_VAR, NULL, "int", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         } else if ($2.type == E_REAL) {
             $$.type = E_REAL;
             $$.value.v_real = - $2.value.v_real;
             temp_var = create_label('f');
-            new_command_bufferized(C_VAR, NULL, "float", temp_var);
+            char* temp_var_decl = strdup(temp_var);
+            if (parsing_subprogram == 1) {
+                strcat(temp_var_decl, "[100]");
+                strcat(temp_var, "[");
+                strcat(temp_var, functionName);
+                strcat(temp_var, "_stack_control]");
+            }
+            new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         } else { 
             printf("Incompatible type. - UnaryExp \n");
         }
@@ -1659,7 +1853,14 @@ CastExp:
             printf("string cannot be converted to int!\n");
         }
         char* temp_var = create_label('i');
-        new_command_bufferized(C_VAR, NULL, "int", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "int", temp_var_decl);
         new_command_bufferized(C_CAST, temp_var, "int", $4.var);
         $$.var = strdup(temp_var);
         $$.is_constant = $4.is_constant;
@@ -1687,7 +1888,14 @@ CastExp:
             printf("string cannot be converted to real!\n");
         }
         char* temp_var = create_label('f');
-        new_command_bufferized(C_VAR, NULL, "float", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "float", temp_var_decl);
         new_command_bufferized(C_CAST, temp_var, "float", $4.var);
         $$.var = strdup(temp_var);
         $$.is_constant = $4.is_constant;
@@ -1714,7 +1922,14 @@ CastExp:
             printf("string cannot be converted to bool!");
         }
         char* temp_var = create_label('b');
-        new_command_bufferized(C_VAR, NULL, "bool", temp_var);
+        char* temp_var_decl = strdup(temp_var);
+        if (parsing_subprogram == 1) {
+            strcat(temp_var_decl, "[100]");
+            strcat(temp_var, "[");
+            strcat(temp_var, functionName);
+            strcat(temp_var, "_stack_control]");
+        }
+        new_command_bufferized(C_VAR, NULL, "bool", temp_var_decl);
         new_command_bufferized(C_CAST, temp_var, "bool", $4.var);
         $$.is_constant = $4.is_constant;
         $$.name = strdup("(bool) ");
@@ -1788,8 +2003,23 @@ SimpleExp:
         $$.type = $1.type;
         $$.name = $1.name;
         char* label1 = create_label('a');
-        new_command(C_VAR, NULL, strdup(get_c_type($1.type)), strdup(label1));
+        char* label_creation = strdup(label1);
         
+        char* label_access = calloc(256, sizeof(char));
+        label_access = strcpy(label_access, label1);
+        if(parsing_subprogram == 1){
+            
+            strcat(label_creation, "[100]");
+            strcat(label_access, "[");
+            strcat(label_access, functionName);
+            strcat(label_access, "_stack_control]");
+        }
+        char* cur_type = strdup(get_c_type($1.type));
+        if (on_ref) {
+            strcat(cur_type, "*");
+        }
+        new_command(C_VAR, NULL, cur_type, strdup(label_creation));
+
         char* subprog_var_name;
         if($1.is_subprog_var == 1){
             subprog_var_name = strdup(functionName);
@@ -1798,8 +2028,10 @@ SimpleExp:
             strcat(subprog_var_name, "[");
             strcat(subprog_var_name, functionName);
             strcat(subprog_var_name, "_stack_control]");
-
-            new_command(C_ATTRIB, strdup(label1), strdup(subprog_var_name), NULL);
+            if ($1.is_ref == 1) {
+                sprintf(subprog_var_name, "*%s", strdup(subprog_var_name));
+            }
+            new_command(C_ATTRIB, strdup(label_access), strdup(subprog_var_name), NULL);
 
             free(subprog_var_name);
         }
@@ -1810,17 +2042,21 @@ SimpleExp:
                 strcat(return_var, strdup($1.name));
                 strcat(return_var, "_stack_control+1]");
 
-                new_command(C_ATTRIB, strdup(label1), strdup(return_var), NULL);
+                new_command(C_ATTRIB, strdup(label_access), strdup(return_var), NULL);
                 free(return_var);
             }
             else{
                 //Erro neste new command quando expressao eh chamada de funcao
                 //Resolvido com inserção do tratamento "if($1.is_function_call)" ?
-                new_command(C_ATTRIB, strdup(label1), strdup($1.var), NULL);
+                char* cur_val = strdup($1.var);
+                if (on_ref) {
+                    sprintf(cur_val, "&%s", strdup(cur_val));
+                }
+                new_command(C_ATTRIB, strdup(label_access), strdup(cur_val), NULL);
             }
         }
 
-        $$.var = strdup(label1);
+        $$.var = strdup(label_access);
         $$.is_constant = $1.is_constant;
         $$.is_function_call = $1.is_function_call;
         $$.value = $1.value;

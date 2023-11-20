@@ -30,6 +30,7 @@ typedef struct Variable
 {
     int is_constant;
     int is_subprog_var;
+    int is_ref;
     int type;
     union Value {
         int v_int;
