@@ -43,7 +43,7 @@ Register Stack[100]; // Tamanho da pilha (100)
 
 
 void pushRegister(Register registro) {
-	if (top < 99) { // Ajustar o tamanho da pilha
+	if (top < 99) {
 		getScope(&registro);
 		Stack[++top] = registro;
 		printMessage(SUCCESS, "Registro salvo na stack. \n|Memory Address: %d \n", registro.memoryAddress); 
